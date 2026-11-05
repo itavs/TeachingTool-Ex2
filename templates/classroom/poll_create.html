@@ -1,0 +1,2 @@
+{% extends 'base.html' %}{% block title %}Create poll{% endblock %}
+{% block content %}<a class="back-link" href="{% url 'poll-list' course.pk meeting.pk %}">← Polls</a><section class="panel"><h1>Create a poll draft</h1><p class="notice">Real AI generation is not active or verified. Submitting this form makes no AI request and cannot produce a draft. Local demo data is a separate command-line path.</p><form method="post">{% csrf_token %}{{ form.as_p }}<button class="button" type="submit">Request generation / retry</button></form></section>{% endblock %}

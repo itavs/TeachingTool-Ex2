@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import participation_views as participation
+from . import poll_views as polls
 
 urlpatterns = [
     path("", views.course_list, name="course-list"),
@@ -20,4 +21,12 @@ urlpatterns += [
     path(meeting_prefix + "attendance/scan/<str:token>/", participation.attendance_scan, name="attendance-scan"),
     path(meeting_prefix + "requests/", participation.requests_page, name="meeting-requests"),
     path(meeting_prefix + "requests/feed/", participation.requests_feed, name="requests-feed"),
+    path(meeting_prefix + 'polls/', polls.poll_list, name='poll-list'),
+    path(meeting_prefix + 'polls/new/', polls.poll_create, name='poll-create'),
+    path(meeting_prefix + 'polls/<int:poll_id>/', polls.poll_detail, name='poll-detail'),
+    path(meeting_prefix + 'polls/<int:poll_id>/state/', polls.poll_state, name='poll-state'),
+    path(meeting_prefix + 'polls/<int:poll_id>/edit/', polls.poll_edit, name='poll-edit'),
+    path(meeting_prefix + 'polls/<int:poll_id>/publish/', polls.poll_publish, name='poll-publish'),
+    path(meeting_prefix + 'polls/<int:poll_id>/close/', polls.poll_close, name='poll-close'),
+    path(meeting_prefix + 'polls/<int:poll_id>/vote/', polls.poll_vote, name='poll-vote'),
 ]
