@@ -1,0 +1,428 @@
+{
+  "case": "poll_he_comprehension",
+  "model": "qwen3:4b",
+  "utc_started": "2026-11-05T08:14:26.306069+00:00",
+  "prompt": "Create one comprehension poll in Hebrew with four distinct single-choice options. Exactly one option must be correct. Give its zero-based index and a short explanation grounded in the text.\nLearning material:\nבמערכת רישום לקורס, transaction מאגדת את עדכון מספר המקומות ואת יצירת ההרשמה ליחידה אחת. Atomicity פירושה ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר. Rollback מבטל שינויים של transaction שנכשלה. אילוץ UNIQUE על הצירוף מזהה סטודנט ומזהה קורס מונע הרשמה כפולה, אך לבדו אינו מונע משני סטודנטים לתפוס את המקום האחרון. בידוד מתאים או עדכון מותנה של מונה המקומות נדרשים כדי למנוע הרשמת יתר תחת concurrency. מטמון יכול להפחית זמן קריאה, אך עלול להציג מידע מיושן. אין להסתמך על מידע במטמון לבדו כדי לאשר מקום אחרון.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "question": {
+        "type": "string"
+      },
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 4,
+        "maxItems": 4
+      },
+      "correct_index": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 3
+      },
+      "explanation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "question",
+      "options",
+      "correct_index",
+      "explanation"
+    ],
+    "additionalProperties": false
+  },
+  "response": {
+    "model": "qwen3:4b",
+    "created_at": "2026-11-05T08:15:21.8559363Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\n  \"question\": \"מהו הهدف של הـ'Atomicity' במערכת רישום לקורס?\",\n  \"options\": [\n    \"להבטיח ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר\",\n    \"להבטיח שסטודנטים לא יתנחו על מקומות קורס\",\n    \"להבטיח שמחצית המיקוד לא תשתנה במהלך הפעולות\",\n    \"להבטיח שמידע במטמון לא יתנחת\"\n  ],\n  \"correct_index\": 0,\n  \"explanation\": \"בהתאם למקורות, 'Atomicity' פירושה ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר. זה מופיע במשפט: 'Atomicity פירושה ששני העדages מתבצעים יחד או שאף אחד מהם אינו נשמר'.\"\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 55057817400,
+    "load_duration": 27123302000,
+    "prompt_eval_count": 268,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 24299147000,
+    "eval_count": 191,
+    "eval_duration": 3627626000
+  },
+  "output": {
+    "question": "מהו הهدف של הـ'Atomicity' במערכת רישום לקורס?",
+    "options": [
+      "להבטיח ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר",
+      "להבטיח שסטודנטים לא יתנחו על מקומות קורס",
+      "להבטיח שמחצית המיקוד לא תשתנה במהלך הפעולות",
+      "להבטיח שמידע במטמון לא יתנחת"
+    ],
+    "correct_index": 0,
+    "explanation": "בהתאם למקורות, 'Atomicity' פירושה ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר. זה מופיע במשפט: 'Atomicity פירושה ששני העדages מתבצעים יחד או שאף אחד מהם אינו נשמר'."
+  },
+  "completed_generation": true,
+  "running_models": {
+    "models": [
+      {
+        "name": "qwen3:4b",
+        "model": "qwen3:4b",
+        "size": 3877571133,
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-11-05T10:25:21.8585714+02:00",
+        "size_vram": 3877571133,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "timing_s": {
+    "total_duration": 55.0578174,
+    "load_duration": 27.123302,
+    "prompt_eval_duration": 24.299147,
+    "eval_duration": 3.627626
+  },
+  "generation_tokens_per_s": 52.65151368966922,
+  "wall_s": 55.97448209999129,
+  "resources": {
+    "interval_s": 1,
+    "samples": [
+      {
+        "elapsed_s": 0.396,
+        "selected_process_rss_mib": 86.72265625,
+        "system_available_ram_mib": 12518.69921875,
+        "gpu_total_used_mib": 310.0,
+        "gpu_util_percent": 14.0,
+        "gpu_temperature_c": 43.0
+      },
+      {
+        "elapsed_s": 1.874,
+        "selected_process_rss_mib": 87.10546875,
+        "system_available_ram_mib": 11878.94140625,
+        "gpu_total_used_mib": 2770.0,
+        "gpu_util_percent": 6.0,
+        "gpu_temperature_c": 44.0
+      },
+      {
+        "elapsed_s": 3.27,
+        "selected_process_rss_mib": 87.125,
+        "system_available_ram_mib": 11797.42578125,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 3.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 4.744,
+        "selected_process_rss_mib": 87.125,
+        "system_available_ram_mib": 11575.58203125,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 4.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 6.152,
+        "selected_process_rss_mib": 87.12890625,
+        "system_available_ram_mib": 11569.15234375,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 3.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 7.59,
+        "selected_process_rss_mib": 87.13671875,
+        "system_available_ram_mib": 11568.3359375,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 2.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 9.023,
+        "selected_process_rss_mib": 87.140625,
+        "system_available_ram_mib": 11566.3046875,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 16.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 10.441,
+        "selected_process_rss_mib": 87.14453125,
+        "system_available_ram_mib": 11561.50390625,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 18.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 11.872,
+        "selected_process_rss_mib": 87.14453125,
+        "system_available_ram_mib": 11771.55859375,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 8.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 13.338,
+        "selected_process_rss_mib": 87.1484375,
+        "system_available_ram_mib": 11674.91015625,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 13.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 14.768,
+        "selected_process_rss_mib": 87.15234375,
+        "system_available_ram_mib": 11702.40625,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 16.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 16.244,
+        "selected_process_rss_mib": 87.15234375,
+        "system_available_ram_mib": 11704.7109375,
+        "gpu_total_used_mib": 4098.0,
+        "gpu_util_percent": 21.0,
+        "gpu_temperature_c": 46.0
+      },
+      {
+        "elapsed_s": 17.651,
+        "selected_process_rss_mib": 87.15625,
+        "system_available_ram_mib": 11658.7734375,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 17.0,
+        "gpu_temperature_c": 45.0
+      },
+      {
+        "elapsed_s": 19.066,
+        "selected_process_rss_mib": 87.15625,
+        "system_available_ram_mib": 11632.72265625,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 14.0,
+        "gpu_temperature_c": 46.0
+      },
+      {
+        "elapsed_s": 20.533,
+        "selected_process_rss_mib": 87.15625,
+        "system_available_ram_mib": 11648.5546875,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 12.0,
+        "gpu_temperature_c": 46.0
+      },
+      {
+        "elapsed_s": 21.966,
+        "selected_process_rss_mib": 87.16015625,
+        "system_available_ram_mib": 11633.328125,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 16.0,
+        "gpu_temperature_c": 46.0
+      },
+      {
+        "elapsed_s": 23.387,
+        "selected_process_rss_mib": 87.16015625,
+        "system_available_ram_mib": 11735.48046875,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 15.0,
+        "gpu_temperature_c": 46.0
+      },
+      {
+        "elapsed_s": 24.826,
+        "selected_process_rss_mib": 87.16015625,
+        "system_available_ram_mib": 11752.27734375,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 20.0,
+        "gpu_temperature_c": 46.0
+      },
+      {
+        "elapsed_s": 26.224,
+        "selected_process_rss_mib": 87.1640625,
+        "system_available_ram_mib": 11725.140625,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 3.0,
+        "gpu_temperature_c": 46.0
+      },
+      {
+        "elapsed_s": 27.629,
+        "selected_process_rss_mib": 87.1640625,
+        "system_available_ram_mib": 11738.9765625,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 29.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 29.054,
+        "selected_process_rss_mib": 87.3984375,
+        "system_available_ram_mib": 11613.75390625,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 4.0,
+        "gpu_temperature_c": 47.0
+      },
+      {
+        "elapsed_s": 30.496,
+        "selected_process_rss_mib": 87.4375,
+        "system_available_ram_mib": 11596.83984375,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 13.0,
+        "gpu_temperature_c": 47.0
+      },
+      {
+        "elapsed_s": 31.917,
+        "selected_process_rss_mib": 87.46875,
+        "system_available_ram_mib": 11569.83984375,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 11.0,
+        "gpu_temperature_c": 47.0
+      },
+      {
+        "elapsed_s": 33.348,
+        "selected_process_rss_mib": 87.46875,
+        "system_available_ram_mib": 11595.58203125,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 12.0,
+        "gpu_temperature_c": 47.0
+      },
+      {
+        "elapsed_s": 34.78,
+        "selected_process_rss_mib": 87.46875,
+        "system_available_ram_mib": 11597.12109375,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 16.0,
+        "gpu_temperature_c": 47.0
+      },
+      {
+        "elapsed_s": 36.25,
+        "selected_process_rss_mib": 87.46875,
+        "system_available_ram_mib": 11560.1015625,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 16.0,
+        "gpu_temperature_c": 47.0
+      },
+      {
+        "elapsed_s": 37.733,
+        "selected_process_rss_mib": 87.47265625,
+        "system_available_ram_mib": 11557.08984375,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 11.0,
+        "gpu_temperature_c": 47.0
+      },
+      {
+        "elapsed_s": 39.16,
+        "selected_process_rss_mib": 87.4765625,
+        "system_available_ram_mib": 11513.22265625,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 11.0,
+        "gpu_temperature_c": 47.0
+      },
+      {
+        "elapsed_s": 40.626,
+        "selected_process_rss_mib": 87.4765625,
+        "system_available_ram_mib": 11521.70703125,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 17.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 42.052,
+        "selected_process_rss_mib": 87.4765625,
+        "system_available_ram_mib": 11566.94140625,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 13.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 43.468,
+        "selected_process_rss_mib": 87.4765625,
+        "system_available_ram_mib": 11572.2265625,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 16.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 44.948,
+        "selected_process_rss_mib": 87.4765625,
+        "system_available_ram_mib": 11674.07421875,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 16.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 46.426,
+        "selected_process_rss_mib": 87.4765625,
+        "system_available_ram_mib": 11582.35546875,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 9.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 47.873,
+        "selected_process_rss_mib": 87.48046875,
+        "system_available_ram_mib": 11583.72265625,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 22.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 49.31,
+        "selected_process_rss_mib": 87.48046875,
+        "system_available_ram_mib": 11578.54296875,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 15.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 50.745,
+        "selected_process_rss_mib": 87.484375,
+        "system_available_ram_mib": 11584.125,
+        "gpu_total_used_mib": 4104.0,
+        "gpu_util_percent": 17.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 52.221,
+        "selected_process_rss_mib": 87.51171875,
+        "system_available_ram_mib": 11650.93359375,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 75.0,
+        "gpu_temperature_c": 53.0
+      },
+      {
+        "elapsed_s": 53.578,
+        "selected_process_rss_mib": 87.51171875,
+        "system_available_ram_mib": 11720.29296875,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 93.0,
+        "gpu_temperature_c": 60.0
+      },
+      {
+        "elapsed_s": 54.948,
+        "selected_process_rss_mib": 87.51171875,
+        "system_available_ram_mib": 11714.4296875,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 94.0,
+        "gpu_temperature_c": 63.0
+      },
+      {
+        "elapsed_s": 55.913,
+        "selected_process_rss_mib": 87.06640625,
+        "system_available_ram_mib": 11703.046875,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 94.0,
+        "gpu_temperature_c": 60.0
+      }
+    ],
+    "errors": [],
+    "ram_scope": "Summed RSS of this Python process and all ollama* processes; shared pages may be double counted.",
+    "gpu_scope": "Total device memory, including Windows and other applications; sampled peaks are not exact allocation peaks.",
+    "peak_selected_rss_mib": 87.51171875,
+    "peak_device_used_mib": 4108.0
+  }
+}

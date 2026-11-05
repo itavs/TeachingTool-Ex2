@@ -1,0 +1,25 @@
+{
+  "audio_sha256": "091c9944eb3f3106dab9cd50a3472a9260c36b0db4093a815972adb7cc290f20",
+  "source_permission": "User supplied local media for this experiment; redistribution not established.",
+  "language_detection": "en (incorrect: user confirmed a song mainly in Hebrew)",
+  "source_type_and_language": "Song mainly in Hebrew, confirmed by the user after the experiment.",
+  "quality_status": "Failed language detection and same-language preservation on musical input; English rendering accuracy unverified. Lecture speech cases remain untested.",
+  "audio_duration_s": 350.8999375,
+  "load_s": 2.506949899950996,
+  "processing_s": 128.3142037000507,
+  "device": "cuda",
+  "compute_type": "float16",
+  "asr_peak_device_mib": 3241.0,
+  "asr_peak_rss_mib": 612.5234375,
+  "summary_timing_s": {
+    "total_duration": 6.8797011,
+    "load_duration": 3.1477206,
+    "prompt_eval_duration": 0.353157,
+    "eval_duration": 3.371719
+  },
+  "summary_wall_s": 7.699440799886361,
+  "summary_peak_device_mib": 6574.0,
+  "summary_peak_rss_mib": 1377.40234375,
+  "summary_point_count": 5,
+  "media_and_transcript_in_git": false
+}

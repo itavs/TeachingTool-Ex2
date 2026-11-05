@@ -1,0 +1,212 @@
+{
+  "case": "poll_he_comprehension",
+  "model": "qwen3:8b",
+  "utc_started": "2026-11-05T08:19:13.366642+00:00",
+  "prompt": "Create one comprehension poll in Hebrew with four distinct single-choice options. Exactly one option must be correct. Give its zero-based index and a short explanation grounded in the text.\nLearning material:\nבמערכת רישום לקורס, transaction מאגדת את עדכון מספר המקומות ואת יצירת ההרשמה ליחידה אחת. Atomicity פירושה ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר. Rollback מבטל שינויים של transaction שנכשלה. אילוץ UNIQUE על הצירוף מזהה סטודנט ומזהה קורס מונע הרשמה כפולה, אך לבדו אינו מונע משני סטודנטים לתפוס את המקום האחרון. בידוד מתאים או עדכון מותנה של מונה המקומות נדרשים כדי למנוע הרשמת יתר תחת concurrency. מטמון יכול להפחית זמן קריאה, אך עלול להציג מידע מיושן. אין להסתמך על מידע במטמון לבדו כדי לאשר מקום אחרון.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "question": {
+        "type": "string"
+      },
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 4,
+        "maxItems": 4
+      },
+      "correct_index": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 3
+      },
+      "explanation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "question",
+      "options",
+      "correct_index",
+      "explanation"
+    ],
+    "additionalProperties": false
+  },
+  "response": {
+    "model": "qwen3:8b",
+    "created_at": "2026-11-05T08:19:30.9304155Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\n  \"question\": \"מה משמעות המונח 'Atomicity' ב맥סימום של מערכת רישום לקורס?\",\n  \"options\": [\n    \"ששני העדכונים (עדכון מספר המקומות ויצירת ההרשמה) מתבצעים יחד או שאף אחד מהם אינו נשמר.\",\n    \"ששינויים של transaction שנכשלה יכולים להיות מבטלים באמצעות Rollback.\",\n    \"שאילוץ UNIQUE על הצירוף מזהה סטודנט ומזהה קורס מונע הרשמה כפולה.\",\n    \"שמטמון יכול להפחית זמן קריאה, אך עלול להציג מידע מיושן.\"\n  ],\n  \"correct_index\": 0,\n  \"explanation\": \"Atomicity מתאר את תכונת הפעולה שהעדה ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר.\"\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 17110936700,
+    "load_duration": 5293133600,
+    "prompt_eval_count": 274,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 1114010000,
+    "eval_count": 195,
+    "eval_duration": 10697798000
+  },
+  "output": {
+    "question": "מה משמעות המונח 'Atomicity' ב맥סימום של מערכת רישום לקורס?",
+    "options": [
+      "ששני העדכונים (עדכון מספר המקומות ויצירת ההרשמה) מתבצעים יחד או שאף אחד מהם אינו נשמר.",
+      "ששינויים של transaction שנכשלה יכולים להיות מבטלים באמצעות Rollback.",
+      "שאילוץ UNIQUE על הצירוף מזהה סטודנט ומזהה קורס מונע הרשמה כפולה.",
+      "שמטמון יכול להפחית זמן קריאה, אך עלול להציג מידע מיושן."
+    ],
+    "correct_index": 0,
+    "explanation": "Atomicity מתאר את תכונת הפעולה שהעדה ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר."
+  },
+  "completed_generation": true,
+  "running_models": {
+    "models": [
+      {
+        "name": "qwen3:8b",
+        "model": "qwen3:8b",
+        "size": 6194766806,
+        "digest": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "8.2B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-11-05T10:29:30.9314399+02:00",
+        "size_vram": 6194766806,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "timing_s": {
+    "total_duration": 17.1109367,
+    "load_duration": 5.2931336,
+    "prompt_eval_duration": 1.11401,
+    "eval_duration": 10.697798
+  },
+  "generation_tokens_per_s": 18.228050295958102,
+  "wall_s": 18.055320899933577,
+  "resources": {
+    "interval_s": 1,
+    "samples": [
+      {
+        "elapsed_s": 0.376,
+        "selected_process_rss_mib": 89.19921875,
+        "system_available_ram_mib": 12173.03125,
+        "gpu_total_used_mib": 369.0,
+        "gpu_util_percent": 14.0,
+        "gpu_temperature_c": 48.0
+      },
+      {
+        "elapsed_s": 2.11,
+        "selected_process_rss_mib": 748.04296875,
+        "system_available_ram_mib": 11438.1484375,
+        "gpu_total_used_mib": 5097.0,
+        "gpu_util_percent": 75.0,
+        "gpu_temperature_c": 50.0
+      },
+      {
+        "elapsed_s": 3.626,
+        "selected_process_rss_mib": 876.54296875,
+        "system_available_ram_mib": 11299.58984375,
+        "gpu_total_used_mib": 6367.0,
+        "gpu_util_percent": 5.0,
+        "gpu_temperature_c": 51.0
+      },
+      {
+        "elapsed_s": 5.057,
+        "selected_process_rss_mib": 887.546875,
+        "system_available_ram_mib": 11365.3515625,
+        "gpu_total_used_mib": 6367.0,
+        "gpu_util_percent": 3.0,
+        "gpu_temperature_c": 50.0
+      },
+      {
+        "elapsed_s": 6.544,
+        "selected_process_rss_mib": 929.8359375,
+        "system_available_ram_mib": 11337.78515625,
+        "gpu_total_used_mib": 6417.0,
+        "gpu_util_percent": 5.0,
+        "gpu_temperature_c": 50.0
+      },
+      {
+        "elapsed_s": 7.999,
+        "selected_process_rss_mib": 1159.74609375,
+        "system_available_ram_mib": 11128.140625,
+        "gpu_total_used_mib": 6419.0,
+        "gpu_util_percent": 4.0,
+        "gpu_temperature_c": 50.0
+      },
+      {
+        "elapsed_s": 9.442,
+        "selected_process_rss_mib": 1167.19140625,
+        "system_available_ram_mib": 11122.4609375,
+        "gpu_total_used_mib": 6419.0,
+        "gpu_util_percent": 3.0,
+        "gpu_temperature_c": 50.0
+      },
+      {
+        "elapsed_s": 10.965,
+        "selected_process_rss_mib": 1174.875,
+        "system_available_ram_mib": 11094.078125,
+        "gpu_total_used_mib": 6419.0,
+        "gpu_util_percent": 5.0,
+        "gpu_temperature_c": 50.0
+      },
+      {
+        "elapsed_s": 12.423,
+        "selected_process_rss_mib": 1183.0390625,
+        "system_available_ram_mib": 11104.78515625,
+        "gpu_total_used_mib": 6419.0,
+        "gpu_util_percent": 18.0,
+        "gpu_temperature_c": 50.0
+      },
+      {
+        "elapsed_s": 13.89,
+        "selected_process_rss_mib": 996.98046875,
+        "system_available_ram_mib": 11265.0703125,
+        "gpu_total_used_mib": 6419.0,
+        "gpu_util_percent": 12.0,
+        "gpu_temperature_c": 49.0
+      },
+      {
+        "elapsed_s": 15.37,
+        "selected_process_rss_mib": 997.5,
+        "system_available_ram_mib": 11284.32421875,
+        "gpu_total_used_mib": 6419.0,
+        "gpu_util_percent": 95.0,
+        "gpu_temperature_c": 61.0
+      },
+      {
+        "elapsed_s": 16.832,
+        "selected_process_rss_mib": 1004.0625,
+        "system_available_ram_mib": 11280.7578125,
+        "gpu_total_used_mib": 6419.0,
+        "gpu_util_percent": 96.0,
+        "gpu_temperature_c": 62.0
+      },
+      {
+        "elapsed_s": 17.98,
+        "selected_process_rss_mib": 1004.04296875,
+        "system_available_ram_mib": 11274.8515625,
+        "gpu_total_used_mib": 6419.0,
+        "gpu_util_percent": 4.0,
+        "gpu_temperature_c": 53.0
+      }
+    ],
+    "errors": [],
+    "ram_scope": "Summed RSS of this Python process and all ollama* processes; shared pages may be double counted.",
+    "gpu_scope": "Total device memory, including Windows and other applications; sampled peaks are not exact allocation peaks.",
+    "peak_selected_rss_mib": 1183.0390625,
+    "peak_device_used_mib": 6419.0
+  }
+}

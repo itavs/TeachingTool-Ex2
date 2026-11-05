@@ -1,0 +1,120 @@
+{
+  "case": "poll_en_opinion",
+  "model": "qwen3:4b",
+  "utc_started": "2026-11-05T08:15:27.810933+00:00",
+  "prompt": "Create one opinion poll in English with four distinct single-choice options. Do not mark or evaluate correctness. Ask about a preference or trade-off, not factual recall.\nLearning material:\nIn course registration, a transaction groups updating the remaining-seat count and creating an enrollment into one unit. Atomicity means that both changes succeed together or neither persists. Rollback undoes changes of a failed transaction. A UNIQUE constraint on student ID and course ID prevents duplicate enrollment, but alone does not prevent two different students claiming the last seat. Appropriate isolation or a conditional seat-counter update is needed to prevent overbooking under concurrency. A cache can reduce read latency but may contain stale data. The last seat must not be approved from cached availability alone.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "question": {
+        "type": "string"
+      },
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 4,
+        "maxItems": 4
+      }
+    },
+    "required": [
+      "question",
+      "options"
+    ],
+    "additionalProperties": false
+  },
+  "response": {
+    "model": "qwen3:4b",
+    "created_at": "2026-11-05T08:15:29.6583627Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\n  \"question\": \"When designing a course registration system, which approach best balances preventing overbooking while maintaining real-time seat availability?\",\n  \"options\": [\n    \"Always use a cache for seat availability with immediate updates to the database\",\n    \"Use a UNIQUE constraint on student ID and course ID to prevent duplicate enrollments\",\n    \"Implement a transaction that updates seat counts and creates enrollments atomically, with a conditional check for remaining seats\",\n    \"Rely on a cache with a separate background process to update seat counts periodically\"\n  ]\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 1461376900,
+    "load_duration": 4758300,
+    "prompt_eval_count": 195,
+    "prompt_eval_cached_count": 45,
+    "prompt_eval_duration": 72033000,
+    "eval_count": 112,
+    "eval_duration": 1362069000
+  },
+  "output": {
+    "question": "When designing a course registration system, which approach best balances preventing overbooking while maintaining real-time seat availability?",
+    "options": [
+      "Always use a cache for seat availability with immediate updates to the database",
+      "Use a UNIQUE constraint on student ID and course ID to prevent duplicate enrollments",
+      "Implement a transaction that updates seat counts and creates enrollments atomically, with a conditional check for remaining seats",
+      "Rely on a cache with a separate background process to update seat counts periodically"
+    ]
+  },
+  "completed_generation": true,
+  "running_models": {
+    "models": [
+      {
+        "name": "qwen3:4b",
+        "model": "qwen3:4b",
+        "size": 3877571133,
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-11-05T10:25:29.660955+02:00",
+        "size_vram": 3877571133,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "timing_s": {
+    "total_duration": 1.4613769,
+    "load_duration": 0.0047583,
+    "prompt_eval_duration": 0.072033,
+    "eval_duration": 1.362069
+  },
+  "generation_tokens_per_s": 82.22784601954821,
+  "wall_s": 2.2515773000195622,
+  "resources": {
+    "interval_s": 1,
+    "samples": [
+      {
+        "elapsed_s": 0.334,
+        "selected_process_rss_mib": 86.89453125,
+        "system_available_ram_mib": 11636.796875,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 3.0,
+        "gpu_temperature_c": 53.0
+      },
+      {
+        "elapsed_s": 1.673,
+        "selected_process_rss_mib": 86.97265625,
+        "system_available_ram_mib": 11589.55078125,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 95.0,
+        "gpu_temperature_c": 60.0
+      },
+      {
+        "elapsed_s": 2.201,
+        "selected_process_rss_mib": 86.94921875,
+        "system_available_ram_mib": 11584.37890625,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 14.0,
+        "gpu_temperature_c": 57.0
+      }
+    ],
+    "errors": [],
+    "ram_scope": "Summed RSS of this Python process and all ollama* processes; shared pages may be double counted.",
+    "gpu_scope": "Total device memory, including Windows and other applications; sampled peaks are not exact allocation peaks.",
+    "peak_selected_rss_mib": 86.97265625,
+    "peak_device_used_mib": 4108.0
+  }
+}

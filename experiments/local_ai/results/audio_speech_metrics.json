@@ -1,0 +1,53 @@
+{
+  "asr_load_s": 3.1618349000345916,
+  "asr_compute_type": "float16",
+  "asr_device": "cuda",
+  "llm": "qwen3:8b",
+  "case_assessment": "Generated-text inspection only; no reference transcript or listening-based WER.",
+  "cases": [
+    {
+      "case": "short_explain",
+      "audio_sha256": "916d4ce7b90cb5bd72916574cad11383492a4e0d94745726e1057248015452b2",
+      "expected_language_user_confirmed": "en",
+      "detected_language": "en",
+      "detector_probability_not_accuracy": 0.99951171875,
+      "duration_s": 56.7495625,
+      "asr_s": 10.965715700061992,
+      "asr_rss_mib": 465.44140625,
+      "asr_device_memory_mib": 2428.0,
+      "summary_timing_s": {
+        "total_duration": 6.2689234,
+        "load_duration": 2.6202357,
+        "prompt_eval_duration": 0.247202,
+        "eval_duration": 3.396815
+      },
+      "summary_wall_s": 7.027407699963078,
+      "summary_rss_mib": 1348.30078125,
+      "summary_device_memory_mib": 6433.0,
+      "summary_bullet_count": 4,
+      "assessment": "English output coherent against transcript; speech fidelity unscored."
+    },
+    {
+      "case": "static_explanation",
+      "audio_sha256": "85891f043d7a0de80080abbe43206205bdaf4b16626deaec9863ed4f2f8d22fc",
+      "expected_language_user_confirmed": "he",
+      "detected_language": "he",
+      "detector_probability_not_accuracy": 0.9892578125,
+      "duration_s": 235.2878125,
+      "asr_s": 170.99953059991822,
+      "asr_rss_mib": 476.765625,
+      "asr_device_memory_mib": 3104.0,
+      "summary_timing_s": {
+        "total_duration": 6.5571251,
+        "load_duration": 0.0095172,
+        "prompt_eval_duration": 0.354509,
+        "eval_duration": 6.160457
+      },
+      "summary_wall_s": 7.386085599893704,
+      "summary_rss_mib": 1417.76171875,
+      "summary_device_memory_mib": 6437.0,
+      "summary_bullet_count": 4,
+      "assessment": "Language preserved, but corrupted technical terms and erroneous summary wording; quality not accepted."
+    }
+  ]
+}

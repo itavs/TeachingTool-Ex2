@@ -1,0 +1,120 @@
+{
+  "case": "poll_he_opinion",
+  "model": "qwen3:4b",
+  "utc_started": "2026-11-05T08:15:22.281360+00:00",
+  "prompt": "Create one opinion poll in Hebrew with four distinct single-choice options. Do not mark or evaluate correctness. Ask about a preference or trade-off, not factual recall.\nLearning material:\nבמערכת רישום לקורס, transaction מאגדת את עדכון מספר המקומות ואת יצירת ההרשמה ליחידה אחת. Atomicity פירושה ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר. Rollback מבטל שינויים של transaction שנכשלה. אילוץ UNIQUE על הצירוף מזהה סטודנט ומזהה קורס מונע הרשמה כפולה, אך לבדו אינו מונע משני סטודנטים לתפוס את המקום האחרון. בידוד מתאים או עדכון מותנה של מונה המקומות נדרשים כדי למנוע הרשמת יתר תחת concurrency. מטמון יכול להפחית זמן קריאה, אך עלול להציג מידע מיושן. אין להסתמך על מידע במטמון לבדו כדי לאשר מקום אחרון.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "question": {
+        "type": "string"
+      },
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 4,
+        "maxItems": 4
+      }
+    },
+    "required": [
+      "question",
+      "options"
+    ],
+    "additionalProperties": false
+  },
+  "response": {
+    "model": "qwen3:4b",
+    "created_at": "2026-11-05T08:15:24.6803361Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\n  \"question\": \"במהלך התרגול, מהו הבחירה הרצויה בין הפעולות הבאות?\",\n  \"options\": [\n    \"להשתמש במטמון כדי להפחית זמן קריאה, אך להדגיש את הדרישה למידע עדכני\",\n    \"להכין את הפעולות בודדות כדי להבטיח את האטום של העדכונים\",\n    \"להוסיף אילוץ UNIQUE על הצירוף מזהה סטודנט ומזהה קורס כדי למנוע הרשמה כפולה\",\n    \"להשתמש ב-rollback כדי להחזיר את הפעולות הנכשלות לסטטוס מקודם\"\n  ]\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 1944204200,
+    "load_duration": 4474400,
+    "prompt_eval_count": 266,
+    "prompt_eval_cached_count": 45,
+    "prompt_eval_duration": 87622000,
+    "eval_count": 144,
+    "eval_duration": 1819013000
+  },
+  "output": {
+    "question": "במהלך התרגול, מהו הבחירה הרצויה בין הפעולות הבאות?",
+    "options": [
+      "להשתמש במטמון כדי להפחית זמן קריאה, אך להדגיש את הדרישה למידע עדכני",
+      "להכין את הפעולות בודדות כדי להבטיח את האטום של העדכונים",
+      "להוסיף אילוץ UNIQUE על הצירוף מזהה סטודנט ומזהה קורס כדי למנוע הרשמה כפולה",
+      "להשתמש ב-rollback כדי להחזיר את הפעולות הנכשלות לסטטוס מקודם"
+    ]
+  },
+  "completed_generation": true,
+  "running_models": {
+    "models": [
+      {
+        "name": "qwen3:4b",
+        "model": "qwen3:4b",
+        "size": 3877571133,
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-11-05T10:25:24.6829443+02:00",
+        "size_vram": 3877571133,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "timing_s": {
+    "total_duration": 1.9442042,
+    "load_duration": 0.0044744,
+    "prompt_eval_duration": 0.087622,
+    "eval_duration": 1.819013
+  },
+  "generation_tokens_per_s": 79.16381026413775,
+  "wall_s": 2.8079999000765383,
+  "resources": {
+    "interval_s": 1,
+    "samples": [
+      {
+        "elapsed_s": 0.383,
+        "selected_process_rss_mib": 87.15234375,
+        "system_available_ram_mib": 11704.234375,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 4.0,
+        "gpu_temperature_c": 51.0
+      },
+      {
+        "elapsed_s": 1.794,
+        "selected_process_rss_mib": 87.25,
+        "system_available_ram_mib": 11680.23046875,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 95.0,
+        "gpu_temperature_c": 59.0
+      },
+      {
+        "elapsed_s": 2.753,
+        "selected_process_rss_mib": 86.98046875,
+        "system_available_ram_mib": 11683.5859375,
+        "gpu_total_used_mib": 4108.0,
+        "gpu_util_percent": 29.0,
+        "gpu_temperature_c": 56.0
+      }
+    ],
+    "errors": [],
+    "ram_scope": "Summed RSS of this Python process and all ollama* processes; shared pages may be double counted.",
+    "gpu_scope": "Total device memory, including Windows and other applications; sampled peaks are not exact allocation peaks.",
+    "peak_selected_rss_mib": 87.25,
+    "peak_device_used_mib": 4108.0
+  }
+}

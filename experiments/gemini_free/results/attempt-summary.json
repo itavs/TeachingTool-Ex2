@@ -1,0 +1,113 @@
+{
+  "user_confirmed_project_tier": "Free, no linked billing account",
+  "generation_request_count": 3,
+  "automatic_retries": 0,
+  "quota_exhaustion_observed": false,
+  "numeric_quotas": "unknown",
+  "substantive_task_results": 0,
+  "attempts": [
+    {
+      "case": "smoke",
+      "requested_model": "gemini-3.8-flash",
+      "wall_s": 70.61954240011983,
+      "success": true,
+      "http_status": null,
+      "finish_reason": "STOP",
+      "server_status": null,
+      "server_message": null,
+      "settings": {
+        "temperature": 0,
+        "maxOutputTokens": 4096,
+        "thinkingConfig": {
+          "thinkingLevel": "LOW"
+        }
+      },
+      "request_sha256": "f3c64f4c614cdb4f0ef26aa3e605f8906b489009bfc361429dca18c5c8ced71c",
+      "model_version": "gemini-3.8-flash",
+      "usage": {
+        "promptTokenCount": 44,
+        "candidatesTokenCount": 1,
+        "totalTokenCount": 45,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 44
+          }
+        ],
+        "serviceTier": "standard"
+      }
+    },
+    {
+      "case": "poll_he_comprehension",
+      "requested_model": "gemini-3.8-flash",
+      "wall_s": 180.12110839993693,
+      "success": false,
+      "http_status": null,
+      "finish_reason": null,
+      "server_status": null,
+      "server_message": null,
+      "settings": {
+        "temperature": 0,
+        "maxOutputTokens": 4096,
+        "thinkingConfig": {
+          "thinkingLevel": "LOW"
+        },
+        "responseMimeType": "application/json",
+        "responseJsonSchema": {
+          "type": "object",
+          "properties": {
+            "question": {
+              "type": "string"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "correct_index": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "explanation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "question",
+            "options",
+            "correct_index",
+            "explanation"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "request_sha256": "b66e08af4d887c46630da07b4d2af4c21a877285ff9aa4a264139cc54a6e3796",
+      "model_version": null,
+      "usage": null
+    },
+    {
+      "case": "smoke",
+      "requested_model": "gemini-3.5-flash-lite",
+      "wall_s": 7.341346499975771,
+      "success": false,
+      "http_status": 503,
+      "finish_reason": null,
+      "server_status": "UNAVAILABLE",
+      "server_message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+      "settings": {
+        "temperature": 0,
+        "maxOutputTokens": 4096,
+        "thinkingConfig": {
+          "thinkingLevel": "LOW"
+        }
+      },
+      "request_sha256": "f3c64f4c614cdb4f0ef26aa3e605f8906b489009bfc361429dca18c5c8ced71c",
+      "model_version": null,
+      "usage": null
+    }
+  ]
+}

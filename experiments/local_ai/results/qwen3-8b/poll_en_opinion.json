@@ -1,0 +1,120 @@
+{
+  "case": "poll_en_opinion",
+  "model": "qwen3:8b",
+  "utc_started": "2026-11-05T08:19:39.090531+00:00",
+  "prompt": "Create one opinion poll in English with four distinct single-choice options. Do not mark or evaluate correctness. Ask about a preference or trade-off, not factual recall.\nLearning material:\nIn course registration, a transaction groups updating the remaining-seat count and creating an enrollment into one unit. Atomicity means that both changes succeed together or neither persists. Rollback undoes changes of a failed transaction. A UNIQUE constraint on student ID and course ID prevents duplicate enrollment, but alone does not prevent two different students claiming the last seat. Appropriate isolation or a conditional seat-counter update is needed to prevent overbooking under concurrency. A cache can reduce read latency but may contain stale data. The last seat must not be approved from cached availability alone.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "question": {
+        "type": "string"
+      },
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 4,
+        "maxItems": 4
+      }
+    },
+    "required": [
+      "question",
+      "options"
+    ],
+    "additionalProperties": false
+  },
+  "response": {
+    "model": "qwen3:8b",
+    "created_at": "2026-11-05T08:19:41.7577676Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\n  \"question\": \"Which approach best ensures that the last seat in a course is not overbooked when multiple students are registering concurrently?\",\n  \"options\": [\n    \"Using a UNIQUE constraint on student ID and course ID alone.\",\n    \"Implementing a cache to reduce read latency, with a check against the database for seat availability.\",\n    \"Allowing transactions to proceed without isolation, relying on the database to handle concurrency.\",\n    \"Using appropriate isolation levels and conditional updates to the seat counter within transactions.\"\n  ]\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 2255873900,
+    "load_duration": 5476400,
+    "prompt_eval_count": 201,
+    "prompt_eval_cached_count": 45,
+    "prompt_eval_duration": 97070000,
+    "eval_count": 107,
+    "eval_duration": 2128560000
+  },
+  "output": {
+    "question": "Which approach best ensures that the last seat in a course is not overbooked when multiple students are registering concurrently?",
+    "options": [
+      "Using a UNIQUE constraint on student ID and course ID alone.",
+      "Implementing a cache to reduce read latency, with a check against the database for seat availability.",
+      "Allowing transactions to proceed without isolation, relying on the database to handle concurrency.",
+      "Using appropriate isolation levels and conditional updates to the seat counter within transactions."
+    ]
+  },
+  "completed_generation": true,
+  "running_models": {
+    "models": [
+      {
+        "name": "qwen3:8b",
+        "model": "qwen3:8b",
+        "size": 6194766806,
+        "digest": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "8.2B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-11-05T10:29:41.7604594+02:00",
+        "size_vram": 6194766806,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "timing_s": {
+    "total_duration": 2.2558739,
+    "load_duration": 0.0054764,
+    "prompt_eval_duration": 0.09707,
+    "eval_duration": 2.12856
+  },
+  "generation_tokens_per_s": 50.26872627504041,
+  "wall_s": 3.127324700122699,
+  "resources": {
+    "interval_s": 1,
+    "samples": [
+      {
+        "elapsed_s": 0.337,
+        "selected_process_rss_mib": 1126.5546875,
+        "system_available_ram_mib": 11153.4140625,
+        "gpu_total_used_mib": 6421.0,
+        "gpu_util_percent": 3.0,
+        "gpu_temperature_c": 54.0
+      },
+      {
+        "elapsed_s": 1.778,
+        "selected_process_rss_mib": 1172.90234375,
+        "system_available_ram_mib": 11119.90234375,
+        "gpu_total_used_mib": 6421.0,
+        "gpu_util_percent": 94.0,
+        "gpu_temperature_c": 65.0
+      },
+      {
+        "elapsed_s": 3.074,
+        "selected_process_rss_mib": 1173.19140625,
+        "system_available_ram_mib": 11120.171875,
+        "gpu_total_used_mib": 6421.0,
+        "gpu_util_percent": 21.0,
+        "gpu_temperature_c": 58.0
+      }
+    ],
+    "errors": [],
+    "ram_scope": "Summed RSS of this Python process and all ollama* processes; shared pages may be double counted.",
+    "gpu_scope": "Total device memory, including Windows and other applications; sampled peaks are not exact allocation peaks.",
+    "peak_selected_rss_mib": 1173.19140625,
+    "peak_device_used_mib": 6421.0
+  }
+}

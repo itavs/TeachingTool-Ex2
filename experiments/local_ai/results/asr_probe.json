@@ -1,0 +1,7 @@
+{
+  "device": "cuda",
+  "compute_type": "int8_float16",
+  "audio_test_performed": false,
+  "model_load_s": 3.479168700054288,
+  "status": "Model loaded; real audio inference remains untested."
+}

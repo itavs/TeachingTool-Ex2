@@ -1,0 +1,128 @@
+{
+  "case": "poll_he_opinion",
+  "model": "qwen3:8b",
+  "utc_started": "2026-11-05T08:19:31.423022+00:00",
+  "prompt": "Create one opinion poll in Hebrew with four distinct single-choice options. Do not mark or evaluate correctness. Ask about a preference or trade-off, not factual recall.\nLearning material:\nבמערכת רישום לקורס, transaction מאגדת את עדכון מספר המקומות ואת יצירת ההרשמה ליחידה אחת. Atomicity פירושה ששני העדכונים מתבצעים יחד או שאף אחד מהם אינו נשמר. Rollback מבטל שינויים של transaction שנכשלה. אילוץ UNIQUE על הצירוף מזהה סטודנט ומזהה קורס מונע הרשמה כפולה, אך לבדו אינו מונע משני סטודנטים לתפוס את המקום האחרון. בידוד מתאים או עדכון מותנה של מונה המקומות נדרשים כדי למנוע הרשמת יתר תחת concurrency. מטמון יכול להפחית זמן קריאה, אך עלול להציג מידע מיושן. אין להסתמך על מידע במטמון לבדו כדי לאשר מקום אחרון.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "question": {
+        "type": "string"
+      },
+      "options": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 4,
+        "maxItems": 4
+      }
+    },
+    "required": [
+      "question",
+      "options"
+    ],
+    "additionalProperties": false
+  },
+  "response": {
+    "model": "qwen3:8b",
+    "created_at": "2026-11-05T08:19:34.3438594Z",
+    "message": {
+      "role": "assistant",
+      "content": "{\n  \"question\": \"אם היית מנהל מערכת רישום לקורס, מה היית מעדיף כדי למנוע הרשמה כפולה לאותו מקום?\",\n  \"options\": [\n    \"לדרוש אילוץ UNIQUE על הצירוף של סטודנט וקורס\",\n    \"לדרוש בידוד או עדכון מותנה של מספר המקומות\",\n    \"לשמור על מטמון כדי להפחית זמן קריאה\",\n    \"לקרוא ישירות מהבסיס ולא להשתמש במטמון\"\n  ]\n}"
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 2498071800,
+    "load_duration": 7629200,
+    "prompt_eval_count": 272,
+    "prompt_eval_cached_count": 45,
+    "prompt_eval_duration": 130125000,
+    "eval_count": 116,
+    "eval_duration": 2327971000
+  },
+  "output": {
+    "question": "אם היית מנהל מערכת רישום לקורס, מה היית מעדיף כדי למנוע הרשמה כפולה לאותו מקום?",
+    "options": [
+      "לדרוש אילוץ UNIQUE על הצירוף של סטודנט וקורס",
+      "לדרוש בידוד או עדכון מותנה של מספר המקומות",
+      "לשמור על מטמון כדי להפחית זמן קריאה",
+      "לקרוא ישירות מהבסיס ולא להשתמש במטמון"
+    ]
+  },
+  "completed_generation": true,
+  "running_models": {
+    "models": [
+      {
+        "name": "qwen3:8b",
+        "model": "qwen3:8b",
+        "size": 6194766806,
+        "digest": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "8.2B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-11-05T10:29:34.3467876+02:00",
+        "size_vram": 6194766806,
+        "context_length": 8192,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "timing_s": {
+    "total_duration": 2.4980718,
+    "load_duration": 0.0076292,
+    "prompt_eval_duration": 0.130125,
+    "eval_duration": 2.327971
+  },
+  "generation_tokens_per_s": 49.82879941373841,
+  "wall_s": 3.7996825000736862,
+  "resources": {
+    "interval_s": 1,
+    "samples": [
+      {
+        "elapsed_s": 0.347,
+        "selected_process_rss_mib": 1004.27734375,
+        "system_available_ram_mib": 11279.53515625,
+        "gpu_total_used_mib": 6419.0,
+        "gpu_util_percent": 4.0,
+        "gpu_temperature_c": 53.0
+      },
+      {
+        "elapsed_s": 1.824,
+        "selected_process_rss_mib": 1069.32421875,
+        "system_available_ram_mib": 11216.5625,
+        "gpu_total_used_mib": 6421.0,
+        "gpu_util_percent": 97.0,
+        "gpu_temperature_c": 60.0
+      },
+      {
+        "elapsed_s": 3.297,
+        "selected_process_rss_mib": 1068.84375,
+        "system_available_ram_mib": 11225.1484375,
+        "gpu_total_used_mib": 6421.0,
+        "gpu_util_percent": 95.0,
+        "gpu_temperature_c": 64.0
+      },
+      {
+        "elapsed_s": 3.753,
+        "selected_process_rss_mib": 1069.1796875,
+        "system_available_ram_mib": 11218.515625,
+        "gpu_total_used_mib": 6421.0,
+        "gpu_util_percent": 4.0,
+        "gpu_temperature_c": 53.0
+      }
+    ],
+    "errors": [],
+    "ram_scope": "Summed RSS of this Python process and all ollama* processes; shared pages may be double counted.",
+    "gpu_scope": "Total device memory, including Windows and other applications; sampled peaks are not exact allocation peaks.",
+    "peak_selected_rss_mib": 1069.32421875,
+    "peak_device_used_mib": 6421.0
+  }
+}

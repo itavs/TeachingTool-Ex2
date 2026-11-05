@@ -1,0 +1,14 @@
+# Local AI feasibility environment, downloaded models, and private media.
+/.ai-lab/
+__pycache__/
+*.py[cod]
+# Application runtime state and local credentials.
+/.venv/
+/.local/
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+.env
+.env.*
+/staticfiles/

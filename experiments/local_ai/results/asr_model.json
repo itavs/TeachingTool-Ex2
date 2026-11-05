@@ -1,0 +1,23 @@
+{
+  "repo": "Systran/faster-whisper-medium",
+  "revision": "08e178d48790749d25932bbc082711ddcfdfbc4f",
+  "files": [
+    {
+      "name": "config.json",
+      "size": 2257
+    },
+    {
+      "name": "model.bin",
+      "size": 1527906378
+    },
+    {
+      "name": "tokenizer.json",
+      "size": 2203239
+    },
+    {
+      "name": "vocabulary.txt",
+      "size": 459861
+    }
+  ],
+  "download_wall_s": 0.8117651999928057
+}
