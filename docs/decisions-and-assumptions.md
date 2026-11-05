@@ -3,8 +3,11 @@
 ## 1. Purpose and Status
 
 This register is the shared source of decision status for the requirements
-drafts. It records approved attendance and polling decisions separately from
-the remaining open demo proposals.
+drafts. It records approved attendance, polling, and video-summary decisions
+separately from the remaining open demo proposals.
+D-17 retains the unresolved comments-offline boundary. D-18 through D-22 now
+approve the connected comments workflow and the first-version homework scope;
+all capabilities still await implementation and verification.
 No application behavior, AI experiment, or runtime test has been implemented
 or verified in this stage.
 
@@ -62,6 +65,17 @@ this is a document inspection, not separate confirmation from the lecturer.
 | D-09 | The lecturer reviews and may edit all generated content before publication only, including the correct answer and explanation for comprehension questions. Each identified student submits one final response per poll with no changes after submission. One poll may be active per meeting; additional polls can be created after the previous poll closes. Closure is manual. | Approved workflow, not implemented. The shared student-identification method remains unresolved (Q-07); the one-active-poll rule is per meeting, not a global one-meeting limit. |
 | D-10 | During voting, the lecturer sees the respondent count and response distribution as counts and percentages. Students see aggregate results only after closure, without respondent identities. For comprehension questions the correct answer and short explanation are also revealed to students only after closure. | Approved visibility rules. No grades are assigned; opinion polls never designate or evaluate a correct answer. Approval does not establish implementation or verification. |
 | D-11 | The basic polling scope excludes grades, file uploads, open-ended questions, and automatic scheduling. Generation failure produces an error and a retry option, without presenting prepared content as generated from the supplied material. | Approved scope and failure behavior. Actual generation, error recovery, and result visibility still require later implementation and verification. |
+| D-12 | Target support for Hebrew and English recordings, producing each summary in the spoken language of its recording, without translation in the first version. | An implementation and verification target, not demonstrated language support. D-15 clarifies Hebrew speech with English technical terms and the limit on sustained language switching. This decision concerns video summaries, not poll language. |
+| D-13 | Summarize video through audio extraction, speech transcription, and model-based summarization of that transcript. Analyze audio only and clearly state in the result that visual information not spoken in the recording is not included in the analysis. | Approved processing direction, not implemented or verified. No visual analysis is approved. Lecturer acceptance of this interpretation of a class-video summary is unconfirmed. D-14 and D-16 now define the input/output direction and the policy for later numeric limits. |
+| D-14 | The lecturer manually uploads a file from the computer, with MP4 as the initial supported format. The result contains a summary paragraph and 3-5 key points, alongside an option to view the full transcript. | Approved implementation target, not verified support. No additional formats, link-import workflow, transcript editing, or transcript export are established by this decision. |
+| D-15 | Planned verification includes a Hebrew lecture using English technical terms, in addition to Hebrew and English recordings. The summary remains in the recording's spoken language without a translation stage. | Sustained switching between languages is outside the current commitment. This does not exclude ordinary English technical terminology in a Hebrew lecture or claim that this case has already passed. No automatic rejection/detection policy or numeric switching threshold is chosen. |
+| D-16 | Set maximum video duration and file size after measuring processing time and cost. Define the demo-segment duration separately from those system limits. | The measurement-first policy is approved, but no numeric duration, byte-size limit, or demo length is fixed. No unlimited-length capability, completed benchmark, provider, or budget is implied. |
+| D-17 | Keep the meaning of offline for comments/suggestions open for clarification with the lecturer or teaching assistant. In the design, separate creating a request, submitting it, and storing it so later clarification can be accommodated. | No local persistence, send queue, or disconnected synchronization is approved or implemented. Online activity after class is not an approved interpretation of offline. Coverage of that part of AS-02 is pending clarification. This decision did not approve the other comments/homework proposals; subsequent D-18 through D-22 record their later approval. |
+| D-18 | Identified students create meeting-associated requests of type comment or suggestion. A student sees only their own requests; the lecturer sees all requests for the meeting. Store requests and provide history; show new requests to the lecturer without manual refresh. | Approved connected-flow target, not verified behavior. Creation, submission, and storage remain distinct under D-17. Identity method, retention duration, and operational details are not selected here. |
+| D-19 | The first comments/suggestions version excludes lecturer replies, discussion threads, attachments, votes, and notifications. D-17 remains in force: offline meaning awaits clarification and is not considered covered. | Approved scope boundary, not a replacement of the offline requirement. After-class online activity does not establish offline coverage; no local persistence, queue, or disconnected synchronization is added. |
+| D-20 | Support theoretical homework assignments with pasted-text submissions in Hebrew and English. The lecturer supplies instructions and review criteria. A student may request review of their own work; the lecturer may request review of any submission. An LLM processes the work against the supplied instructions/criteria and returns strengths, gaps, and actionable recommendations. | Approved implementation and verification target, not tested language or review support. Review output language, numeric input limits, revision behavior, and measurable quality criteria are not fixed by this decision. No one-assignment system limit is approved. |
+| D-21 | Compare actual other submissions for the same assignment, addressing topic coverage and solution approaches. Students see their own feedback and comparison without peer identities or full peer works; the lecturer sees all submissions and feedback. With no peer submissions, individual review is allowed but must explicitly say that no comparison was performed. | Comparison must actually process peer inputs; general LLM knowledge or canned comparison is not a substitute. Exact eligible-peer selection and revision/snapshot behavior still need refinement. No anonymity guarantee beyond the approved student-visible exclusions is claimed. |
+| D-22 | The first homework version excludes grades, plagiarism determinations, and execution of submitted code. Use sample works only in the demo; their count is not a system limit. | Approved first-version and demo scope. Actual student homework is not approved as demo input. Other data-use, retention, AI-processing, and spending decisions remain Q-07; no numeric submission-count or text-length cap is set. |
 
 The project is an individual assignment. The working planning horizon is about
 three weeks, as provided by the user; the exact deadline is not confirmed.
@@ -70,7 +84,11 @@ three weeks, as provided by the user; the exact deadline is not confirmed.
 
 P-02 and P-03 retain the history of the earlier attendance proposals and their
 resolution by D-05 and D-06. P-05 records the polling proposal resolved by
-D-08 through D-11. Other rows remain open proposals; their inclusion does not
+D-08 through D-11. P-06 is partly resolved by D-12 through D-16; its numeric
+limits and remaining quality questions are open. P-04 is resolved for the
+connected workflow by D-18/D-19, with D-17 preserving the offline gap. P-07 and
+P-08 are resolved for the approved homework scope by D-20 through D-22, with
+remaining operational/data-use details explicit. Other open rows do not
 approve an implementation requirement or scope reduction.
 
 | ID | Proposal and current status | Effect and unresolved boundary |
@@ -78,11 +96,11 @@ approve an implementation requirement or scope reduction.
 | P-01 | One course, one lecturer, and one active meeting at a time. | Reduces administration; actual class size and concurrency remain unknown. |
 | P-02 | Superseded by D-05: the earlier proposal used identified meeting entry as the attendance trigger. | The approved trigger is now a valid, meeting-bound rotating QR during an open registration window; meeting entry alone is not the selected trigger. Identity, timing, and late-arrival details remain open. |
 | P-03 | Partly resolved by D-06: online list and XLSX snapshot export without synchronization back are approved. | Exact fields and online corrections remain open; lecturer confirmation of the online/offline interpretation is still needed. |
-| P-04 | Offline comments mean asynchronous access outside lesson time, with an internet connection. Retain comments; show identified comments only to the lecturer. | Does not provide disconnected operation or later synchronization; interpretation and visibility require approval. |
+| P-04 | Resolved for connected comments by D-18/D-19: identified comment/suggestion requests, meeting association, storage/history, student-own and lecturer-meeting visibility, live updates, and exclusions are approved targets. | D-17 preserves separate creation/submission/storage and the unresolved offline meaning. No offline coverage, local persistence, send queue, or disconnected synchronization is approved. Retention duration and other operational details remain open. |
 | P-05 | Resolved by D-08 through D-11: model-generated comprehension questions and opinion polls from pasted learning text, four single-choice options, pre-publication lecturer review/editing, final responses, and one active poll per meeting. | Poll types, lifecycle, results visibility, exclusions, and failure/retry behavior are approved. Language and input-length limit remain open under Q-03; this row is historical, not a pending vote on the approved workflow. |
-| P-06 | Manually upload a one-to-two-minute video in one agreed language; extract audio, transcribe it, and summarize the transcript using actual model processing. | Does not interpret silent slides or board content, process full lessons, or import recordings automatically. The video-to-summary pipeline must actually run if approved. |
-| P-07 | One homework assignment, about three short text submissions of a few hundred words, lecturer-provided instructions and criteria, and real LLM review and cross-submission comparison. | Text-only input, workload, review rubric, and depth require approval; numeric grading, plagiarism judgments, and code execution are not proposed for the basic demo. |
-| P-08 | Students see their own review and anonymized comparisons; the lecturer sees all reviews. Use clearly identified sample inputs for the demo. | Access controls, consent, use of actual student work, retention, deletion, and what may be sent for AI processing are unresolved. |
+| P-06 | Partly resolved by D-12 through D-16: Hebrew/English targets, audio-only processing/disclosure, manual computer-file upload with initial MP4 support, a summary paragraph plus 3-5 key points, and full-transcript viewing are approved targets. Planned cases include Hebrew speech with English technical terms. | Sustained language switching is outside the commitment. Numeric duration/file-size limits follow time/cost measurements; demo duration is separate. Quality criteria and lecturer interpretation remain open (Q-04). No fixed one-to-two-minute cap, full-lesson exclusion, or unlimited-length claim is approved. |
+| P-07 | Resolved in scope by D-20 through D-22: theoretical Hebrew/English pasted-text assignments, lecturer criteria, real LLM review, and actual same-assignment peer comparison are approved. | The earlier one-assignment/three-short-submission proposal is not a system constraint. Numeric limits, eligible-peer selection, review output language, revisions, and quality thresholds remain open; grades, plagiarism determinations, and code execution are excluded. |
+| P-08 | Resolved in visibility/demo scope by D-21/D-22: student-own review with comparison excluding peer identities/full works, lecturer access to all submissions/feedback, and sample works only for the demo. | Identity/access mechanisms, retention/deletion, external processing, and budget remain Q-07. No real student homework is approved for the demo, and the number of demo samples is not a system cap. |
 | P-09 | Prepare demo inputs in advance and aim to show actual processing within ten minutes. Label any previously processed output explicitly. | Runtime is unmeasured. Previously processed results are not a substitute for a live-processing requirement without approval; simulated output cannot establish capability completion. |
 | P-10 | Optionally check whether a registration request comes through the university network, subject to feasibility (D-07). | No network restriction is approved. Address ranges, actual request path, VPN/shared-address effects, IPv4/IPv6 behavior, and handling of unavailable evidence require investigation and a later decision (Q-10). |
 
@@ -91,12 +109,12 @@ approve an implementation requirement or scope reduction.
 | ID | Question | Related items | Resolution needed |
 |----|----------|---------------|-------------------|
 | Q-01 | Which identity method, registration-window duration, QR rotation/validity timings, transition rules, and late-arrival handling should accompany D-05? Does the lecturer accept this mechanism as automatically recording attendance? | AS-01, D-05, P-02 | Direction approved; these details remain open. Physical presence is not guaranteed, and real-time sharing of valid codes is not prevented. Lecturer interpretation remains unverified. |
-| Q-02 | Does the lecturer accept the D-06 online list and XLSX snapshot as online/offline? Which fields and online corrections are needed? Separately, what does offline mean for comments? | AS-01, AS-02, D-06, P-03, P-04 | Attendance output format and no-back-sync behavior are decided; fields, corrections, lecturer interpretation, and the unrelated comments interpretation remain open. |
+| Q-02 | Does the lecturer accept the D-06 online list and XLSX snapshot as online/offline? Which fields and online corrections are needed? Separately, what does offline mean for comments according to the lecturer or teaching assistant? | AS-01, AS-02, D-06, D-17, P-03, P-04 | Attendance output format and no-back-sync behavior are decided; fields, corrections, and lecturer interpretation remain open. Comments offline coverage is pending clarification; after-class online use is not an approved offline interpretation. Local persistence, send queues, and disconnected synchronization are not approved. |
 | Q-03 | Which poll language and input-length limit should be supported? | AS-03, D-08 through D-11, P-05 | These two parameters remain open. Poll types, four options, lecturer review/editing, voting, closure, visibility, exclusions, and failure/retry behavior are decided; shared identity, capacity, and AI-service constraints remain Q-06/Q-07. |
-| Q-04 | Is an audio-based summary of a short uploaded video sufficient? Which language, duration, formats, and quality criteria apply? | AS-04, P-06 | User scope decision and any necessary lecturer clarification. |
-| Q-05 | Which homework types, comparison population, review criteria, and depth are required? | AS-05, P-07, P-08 | User approval before fixing inputs, review behavior, and acceptance fixtures. |
+| Q-04 | Which numeric maximum duration and file size should follow time/cost measurements? What separate demo duration and summary/transcription quality criteria are appropriate, and does the lecturer accept the audio-only interpretation? | AS-04, D-12 through D-16, P-06 | Language, audio processing/disclosure, manual MP4 upload, output layout, full-transcript viewing, terminology test coverage, and measurement-first limits policy are decided. Numeric limits, demo duration, quality criteria, and lecturer interpretation remain open. Sustained language switching is outside the current commitment. |
+| Q-05 | Which eligible peer submissions should a review use, and how should revisions/reviews be associated? What review output language, numeric input/workload limits, and measurable quality criteria should apply? | AS-05, D-20 through D-22, P-07, P-08 | Types, Hebrew/English pasted input, lecturer criteria, review content, same-assignment comparison, visibility, no-peer behavior, exclusions, and sample-only demo are approved. Remaining parameters require later decisions; demo sample count is not a system limit. |
 | Q-06 | How many classroom users, devices, and simultaneous actions must be supported, and where must the demo be accessible? | AS-06, AS-07, P-01 | Actual class conditions, network availability, and measurable usability/capacity targets. |
-| Q-07 | What identity, access, data-use, consent, retention, deletion, and AI-spending boundaries apply? | P-02, P-04, P-08, D-02 | User approval before external processing, paid use, or actual student-data use; no budget is assumed. |
+| Q-07 | Which identity/access mechanism and data-use, consent, retention/deletion, external-AI-processing, and spending boundaries should apply? | D-02, D-10, D-18, D-21, D-22, P-02, P-04, P-08 | Poll, comments, and homework visibility rules are decided; how to enforce identity/access and handle data lifecycle/resources remains open. Homework demo inputs are sample works only. No budget or external-service permission is inferred. |
 | Q-08 | What are the exact deadline, submission format, templates, and assessment criteria? | AS-10 through AS-14 | User or lecturer information; do not invent submission rules. |
 | Q-09 | Must every AI output finish live during the presentation, and what is the acceptable duration and quality of each result? | AS-09, D-01, P-09 | User decision plus later measured feasibility; disclose any approved use of earlier results. |
 | Q-10 | Can the intended deployment reliably distinguish university-network requests from other traffic, and is that signal useful enough to adopt? | D-07, P-10 | Obtain network information, perform the proposed local review and campus observations below, document uncertainty, and seek a separate decision. No implementation requirement or successful experiment is assumed. |
@@ -180,3 +198,81 @@ Shared IP addresses do not uniquely identify a user
 ([RFC 6269, Section 13.2](https://www.rfc-editor.org/rfc/rfc6269.html#section-13.2)).
 Whether campus routing or VPN behavior defeats a university-origin heuristic
 is a hypothesis for this study, not an observed property of this university.
+
+## 8. Video-Summary Decisions and Pending Limits
+
+These are user-approved project targets, not additional handout requirements
+or claims of tested capabilities:
+
+| Topic | Approved target | Decision boundary |
+|-------|---------------------|-------------------|
+| Video delivery | Lecturer manually uploads a file from the computer (D-14). | Link import is not part of the selected workflow. |
+| Input format | MP4 is the initial supported format (D-14). | Actual decoding/processing support remains to be implemented and tested; other formats are not committed. |
+| Summary layout | A summary paragraph followed by 3-5 key points (D-14). | No additional numeric text-length constraint is selected. |
+| Transcript display | Lecturer can view the full transcript alongside the summary (D-14). | Transcript editing or export is not added by this decision. |
+| Language verification | Hebrew, English, and a Hebrew lecture with English technical terms (D-12/D-15). | No translation stage; sustained language switching is outside the current commitment. All cases are planned, not passed. |
+
+**Approved limits policy (D-16):** determine maximum recording duration and
+file size after processing-time and cost measurements. Choose demo-segment
+duration separately. A short demo sample does not define the system's maximum
+input, and no numeric duration/file-size limit or demo duration is approved,
+including the earlier one-to-two-minute suggestion. Unlimited processing or
+full-lesson support has not been established.
+
+**Planned limit-setting measurements, not performed:** in later feasibility
+work, measure processing time and cost for permitted Hebrew and English
+samples of different durations and file sizes, including Hebrew speech with
+English technical terms. Record input duration, language, file size, extraction,
+transcription and summarization times, total turnaround, observed quality,
+failures, and cost. Label estimated cost separately from actual usage charges;
+if charges are unavailable, record that gap rather than a zero cost. Use the
+evidence to propose maximum recording duration and file size, with a separate
+demo-segment duration, for user approval. No tool/provider, budget, framework,
+or experimental result is established by this plan. Sustained language
+switching remains outside the commitment rather than silently adding
+translation or an unapproved automatic rejection policy.
+
+## 9. Open Decisions and Technical-Design Readiness
+
+The distinctions below are planning recommendations, not additional user
+decisions or blanket blockers. Conceptual component/use-case design can
+proceed from the approved scope. Do not silently assume answers when fixing
+an affected interface, architecture, or acceptance claim.
+
+### Decisions needed before committing to affected technical choices
+
+| Decision | Why it matters | Related items |
+|----------|----------------|---------------|
+| Shared student/lecturer identification and access method | Stable identity is needed for attendance deduplication, final poll votes, own-request visibility, and own-work review. | Q-07 |
+| First-version course/meeting organization, expected users/concurrency, and classroom access/network conditions | Determines context boundaries and the deployment/capacity assumptions; one course/lecturer/active meeting remains a proposal. | P-01, Q-06 |
+| Permitted external AI/data processing, budget, and data-lifecycle expectations | Needed before selecting or using an AI service and settling persistence/security boundaries. Sample-only homework demo scope does not itself approve external processing or paid use. | Q-07, D-22 |
+| Eligible peer set and handling of submission revisions | Needed before fixing homework comparison inputs and review-to-submission associations; compare only actual other works for the same assignment. | Q-05, D-21 |
+
+Offline meaning is a **scoped clarification gate**: completing the offline
+comments design or claiming full AS-02 coverage requires lecturer/teaching-
+assistant clarification (Q-02/D-17). It does not approve a disconnected
+mechanism or block unrelated technical planning. Lecturer interpretation of
+attendance and audio-only summaries also remains unconfirmed (Q-01/Q-04);
+record any scope impact rather than inventing confirmation.
+
+### Details that can be resolved during later design or feasibility work
+
+- Poll language/input length, homework review output language, and interface
+  language can be settled while refining the affected AI/UX interfaces;
+  do not assume the video-language decision applies to them (Q-03/Q-05/Q-06).
+- QR rotation/validity/window values, late-arrival policy, attendance export
+  fields/corrections, and comment operational details can be refined before
+  implementing their respective paths (Q-01/Q-02/Q-07).
+- Numeric video duration/file-size limits follow measured time/cost under
+  D-16. Homework text/workload bounds and AI quality/latency criteria need
+  evidence and agreement, not an invented cap from the demo dataset.
+- Exact retention periods, retry details, error wording, and presentation
+  layout can be refined after the high-level lifecycle/access decisions and
+  before implementation or verification of the affected behavior.
+- Exact deadline/submission instructions and live-demo completion expectations
+  are needed soon for the schedule and rehearsal, but do not prevent initial
+  conceptual design (Q-08/Q-09).
+
+The university-network study remains deferred, conditional, and non-blocking
+(D-07/Q-10). No framework, installation, implementation, or completed runtime
+check is established by this readiness review.

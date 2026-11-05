@@ -18,22 +18,47 @@ and composing existing code or tools is preferred where appropriate.
 
 The user approved planning a demo in which **all five capabilities actually
 work** (D-01). This is our working target; the lecturer has not confirmed that
-all five must be implemented for the demo. Attendance direction D-05/D-06 and
-polling decisions D-08 through D-11 are user-approved; remaining parameters
-and other candidate limits below are open.
+all five must be implemented for the demo. User-approved directions now cover
+attendance D-05/D-06, connected comments D-18/D-19 with the D-17 offline gap,
+polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
+D-22. These are design targets, not implemented or verified capabilities;
+remaining operational parameters and open interpretations are explicit.
 
 | Capability | Assignment behavior | Design direction and open proposals |
 |------------|---------------------|----------------------------------|
 | Attendance | Automatic student attendance; lecturer receives an online/offline spreadsheet. | Approved D-05/D-06: lecturer opens a meeting and registration window; an identified student scans a temporary QR displayed in class and rotated during the window. The system validates code validity and meeting association, records attendance and time, and prevents duplicates per student and meeting. Lecturer views an online list and exports a point-in-time XLSX snapshot without synchronization back. |
-| Comments and suggestions | Students contribute in real time / offline. | Retained, identified comments visible to the lecturer, with live updates and asynchronous online access (P-04). This does not support disconnected operation. |
+| Comments and suggestions | Students contribute in real time / offline. | Approved D-18/D-19: identified comment/suggestion requests associated with a meeting, storage/history, student-own visibility, and lecturer access to all meeting requests with new requests appearing without manual refresh. D-17 preserves separate creation/submission/storage; offline meaning and coverage remain unresolved. |
 | Polls | Lecturers create automatic, simple polls about current learning material. | Approved D-08 through D-11: lecturer selects comprehension or opinion before real model generation from pasted text. Both have one question and four single-choice options. Comprehension also includes one correct answer and a short explanation; opinion has no correct answer or correctness evaluation. Lecturer reviews/edits before publication only; identified students submit one final response. |
-| Video summary | Lecturer obtains an ML summary of a class video. | A short uploaded video is actually processed through audio extraction, transcription, and summarization (P-06). This omits silent visual content and full-length lessons. |
-| Homework review | Students and teachers obtain deep LLM reviews including comparison with other students' work. | Real review of short text submissions against task criteria and actual peer submissions; proposed role-specific and anonymized views (P-07, P-08). |
+| Video summary | Lecturer obtains an ML summary of a class video. | Approved D-12 through D-16: manually upload an MP4 file from the computer; extract audio, transcribe speech, and summarize through a model in the recording's spoken language without translation. Target Hebrew and English, including a Hebrew lecture with English technical terms. Return a summary paragraph, 3-5 key points, full-transcript viewing, and an explicit notice that unspoken visual information is excluded. All support remains unverified. |
+| Homework review | Students and teachers obtain deep LLM reviews including comparison with other students' work. | Approved D-20 through D-22: theoretical Hebrew/English pasted-text assignments, lecturer instructions/criteria, actual LLM feedback and processing of same-assignment peer submissions, student-own review/comparison without peer identities/full works, and lecturer access to all submissions/feedback. No-peer feedback explicitly states that no comparison occurred. |
 
 One course, one lecturer, and one active meeting are proposed simplifications
-(P-01), not approved limits. Video length/language, homework formats and volume,
-identity, access rules, comments' offline meaning, and classroom capacity
-remain open.
+(P-01), not approved limits. Video numeric duration/file-size limits, separate
+demo duration and quality criteria, homework numeric limits, review output
+language/peer-selection/revision rules, shared identity/access mechanisms,
+retention/deletion details, comments' offline meaning, and classroom capacity
+remain open. Approved visibility rules do not choose their enforcement method.
+
+For comments, creating content, attempting submission, and confirming storage
+are separate responsibilities, so later offline clarification can be reflected
+in the design (D-17). This does not approve local persistence, a send queue,
+or disconnected synchronization. Online activity after class is not an
+approved interpretation of offline, and that part of AS-02 is not yet covered
+by an agreed design. The connected scope is now approved under D-18/D-19:
+store identified meeting requests with history, student-own and lecturer-meeting
+views, and live lecturer updates. Lecturer replies, discussion threads,
+attachments, votes, and notifications are excluded.
+
+Homework review uses pasted theoretical work in Hebrew and English against
+lecturer-provided instructions/criteria, returning strengths, gaps, and
+actionable recommendations (D-20). Comparison actually processes other works
+for the same assignment and addresses topic coverage and solution approaches
+(D-21). A student can request their own review; the lecturer can request any
+submission and see all submissions/feedback for the assignment. The student
+view excludes peer identities and full peer works. Without peers, personal
+feedback is allowed with an explicit no-comparison notice. Grades, plagiarism
+determinations, and submitted-code execution are excluded. The demo uses
+sample works only; their count is not a system limit (D-22).
 
 Approved polling scope includes one active poll per meeting, with another
 created after the previous poll closes. The lecturer closes polls manually
@@ -46,6 +71,17 @@ without presenting prepared content as generated from the material. Poll
 language and the input-length limit remain open (Q-03); shared identification
 and AI-service constraints remain unresolved. These are project decisions,
 not details explicitly prescribed by AS-03.
+
+Video input/output direction is approved: manual file upload, initial MP4
+support, a summary paragraph and 3-5 key points, with an option to view the
+full transcript (D-14). Planned verification includes Hebrew, English, and a
+Hebrew lecture using English technical terms (D-15); sustained language
+switching is outside the current commitment. These are unverified targets.
+Maximum recording duration and file size will be set after processing-time
+and cost measurements (D-16). Demo duration is separate; no numeric cap or
+demo duration is fixed, and unlimited-length or full-lesson support is not
+claimed. No such measurement has been performed. See
+Section 8 of the [register](docs/decisions-and-assumptions.md).
 
 Attendance identity method, QR rotation/validity and registration-window
 timings, transition rules, late-arrival handling, export fields, and any
@@ -112,14 +148,21 @@ decisions (`D-*`), open proposals and proposal history (`P-*`), and open
 questions (`Q-*`). A draft
 requirement or planned acceptance check is not evidence of implementation.
 
+Section 9 of the [register](docs/decisions-and-assumptions.md) consolidates
+remaining decisions: identity/access, teaching context/capacity, AI/data/budget
+boundaries, and eligible-peer/revision policy affect technical choices;
+numeric limits and other details can be refined during later design or trials.
+Offline clarification gates that part of comments coverage, not unrelated
+planning. The university-network study remains deferred and non-blocking.
+
 ## Project Status
 
 Initial README, SoW, SRS, and decisions-register drafts have been prepared
-(D-04). Attendance direction D-05/D-06 and polling decisions D-08 through D-11
-are approved; remaining proposal details are still open. Review has covered
-document consistency only; no application,
-AI workflow, network experiment, or runtime verification has been
-implemented. Build/run instructions and application test results are not yet
+(D-04). First-version design targets for all five capabilities are recorded,
+with the offline comments gap and other open parameters retained. Review has
+covered document consistency only; no application, AI workflow, network
+experiment, or runtime verification has been implemented. Build/run
+instructions and application test results are not yet
 available; AI quality, processing time, and classroom-scale behavior remain
 unmeasured.
 

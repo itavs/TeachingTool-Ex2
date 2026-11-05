@@ -36,21 +36,33 @@ implementation. The university-network option in D-07 remains conditional.
 Polling decisions D-08 through D-11 are also user-approved project choices,
 not additional requirements stated by the lecturer. Poll language and the
 input-length limit remain open (Q-03).
+Video decisions D-12 through D-16 define unverified language, audio-processing,
+input/output, terminology-test, and limit-setting targets. P-06 retains pending
+numeric limits and quality questions; its input/output choices are now approved.
+D-18/D-19 now approve the connected comments scope while retaining D-17's
+separate creation/submission/storage and unresolved offline coverage.
+D-20 through D-22 approve the first-version homework scope. These are project
+choices, not additional requirements explicitly prescribed by the handout.
 
 The handout does not prescribe a programming language. Python for the server
 and AI processing is approved by the user (D-02); no conflicting language rule
 was found in the handout. This is not separate lecturer confirmation.
 Frameworks, AI providers, storage, hosting, and the web-interface solution
 remain unselected. English project documents and Hebrew user-facing project
-discussion follow D-03; the application's interface and processing languages
-have not yet been selected.
+discussion follow D-03. Video-summary language targets follow D-12: Hebrew
+and English, with output in the recording's spoken language and no translation.
+Hebrew lectures with English technical terms are included in planned checks;
+sustained language switching is outside the current commitment (D-15).
+Homework pasted-input targets are also Hebrew and English (D-20), without
+claiming tested support. Application-interface language, poll language, and
+homework review output language remain open.
 
 ## 3. Actors and System Boundary
 
 | Actor | Intended responsibilities | Unresolved boundary |
 |-------|---------------------------|---------------------|
-| Student | Participate in attendance, send comments or suggestions, respond to polls, and obtain homework review. | Identity method, permissions, and peer-data visibility are open. |
-| Lecturer | Obtain attendance records, read feedback, create polls, request video summaries, and review homework and comparisons. | Course administration, exact access rules, and review controls are open. |
+| Student | Participate in attendance, send meeting comments/suggestions, respond to polls, and request/view review of their own homework. | Visibility follows D-10/D-18/D-21; identity and enforcement mechanisms, resources, and operational parameters remain open. |
+| Lecturer | Obtain attendance, view all meeting requests, create polls, request video summaries, and request review of any assignment submission while viewing all submissions/feedback. | Course administration, access-enforcement mechanism, and detailed review operations remain open; approved visibility/request rights are not reopened. |
 
 AI processing supports application behavior; it is not an additional user role.
 No integration with Moodle, Zoom, or the university personal-information
@@ -112,12 +124,36 @@ been confirmed by the lecturer as satisfying online/offline.
 Students shall be able to submit comments and suggestions in real time and
 in the mode described by the handout as offline.
 
-**Open proposal:** P-04 would retain meeting-related, identified submissions,
-show new submissions to the lecturer without manual page refresh, and allow
-later access and submission outside lesson time. Student-to-student visibility
-is not proposed. This candidate still needs internet access; it does not
-provide disconnected writing and later synchronization. The meaning of
-offline must be resolved before the requirement can be baselined (Q-02).
+**User-approved preparation boundary (D-17):** keep the meaning of offline
+open for clarification with the lecturer or teaching assistant (Q-02).
+Coverage of the offline portion of AS-02 is pending; online use after class
+must not be presented as an approved way of meeting it.
+
+Prepare separate design responsibilities so the later interpretation can be
+accommodated without conflating these actions:
+
+| Responsibility | Meaning in the design | What it does not establish |
+|----------------|-----------------------|----------------------------|
+| Create | Compose a comment or suggestion before submission. | Creation alone is not submission or confirmed storage, and does not imply a persistent local draft. |
+| Submit | Request delivery of the created content for acceptance by the system. | A submission attempt is not confirmed storage; no automatic send queue or later replay is approved. |
+| Store | Record accepted requests and provide history under D-18; retention/deletion parameters remain to be decided. | No local persistence or disconnected synchronization mechanism is selected or approved. |
+
+The D-17 separation approves no local storage, send queue, or synchronization
+without a network. No offline capability or successful test is claimed.
+Here, local offline persistence means client-side disconnected storage; it
+does not remove the approved application-side request-history requirement.
+
+**User-approved connected scope (D-18/D-19):** identified students create
+requests of type comment or suggestion associated with a meeting. Students
+see only their own requests; the lecturer sees all requests for that meeting.
+Requests are stored with history, and new requests appear to the lecturer
+without manual refresh. The first version excludes lecturer replies,
+discussion threads, attachments, votes, and notifications.
+
+Identity mechanism, exact retention/deletion parameters, update timing,
+revision behavior, and other operational details remain open. Connected
+submission, stored history, or later online access cannot be claimed as
+coverage of offline. P-04 records the resolved connected scope and that gap.
 
 ### FR-04 - Automatic Poll Creation
 
@@ -169,16 +205,41 @@ or verified.
 
 The lecturer shall be able to obtain an ML-generated summary of a class video.
 
-**Open proposal:** Under P-06, the lecturer would upload a one-to-two-minute
-video in one agreed language. Actual processing would extract its audio,
-transcribe the speech, and summarize that transcript into main topics,
-concepts, and key points. A summary based only on speech can omit silent
-slides, diagrams, or board content. Manual upload, short duration, supported
-formats, language, and audio-based interpretation remain open (Q-04).
+**User-approved design direction:** D-12 targets Hebrew and English recordings,
+with the summary in the spoken language of the recording and no translation
+in the first version. Support for both languages must be implemented and
+verified; it has not been demonstrated. Under D-15, planned verification also
+includes a Hebrew lecture with English technical terms; its summary remains
+in Hebrew without a translation stage. Sustained switching between languages
+is outside the current commitment. No automatic rejection/detection policy
+or numeric switching threshold is assumed.
 
-Uploading only a prepared transcript is not equivalent to this proposed
-video-input workflow. A prewritten summary is not evidence of ML processing.
-The proposed duration is not an approved exclusion of full-length recordings.
+D-13 requires actual audio extraction from the video, speech transcription,
+and model-based summarization of that transcript. Analysis is audio-only.
+The result must clearly explain that visual information not spoken in the
+recording is not included in the analysis. Silent slides, formulas, diagrams,
+and board content are therefore not analyzed; speech-recognition errors can
+affect the summary. Lecturer acceptance of this interpretation remains
+unconfirmed; the handout does not explicitly prescribe an audio-only approach.
+
+**User-approved input/output (D-14):** the lecturer manually uploads a video
+file from the computer. MP4 is the initial supported format. The result
+includes a summary paragraph and 3-5 key points, with an option to view the
+full transcript. Other input formats, link import, and transcript editing or
+export are not established by this decision. Actual MP4 processing, language
+support, and result display remain implementation and verification targets.
+
+Under D-16, maximum recording duration and file size will be set after
+measuring processing time and cost. Demo-segment duration is a separate
+parameter. No numeric duration or byte-size cap, including a one-to-two-minute
+cap, is fixed. This does not claim unlimited-length or full-lesson support.
+The measurement-first policy is approved; actual limits still require measured
+evidence and a later decision. See Section 8 of the
+[register](decisions-and-assumptions.md). No such measurement has been made.
+
+Providing only a prepared transcript is not equivalent to the approved
+video-to-audio-to-summary processing direction. A prewritten summary does
+not demonstrate model processing of the supplied video.
 
 ### FR-06 - Deep Homework Review
 
@@ -186,14 +247,21 @@ The proposed duration is not an approved exclusion of full-length recordings.
 
 Students and lecturers shall be able to obtain a deep LLM review of homework.
 
-**Open proposal:** Under P-07, a lecturer would supply assignment instructions
-and review criteria, and the model would inspect a submitted answer against
-them. The review would identify strengths, gaps, and actionable improvements
-with references to relevant parts of the answer. One assignment with about
-three short text submissions of a few hundred words is proposed. Supported
-homework types, depth, input limits, and quality criteria are unresolved
-(Q-05). Numeric grades, plagiarism judgments, and execution of submitted code
-are not proposed for the basic demo; those exclusions remain unapproved.
+**User-approved scope (D-20/D-22):** support theoretical assignments with
+pasted-text submissions in Hebrew and English. The lecturer provides the
+assignment instructions and review criteria. A student can request review
+of their own work; the lecturer can request review of any submission.
+
+The LLM actually processes the submission against those instructions and
+criteria, returning strengths, gaps, and actionable recommendations. These
+are unverified implementation targets, not recorded review or language results.
+
+The first version excludes grades, plagiarism determinations, and execution
+of submitted code. Homework inputs for the demo are sample works only.
+The demo sample count is not a system limit, and no one-assignment, fixed
+submission-count, or text-length cap is approved. Review output language,
+revision behavior, numeric workload limits, and measurable quality criteria
+remain Q-05/Q-07. P-07/P-08 retain the prior proposals and their resolution.
 
 ### FR-07 - Comparison with Other Homework
 
@@ -202,21 +270,31 @@ are not proposed for the basic demo; those exclusions remain unapproved.
 The homework review shall include comparisons with other students' work.
 Reviewing an answer in isolation does not meet this part of the requirement.
 
-**Open proposal:** P-07 would compare actual submissions for the same assignment,
-identifying differences in topic coverage, missing points, and approaches.
-Under P-08, students would see their own review and anonymized comparisons,
-while the lecturer would see all reviews. Comparison membership, access rules,
-and data-use permission remain open (Q-05, Q-07). The system must not claim a
-peer comparison has occurred when no peer submission has been processed;
-the exact user-visible behavior for that case needs agreement.
+**User-approved scope (D-21):** comparisons actually process other submissions
+for the same assignment and address topic coverage and solution approaches.
+Model knowledge or an individual review alone does not establish comparison
+with classmates' work.
+
+The student sees their own feedback and comparison without peer identities
+or full peer works. The lecturer sees all submissions and feedback for the
+assignment. With no other submissions, individual feedback may be produced,
+but the result must explicitly state that no comparison was performed.
+
+Eligible-peer selection, revision/snapshot rules, identity enforcement,
+retention/deletion, and external-processing boundaries remain Q-05/Q-07.
+These remaining details do not reopen the approved visibility or no-peer rule.
+D-22 restricts homework demo inputs to sample works; their number is not a
+system cap. No comparison or privacy-control implementation has been verified.
 
 ## 5. Main Use Cases
 
 UC-01 incorporates approved attendance direction D-05/D-06, and UC-03 follows
 approved polling decisions D-08 through D-11, with remaining details explicit.
-UC-02, UC-04, and UC-05 remain candidate workflows for review, not approval of
-their detailed steps. Each use case identifies its decisions, proposals, and
-unresolved questions.
+UC-04 incorporates video decisions D-12 through D-16 while retaining pending
+numeric limits and quality criteria. UC-02 follows D-18/D-19 while preserving
+the D-17 offline gap; UC-05 follows homework decisions D-20 through D-22.
+Each use case retains its unresolved parameters and distinguishes approved
+direction from implementation or completed checks.
 
 ### UC-01 - Scan a Rotating QR and Obtain Attendance Details
 
@@ -244,17 +322,24 @@ unresolved questions.
 ### UC-02 - Send a Comment or Suggestion
 
 - **Actors:** Student and lecturer.
-- **Trigger/preconditions:** A student has a meeting-related comment or
-  suggestion; access and visibility rules are resolved.
-- **Candidate steps:** The student submits text; the application stores it;
-  the lecturer's open view displays it without manual refresh. The student
-  can submit or the lecturer can read later, outside lesson time.
-- **Expected outcome:** The content is associated with the intended meeting
-  and remains available according to the agreed retention policy.
-- **Failure/alternative:** An unsuccessful save is not shown as completed.
-  Network loss under P-04 does not establish offline support; a disconnected
-  mode would require a separately approved workflow.
-- **Dependencies:** FR-03; P-04; Q-02, Q-06, Q-07.
+- **Trigger/preconditions:** An identified student has a comment or suggestion
+  for a meeting. The shared identity mechanism remains to be designed.
+- **Approved steps:** Create the typed request, submit it, and store accepted
+  content as distinct responsibilities. The student sees their own requests
+  and history; the lecturer sees all meeting requests, with new ones appearing
+  without manual refresh. Storage/retention technology is not selected.
+- **Expected outcome:** A successfully stored request is available in the
+  permitted history views. Students cannot see another student's requests.
+  Lecturer replies, threads, attachments, votes, and notifications are excluded.
+  A stored request or successful connected flow does not establish offline
+  coverage; that part still awaits lecturer/teaching-assistant clarification.
+- **Failure/alternative:** An unsuccessful or uncertain submission/save must
+  not be described as confirmed storage. Recovery behavior is undecided;
+  no persistent local draft, automatic queue, disconnected synchronization,
+  or automatic replay is approved. After-class online activity is not an
+  approved offline acceptance case.
+- **Dependencies:** FR-03; D-17 through D-19; P-04 history and Q-02/Q-06/Q-07
+  for offline clarification, identity, capacity, and operational/data policy.
 
 ### UC-03 - Generate, Publish, and Answer a Poll
 
@@ -284,39 +369,56 @@ unresolved questions.
 - **Dependencies:** FR-04; D-08 through D-11; Q-03, Q-06, Q-07.
   P-05 is resolved proposal history, not pending approval of this workflow.
 
-### UC-04 - Summarize a Recorded Class Segment
+### UC-04 - Summarize the Speech in a Class Video
 
 - **Actor:** Lecturer.
-- **Trigger/preconditions:** An agreed video input is available and permitted
-  for the selected processing path; the language and input limits are resolved.
-- **Candidate steps:** The lecturer uploads the video and requests a summary;
-  the system processes its audio, transcribes speech, generates a summary,
-  and displays the resulting topics, concepts, and key points.
-- **Expected outcome:** The result comes from actual processing of the uploaded
-  recording; it is identified as audio-based if P-06 is approved.
-- **Failure/alternative:** Unsupported input, absent intelligible speech, failed
-  transcription, or failed summarization is reported without a false success.
+- **Trigger/preconditions:** An MP4 video containing Hebrew or English speech
+  is available on the lecturer's computer and permitted for processing.
+  Hebrew speech with English technical terms is included as a planned case;
+  sustained language switching is outside the current commitment.
+- **Approved processing:** The lecturer manually uploads the file and requests
+  summarization. The system extracts audio, transcribes speech, and uses a
+  model to summarize the transcript in the recording's spoken language,
+  without translation. These are targets, not verified capabilities.
+- **Approved result:** Display a summary paragraph and 3-5 key points with
+  an option to view the full transcript. No transcript editing/export or
+  link-import workflow is implied. A demo clip does not define a system cap;
+  numeric maximum duration and file size follow time/cost measurements.
+- **Expected outcome:** A summary derived from actual audio processing, in the
+  recording's spoken language, with an explicit result notice that unspoken
+  visual information is excluded. No analysis of video frames is implied.
+- **Existing candidate failure handling:** Unsupported input, absent intelligible
+  speech, failed transcription, or failed summarization is reported without
+  a false success; exact validation and recovery rules remain to be refined.
   A previously processed result, if permitted for presentation, is labeled
   rather than attributed to the current request.
-- **Dependencies:** FR-05; P-06, P-09; Q-04, Q-07, Q-09.
+- **Dependencies:** FR-05; D-12 through D-16; remaining P-06/P-09 items and
+  Q-04/Q-07/Q-09 for numeric duration/file-size limits, separate demo duration,
+  quality, lecturer interpretation, data-use, cost, and live-demo expectations.
 
 ### UC-05 - Review Homework and Compare Submissions
 
 - **Actors:** Student and lecturer.
-- **Trigger/preconditions:** Assignment instructions, proposed review criteria,
-  and permitted submissions for the same assignment are available; the agreed
-  role is allowed to request the review and comparison.
-- **Candidate steps:** The lecturer supplies instructions and criteria; students
-  submit answers; a student requests review of their answer or the lecturer
-  requests review of an answer; the LLM processes the answer and the actual
-  peer comparison inputs; the requester receives the permitted review view.
-- **Expected outcome:** Feedback addresses the actual answer and criteria,
-  and comparison observations reflect the selected peer submissions. Under
-  P-08, the student view does not disclose peer identities or full answers.
-- **Failure/alternative:** Missing instructions, no peer submissions, invalid
-  inputs, unavailable processing, or unauthorized access is made explicit;
-  a partial review is not described as a completed peer comparison.
-- **Dependencies:** FR-06, FR-07; P-07, P-08; Q-05, Q-07, Q-09.
+- **Trigger/preconditions:** A theoretical assignment has lecturer-supplied
+  instructions and criteria, with permitted Hebrew/English pasted-text work.
+  The requester is the owner of the work or the lecturer. Demo works are samples.
+- **Approved steps:** Students paste submissions; a student requests review of
+  their own work or the lecturer selects any submission. The LLM processes
+  the work against instructions/criteria and, when peers exist, actually
+  processes eligible other submissions for that same assignment.
+- **Expected outcome:** Strengths, gaps, and actionable recommendations plus
+  comparison of topic coverage and solution approaches. The student sees only
+  their own feedback/comparison without peer identities or full works; the
+  lecturer sees all assignment submissions and feedback. No grades, plagiarism
+  determinations, or execution of submitted code are included.
+- **No-peer alternative:** Individual feedback is allowed, with an explicit
+  notice that no comparison was performed. Do not present it as peer comparison.
+- **Other failures:** Missing instructions, invalid inputs, unavailable
+  processing, or unauthorized access must be explicit; detailed recovery
+  behavior remains to be designed. Sample count is not a system limit.
+- **Dependencies:** FR-06, FR-07; D-20 through D-22; P-07/P-08 history and
+  Q-05/Q-07/Q-09 for peer selection, revisions, output language, limits,
+  quality, data-use, cost, and live-demo expectations.
 
 ## 6. Quality Requirements and Constraints
 
@@ -325,8 +427,8 @@ unresolved questions.
 | NFR-01 | Assignment requirement: AS-07 | Provide a simple smartphone web application suitable for student participation. | Supported devices/browsers, interface language, and observable usability criteria; Q-06. |
 | NFR-02 | Assignment requirement: AS-06 | Work in the actual class rather than only as a disconnected mockup. | Class size, concurrent activity, connectivity, deployment/access, and acceptable response times; Q-06. |
 | NFR-03 | Assignment guidance AS-08; approved D-02 | Keep design implementable, consider reuse, and use Python as the main server/AI language. | Frameworks, providers, frontend, storage, hosting, and evidence from later real tool trials. No choices are made here. |
-| NFR-04 | Approved attendance duplicate prevention D-05 and polling controls D-09/D-11; other error-handling details remain proposals under P-04 and P-06 through P-08 | Distinguish pending, successful, partial, and failed operations; avoid duplicate records or false success after errors. Attendance deduplication, final poll responses, and generation-error/retry behavior follow the approved decisions. | General persistence and failure rules still need refinement; attendance identity, timings, and late-arrival handling remain Q-01. No provider-specific retry policy is selected. |
-| NFR-05 | Approved poll visibility D-10; other role/data boundaries remain open under P-08 and Q-07 | Students see poll aggregates only after closure without respondent identities; comprehension answers/explanations are withheld until closure. Enforce approved role/data boundaries and disclose what information is processed externally. | Identity, authorization, consent, retention/deletion, and actual student-data policy. No service or paid use is authorized here. |
+| NFR-04 | Approved attendance/poll controls D-05/D-09/D-11, separate comments stages D-17/D-18, and truthful no-peer behavior D-21 | Distinguish pending, successful, partial, and failed operations; avoid duplicate records or false success after errors. Attendance deduplication, final poll responses, and poll generation-error/retry behavior follow approved decisions. Creation/submission is not confirmed storage; individual homework feedback is not peer comparison. | Detailed persistence/recovery policies remain open. Attendance timings/late arrivals remain Q-01; no provider-specific retry policy is selected. |
+| NFR-05 | Approved visibility D-10/D-18/D-21 and sample-only homework demo D-22; enforcement/lifecycle remain Q-07 | Preserve poll disclosure rules, student-own comments, lecturer-meeting comments, student-own homework feedback/comparison without peer identities/full works, and lecturer access to all assignment submissions/feedback. Disclose external data processing. | Identity/access mechanism, consent, retention/deletion, and permitted AI processing remain open. No external service, paid use, or real-homework demo data is authorized by visibility approval. |
 | NFR-06 | Approved planning target D-01; assignment AS-09; open P-09 | Plan a roughly ten-minute demo with actual functioning capabilities; disclose sample inputs, earlier results, limitations, and failures. | Live-completion expectations, acceptable AI latency/quality, and any approved use of earlier outputs; Q-09. |
 
 Short input samples and earlier processed results cannot by themselves prove
@@ -349,21 +451,21 @@ does not block any other project work.
 
 ## 7. Future Acceptance Checks and Traceability
 
-All checks below are **planned and not executed**. AC-01 follows approved
-attendance direction D-05/D-06, and AC-03 follows polling decisions D-08 through
-D-11; their remaining unresolved parameters are explicit. Other proposed
-detailed criteria remain conditional on approval of the associated P-xx items.
-The checks make
-the intended evidence concrete without claiming the open interpretations meet
-the lecturer's expectations.
+All checks below are **planned and not executed**. AC-01 follows attendance
+D-05/D-06, AC-02 follows connected comments D-18/D-19 with the D-17 separation
+and offline gap, AC-03 follows polls D-08 through D-11, AC-04 follows video
+D-12 through D-16, and AC-05 follows homework D-20 through D-22. Remaining
+parameters are explicit. No offline-specific comments acceptance case is
+approved, and no test below establishes lecturer confirmation of an unresolved
+interpretation or evidence of completed implementation.
 
 | Check | Source | Requirement / use case | Planned evidence and expected result | Open dependencies |
 |-------|--------|------------------------|--------------------------------------|-------------------|
 | AC-01 | AS-01, D-01, D-05, D-06 | FR-01, FR-02; UC-01 | After timing and identity details are agreed, use two identified students and a rotating temporary QR in an open meeting window. Check valid registrations and recorded times; reject an expired code, a wrong-meeting code, and normal registration after window closure. Verify the displayed QR changes and apply the agreed validity rule across rotation boundaries, without assuming an unapproved grace period. Repeated scans by the same student produce one record for that meeting; the second student's valid scan produces a separate record. Export XLSX, open it and compare it with the online list at export time. Add a later valid attendance record and confirm the earlier file remains a snapshot; editing a copy does not change online records. These checks do not establish physical presence or prevent real-time sharing of valid codes. | Q-01, Q-02, Q-07 for identity, timings, late arrivals, fields, and permissions; lecturer interpretation remains unverified. D-07 is not a required network gate. |
-| AC-02 | AS-02, D-01 | FR-03; UC-02 | Submit a known comment while the lecturer view is open; confirm its content appears and remains accessible under the agreed retention rules. Separately exercise the approved offline meaning. Under P-04 this is later online submission, not a network-disconnected test. | Q-02, Q-06, Q-07; P-04. |
+| AC-02 | AS-02, D-01, D-17 through D-19 | FR-03; UC-02 | Create identified comment and suggestion samples associated with a meeting, with at least two test students. Verify creation/submission/storage are distinct and failed or uncertain saves are not reported as stored. Check storage/history, student-own visibility without another student's requests, and the lecturer's all-meeting view with new requests appearing without manual refresh. Check the agreed retention policy once defined. Verify first-version scope excludes lecturer replies, threads, attachments, votes, and notifications. Do not add local persistence, queues, or disconnected synchronization; define an offline acceptance case only after lecturer/teaching-assistant clarification. An after-class online flow does not establish offline coverage. | Q-02 for the offline gap; Q-06/Q-07 for identity/access, capacity, update timing, retention, and operational details. Connected targets are approved, not implemented or tested. |
 | AC-03 | AS-03, D-01, D-08 through D-11 | FR-04; UC-03 | Exercise both lecturer-selected types using real generation from known pasted material. Inspect relevance, four options, and, for comprehension, one correct option plus a short explanation. Edit all applicable draft fields and verify publication uses the approved version; reject later content edits. Cast known votes from two identified students and verify live lecturer counts/percentages, one final response each, no vote changes, and no second active poll in that meeting. Before closure, verify student-facing content exposes neither aggregates nor the comprehension answer/explanation. Close manually; reject later votes and show student aggregates without identities, plus the correct answer/explanation only for comprehension. Confirm opinion polls never designate or evaluate correctness and neither type assigns grades. Create a further poll after closure. Exercise generation failure and retry without a prepared-content substitution. Verify the basic flow has no file upload, open-ended response, or automatic scheduling. | Q-03 for poll language/input length; Q-06/Q-07 for capacity, identity, access, and AI constraints. Approved workflow is not conditional on P-05 approval. |
-| AC-04 | AS-04, D-01 | FR-05; UC-04 | Process an actual video containing identifiable spoken facts. Inspect the produced transcript and summary against those facts using agreed quality criteria. Try a failed/unsupported input and verify no successful summary is claimed. Under P-06, disclose omission of unspoken visual content. | Q-04, Q-07, Q-09; P-06, P-09. |
-| AC-05 | AS-05, D-01 | FR-06, FR-07; UC-05 | Supply answers with deliberately different coverage and known strengths/gaps. Inspect a real LLM review and cross-answer comparison against the answers and agreed criteria. Check the no-peer case and, if P-08 is approved, separate student and lecturer visibility. Do not require identical wording from repeated model outputs. | Q-05, Q-07, Q-09; P-07, P-08. |
+| AC-04 | AS-04, D-01, D-12 through D-16 | FR-05; UC-04 | Manually upload permitted MP4 files for three planned cases: Hebrew speech, English speech, and a Hebrew lecture with English technical terms. Using agreed quality criteria, verify genuine audio extraction/transcription/model summarization, inspect known spoken facts and the intended meaning of technical terms, and confirm output is in the spoken language without translation (Hebrew for the terminology case). Verify a summary paragraph, 3-5 key points, and an option that exposes the full transcript rather than a partial excerpt. Compare the transcript and summary with the actual speech. Check each result clearly states that unspoken visual content is excluded. Check the candidate failed/unsupported-input path without false success after its details are agreed. Measure time and cost for samples of different durations/file sizes before proposing maximum duration and file size; choose demo duration separately. After numeric limits are agreed and implemented, add boundary checks at and above each limit without inventing thresholds now. | Q-04 for numeric limits, demo duration, quality, and lecturer interpretation; Q-07/Q-09 for resources and demo expectations. All three language cases are planned, not passed; sustained language switching is outside the commitment. No completed benchmark or numeric cap is assumed. |
+| AC-05 | AS-05, D-01, D-20 through D-22 | FR-06, FR-07; UC-05 | Use sample theoretical assignments and Hebrew/English pasted submissions with known differences in coverage, strengths, gaps, and approaches. Supply lecturer instructions/criteria and verify real LLM processing produces relevant strengths, gaps, and actionable recommendations. Compare actual other works for the same assignment; verify cross-assignment inputs are not used as peers. Check student-own review requests and feedback/comparison without peer identities/full works; check the lecturer can request any submission and view all assignment submissions/feedback. With no peers, permit personal feedback but explicitly state that no comparison occurred. Verify no grades, plagiarism determinations, or code execution. Sample count is not a system cap; do not require identical model wording. | Q-05/Q-07/Q-09 for eligible-peer selection/revisions, review output language, quality, numeric limits, data/resources, and demo timing. Hebrew/English support, review quality, access, and comparison remain unverified targets. |
 | AC-06 | AS-06, AS-07 | NFR-01, NFR-02; UC-01 through UC-05 | Exercise the relevant student flows on the agreed smartphone/browser set and all flows in the intended classroom environment at the agreed load; record devices, network conditions, observed durations, and failures. | Q-06; P-01. |
 | AC-07 | AS-09, D-01 | NFR-06; UC-01 through UC-05 | Rehearse the approximately ten-minute presentation and record what ran live, actual processing times, any earlier outputs, and any failures. Confirm all five capabilities have genuine execution evidence; label sample data and any separately approved presentation shortcuts. | Q-09; P-09. |
 
@@ -380,14 +482,27 @@ The register remains authoritative for open items. In particular, resolve:
    transitions, late-arrival handling, and lecturer acceptance of automatically
    (Q-01). The rotating-QR direction itself is approved (D-05).
 2. Attendance export fields, any online correction behavior, and lecturer
-   acceptance of online/offline, separately from offline comments (Q-02).
-   Online list and XLSX snapshot without back-sync are approved (D-06).
+   acceptance of online/offline, separately from comments offline meaning
+   (Q-02). Attendance list/XLSX snapshot behavior is approved (D-06). Comments
+   offline coverage awaits lecturer/teaching-assistant clarification under
+   D-17; after-class online use is not an approved substitute. Creation,
+   submission, and storage remain separate. Connected comments scope is now
+   approved by D-18/D-19, with operational parameters still Q-06/Q-07.
 3. Poll language and input-length limit (Q-03). Types, generation from pasted
    text, review/editing, publication, responses, manual closure, visibility,
    exclusions, and failure/retry behavior are approved (D-08 through D-11).
-4. Video language, duration, format, summary quality, and audio-only boundary
-   (Q-04).
-5. Homework formats, scope/depth, comparison group, and review criteria (Q-05).
+4. Video numeric maximum duration/file size, separate demo duration, quality,
+   and lecturer interpretation (Q-04). Manual MP4 upload, a summary paragraph
+   with 3-5 key points and full-transcript viewing, Hebrew/English targets
+   including Hebrew with English technical terms, same-language output without
+   translation, and audio-only processing/disclosure are approved (D-12 through
+   D-16). Sustained language switching is outside the commitment. Determine
+   numeric system limits after processing-time/cost measurements.
+5. Homework eligible-peer selection, revision/review associations, output
+   language, numeric limits, and measurable quality (Q-05). Theoretical
+   Hebrew/English pasted work, lecturer criteria, review/comparison behavior,
+   visibility, no-peer handling, exclusions, and sample-only demo are approved
+   (D-20 through D-22); sample count does not define a system cap.
 6. Classroom access, capacity, devices, network, and usability targets (Q-06).
 7. Identity, access, consent, retention, external processing, and spending
    permission (Q-07).
@@ -398,3 +513,8 @@ The register remains authoritative for open items. In particular, resolve:
 Resolving these questions may change candidate workflows and acceptance
 criteria. Such changes require coordinated updates to the SoW, README, and
 register; they must not be silently represented as already approved.
+
+For the recommended distinction between decisions needed before fixing
+affected technical choices and details that can be settled later, see
+Section 9 of the [register](decisions-and-assumptions.md). This readiness
+classification does not select a framework or approve new scope.
