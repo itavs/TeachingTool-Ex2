@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}{{ meeting.title }} · Teaching Tool{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'course-detail' course.pk %}">← {{ course.title }}</a>
+<div class="page-heading"><div><p class="eyebrow">{{ course.code }} · Meeting</p><h1>{{ meeting.title }}</h1><p class="lead">{{ course.title }}</p></div>{% if membership.role == 'lecturer' %}<a class="button secondary" href="{% url 'meeting-edit' course.pk meeting.pk %}">Edit meeting</a>{% endif %}</div>
+<section class="panel detail-panel"><h2>Meeting details</h2><dl><dt>Date and time</dt><dd><time datetime="{{ meeting.starts_at|date:'c' }}">{{ meeting.starts_at|date:'l, j F Y · H:i' }}</time><span class="muted timezone-label">Asia/Jerusalem</span></dd><dt>Your role in this course</dt><dd>{{ membership.get_role_display }}</dd></dl>{% if meeting.description %}<div class="description">{{ meeting.description|linebreaks }}</div>{% else %}<p class="muted">No additional details have been added.</p>{% endif %}</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}Teaching Tool{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="{% url 'course-list' %}"><span class="brand-icon" aria-hidden="true">T</span> Teaching Tool</a>
+      {% if user.is_authenticated %}
+      <nav aria-label="Main navigation"><a href="{% url 'course-list' %}">My courses</a>
+        <span class="account">{{ user.username }}</span>
+        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="button secondary compact" type="submit">Sign out</button></form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+  <main id="main" class="container">
+    {% if messages %}<div aria-live="polite">{% for message in messages %}<p class="notice">{{ message }}</p>{% endfor %}</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">Teaching Tool <span aria-hidden="true">·</span> A place for your courses and meetings</footer>
+</body>
+</html>

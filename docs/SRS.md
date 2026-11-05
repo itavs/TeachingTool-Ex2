@@ -10,8 +10,10 @@ and verification. It is a draft, not a fully approved requirements baseline.
 
 The user approved planning for all five capabilities to operate genuinely in
 the demo. This coverage target has not been confirmed with the lecturer as the
-required implementation coverage. None of the capabilities or acceptance checks
-below has been implemented or executed in this stage.
+required implementation coverage. None of the five website feature workflows or AC-01 through AC-07 has been
+completed. Shared Unit A infrastructure is implemented and independently
+server-tested; see testing.md. Experimental AI results are not website
+acceptance results.
 
 See the [project overview](../README.md), [draft SoW](SoW.md), and
 [decisions and assumptions register](decisions-and-assumptions.md).
@@ -47,8 +49,8 @@ choices, not additional requirements explicitly prescribed by the handout.
 The handout does not prescribe a programming language. Python for the server
 and AI processing is approved by the user (D-02); no conflicting language rule
 was found in the handout. This is not separate lecturer confirmation.
-Frameworks, AI providers, storage, hosting, and the web-interface solution
-remain unselected. English project documents and Hebrew user-facing project
+D-23/D-26 select Django/Templates and SQLite for initial development.
+AI provider, hosting and classroom readiness remain open. English project documents and Hebrew user-facing project
 discussion follow D-03. Video-summary language targets follow D-12: Hebrew
 and English, with output in the recording's spoken language and no translation.
 Hebrew lectures with English technical terms are included in planned checks;
@@ -61,8 +63,8 @@ homework review output language remain open.
 
 | Actor | Intended responsibilities | Unresolved boundary |
 |-------|---------------------------|---------------------|
-| Student | Participate in attendance, send meeting comments/suggestions, respond to polls, and request/view review of their own homework. | Visibility follows D-10/D-18/D-21; identity and enforcement mechanisms, resources, and operational parameters remain open. |
-| Lecturer | Obtain attendance, view all meeting requests, create polls, request video summaries, and request review of any assignment submission while viewing all submissions/feedback. | Course administration, access-enforcement mechanism, and detailed review operations remain open; approved visibility/request rights are not reopened. |
+| Student | Participate in attendance, send meeting comments/suggestions, respond to polls, and request/view review of their own homework. | Visibility follows D-10/D-18/D-21; initial identity/access follows D-24; feature-specific checks, resources and operational parameters remain open. |
+| Lecturer | Obtain attendance, view all meeting requests, create polls, request video summaries, and request review of any assignment submission while viewing all submissions/feedback. | Course/membership data is prepared under D-25; Unit A enforces course access, while detailed review operations remain open; approved visibility/request rights are not reopened. |
 
 AI processing supports application behavior; it is not an additional user role.
 No integration with Moodle, Zoom, or the university personal-information
@@ -91,7 +93,7 @@ the code's validity and association with the meeting during the open window,
 records attendance and time, and prevents duplicate attendance for the same
 student and meeting. Meeting entry alone is not the selected trigger.
 
-The identity method, window duration, rotation frequency, validity interval,
+Identity follows D-24; window duration, rotation frequency, validity interval,
 transition behavior between successive codes, and late-arrival handling
 remain open (Q-01). No exact timings or grace period are assumed.
 
@@ -150,7 +152,7 @@ Requests are stored with history, and new requests appear to the lecturer
 without manual refresh. The first version excludes lecturer replies,
 discussion threads, attachments, votes, and notifications.
 
-Identity mechanism, exact retention/deletion parameters, update timing,
+Initial identity follows D-24; exact retention/deletion parameters, update timing,
 revision behavior, and other operational details remain open. Connected
 submission, stored history, or later online access cannot be claimed as
 coverage of offline. P-04 records the resolved connected scope and that gap.
@@ -182,7 +184,7 @@ after publication.
 For both types:
 
 - Each identified student may submit one final, single-choice response per
-  poll, with no changes after submission. The identity method remains Q-07.
+  poll, with no changes after submission. The initial identity method is D-24; later feature permissions still need checks.
 - Only one poll may be active per meeting. Further polls can be created after
   the previous poll closes; closure is manual, with no automatic scheduling.
 - During voting, the lecturer sees the respondent count and the distribution
@@ -235,7 +237,7 @@ parameter. No numeric duration or byte-size cap, including a one-to-two-minute
 cap, is fixed. This does not claim unlimited-length or full-lesson support.
 The measurement-first policy is approved; actual limits still require measured
 evidence and a later decision. See Section 8 of the
-[register](decisions-and-assumptions.md). No such measurement has been made.
+[register](decisions-and-assumptions.md). Small experimental measurements exist in local-ai-feasibility.md; numeric system limits remain undecided.
 
 Providing only a prepared transcript is not equivalent to the approved
 video-to-audio-to-summary processing direction. A prewritten summary does
@@ -323,7 +325,7 @@ direction from implementation or completed checks.
 
 - **Actors:** Student and lecturer.
 - **Trigger/preconditions:** An identified student has a comment or suggestion
-  for a meeting. The shared identity mechanism remains to be designed.
+  for a meeting. The shared website identity mechanism is implemented under D-24.
 - **Approved steps:** Create the typed request, submit it, and store accepted
   content as distinct responsibilities. The student sees their own requests
   and history; the lecturer sees all meeting requests, with new ones appearing
@@ -364,7 +366,7 @@ direction from implementation or completed checks.
   never substitutes prepared content as if generated. Duplicate responses,
   attempts to change a submitted choice, post-publication content edits, and
   responses after closure must not change the accepted poll content or votes.
-  Missing input, unusable model output, and shared identity/access details
+  Missing input, unusable model output, and feature-specific access details
   require validation during later design; no framework or provider is chosen.
 - **Dependencies:** FR-04; D-08 through D-11; Q-03, Q-06, Q-07.
   P-05 is resolved proposal history, not pending approval of this workflow.
@@ -426,9 +428,9 @@ direction from implementation or completed checks.
 |----|-------------------|---------------------------------|-----------------|
 | NFR-01 | Assignment requirement: AS-07 | Provide a simple smartphone web application suitable for student participation. | Supported devices/browsers, interface language, and observable usability criteria; Q-06. |
 | NFR-02 | Assignment requirement: AS-06 | Work in the actual class rather than only as a disconnected mockup. | Class size, concurrent activity, connectivity, deployment/access, and acceptable response times; Q-06. |
-| NFR-03 | Assignment guidance AS-08; approved D-02 | Keep design implementable, consider reuse, and use Python as the main server/AI language. | Frameworks, providers, frontend, storage, hosting, and evidence from later real tool trials. No choices are made here. |
+| NFR-03 | Assignment guidance AS-08; approved D-02 | Keep design implementable, consider reuse, and use Python as the main server/AI language. | Django/Templates and development SQLite follow D-23/D-26; AI provider, production hosting and classroom suitability remain open. |
 | NFR-04 | Approved attendance/poll controls D-05/D-09/D-11, separate comments stages D-17/D-18, and truthful no-peer behavior D-21 | Distinguish pending, successful, partial, and failed operations; avoid duplicate records or false success after errors. Attendance deduplication, final poll responses, and poll generation-error/retry behavior follow approved decisions. Creation/submission is not confirmed storage; individual homework feedback is not peer comparison. | Detailed persistence/recovery policies remain open. Attendance timings/late arrivals remain Q-01; no provider-specific retry policy is selected. |
-| NFR-05 | Approved visibility D-10/D-18/D-21 and sample-only homework demo D-22; enforcement/lifecycle remain Q-07 | Preserve poll disclosure rules, student-own comments, lecturer-meeting comments, student-own homework feedback/comparison without peer identities/full works, and lecturer access to all assignment submissions/feedback. Disclose external data processing. | Identity/access mechanism, consent, retention/deletion, and permitted AI processing remain open. No external service, paid use, or real-homework demo data is authorized by visibility approval. |
+| NFR-05 | Approved visibility D-10/D-18/D-21 and sample-only homework demo D-22; enforcement/lifecycle remain Q-07 | Preserve poll disclosure rules, student-own comments, lecturer-meeting comments, student-own homework feedback/comparison without peer identities/full works, and lecturer access to all assignment submissions/feedback. Disclose external data processing. | Initial identity/access follows D-24; consent, retention/deletion, production safeguards and permitted integrated AI processing remain open. No external service, paid use, or real-homework demo data is authorized by visibility approval. |
 | NFR-06 | Approved planning target D-01; assignment AS-09; open P-09 | Plan a roughly ten-minute demo with actual functioning capabilities; disclose sample inputs, earlier results, limitations, and failures. | Live-completion expectations, acceptable AI latency/quality, and any approved use of earlier outputs; Q-09. |
 
 Short input samples and earlier processed results cannot by themselves prove
@@ -478,7 +480,7 @@ actual tool experiments (AS-11), or recorded test and demo outcomes (AS-14).
 
 The register remains authoritative for open items. In particular, resolve:
 
-1. Attendance identity method, registration-window and QR timings, code
+1. With initial identity resolved by D-24, registration-window and QR timings, code
    transitions, late-arrival handling, and lecturer acceptance of automatically
    (Q-01). The rotating-QR direction itself is approved (D-05).
 2. Attendance export fields, any online correction behavior, and lecturer
@@ -504,7 +506,7 @@ The register remains authoritative for open items. In particular, resolve:
    visibility, no-peer handling, exclusions, and sample-only demo are approved
    (D-20 through D-22); sample count does not define a system cap.
 6. Classroom access, capacity, devices, network, and usability targets (Q-06).
-7. Identity, access, consent, retention, external processing, and spending
+7. Production access safeguards, consent, retention, external processing, and spending
    permission (Q-07).
 8. Submission/deadline expectations and live-demo completion rules (Q-08, Q-09).
 9. Feasibility and possible later adoption of a university-network-origin
@@ -518,3 +520,23 @@ For the recommended distinction between decisions needed before fixing
 affected technical choices and details that can be settled later, see
 Section 9 of the [register](decisions-and-assumptions.md). This readiness
 classification does not select a framework or approve new scope.
+
+## 9. Shared Foundation — Unit A
+
+**User-approved project decisions:** D-23 through D-26, not additional handout
+requirements. This infrastructure supports future feature flows without
+claiming they have been implemented.
+
+| ID | Implemented behavior | Verification |
+|---|---|---|
+| FND-01 | Individual username/password login and POST logout using Django sessions; credentials are stored as hashes in the local database. | Valid/invalid/inactive login, session invalidation, CSRF and external-next rejection. |
+| FND-02 | Every course/meeting request checks the current membership; role is per course. Missing/unavailable courses return generic 404; students receive 403 for meeting-management actions in their course. | Foreign direct GET/POST, mismatched parent course, removed membership, demotion, forged role/course, and no global staff bypass. |
+| FND-03 | Members list their courses, view course meetings and meeting details; lecturers create/edit meetings only in their lecturer courses. No deletion or course/membership UI. | Form validation, persistence, timezone awareness, HTML escaping and permission checks. |
+| FND-04 | Sample data spans two courses, six users and mixed roles, with generated local credentials. Counts are not limits. | Repeatable seeding, preserved password hashes and refusal to overwrite unrelated accounts. |
+
+Automated server evidence is in [testing.md](testing.md). Responsive CSS is
+implemented but browser/phone rendering was not verified because browser
+permission for localhost was declined. These foundation tests are separate
+from the future AC-01 through AC-07 checks and do not establish classroom load
+or coverage of offline comments. The current English UI is a reversible
+implementation choice, not an approved final language restriction.

@@ -1,0 +1,2 @@
+{% extends 'base.html' %}{% block title %}Access restricted · Teaching Tool{% endblock %}
+{% block content %}<section class="panel empty-state"><p class="eyebrow">Access restricted</p><h1>Only course lecturers can manage meetings.</h1><a class="button" href="{% url 'course-detail' course.pk %}">Back to course</a></section>{% endblock %}

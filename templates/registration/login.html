@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Sign in · Teaching Tool{% endblock %}
+{% block content %}
+<div class="login-layout">
+  <section class="welcome"><p class="eyebrow">Your classroom, together</p><h1>A clear start<br>to every class.</h1><p class="lead">Find your courses, explore your meetings and keep your learning in one place.</p><div class="welcome-accent" aria-hidden="true"><span>COURSES</span><span>MEETINGS</span><span>LEARNING</span></div></section>
+  <section class="panel login-panel" aria-labelledby="login-title"><p class="eyebrow">Welcome back</p><h2 id="login-title">Sign in</h2><p class="muted">Use your assigned account to continue.</p>
+    <form method="post" action="{% url 'login' %}">{% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="form-error">{{ field.errors }}</div>{% endif %}</div>{% endfor %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="button full-width" type="submit">Sign in <span aria-hidden="true">→</span></button>
+    </form>
+  </section>
+</div>
+{% endblock %}

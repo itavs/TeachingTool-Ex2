@@ -23,6 +23,8 @@ attendance D-05/D-06, connected comments D-18/D-19 with the D-17 offline gap,
 polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
 D-22. These are design targets, not implemented or verified capabilities;
 remaining operational parameters and open interpretations are explicit.
+The shared website foundation is now implemented under D-23 through D-26;
+none of the five feature workflows is implemented in the website yet.
 
 | Capability | Assignment behavior | Design direction and open proposals |
 |------------|---------------------|----------------------------------|
@@ -35,9 +37,9 @@ remaining operational parameters and open interpretations are explicit.
 One course, one lecturer, and one active meeting are proposed simplifications
 (P-01), not approved limits. Video numeric duration/file-size limits, separate
 demo duration and quality criteria, homework numeric limits, review output
-language/peer-selection/revision rules, shared identity/access mechanisms,
+language/peer-selection/revision rules, production access/security parameters,
 retention/deletion details, comments' offline meaning, and classroom capacity
-remain open. Approved visibility rules do not choose their enforcement method.
+remain open. Website identity/access follows D-24; production readiness remains unverified.
 
 For comments, creating content, attempting submission, and confirming storage
 are separate responsibilities, so later offline clarification can be reflected
@@ -68,8 +70,7 @@ after closure; comprehension answers and explanations are also revealed only
 then. The scope excludes grades, file uploads, open-ended questions, and
 automatic scheduling. Generation failure displays an error and permits retry,
 without presenting prepared content as generated from the material. Poll
-language and the input-length limit remain open (Q-03); shared identification
-and AI-service constraints remain unresolved. These are project decisions,
+language and the input-length limit remain open (Q-03); website identification follows D-24 and AI-service constraints remain unresolved. These are project decisions,
 not details explicitly prescribed by AS-03.
 
 Video input/output direction is approved: manual file upload, initial MP4
@@ -80,10 +81,10 @@ switching is outside the current commitment. These are unverified targets.
 Maximum recording duration and file size will be set after processing-time
 and cost measurements (D-16). Demo duration is separate; no numeric cap or
 demo duration is fixed, and unlimited-length or full-lesson support is not
-claimed. No such measurement has been performed. See
+claimed. Small experimental measurements exist, but approved numeric system limits do not. See
 Section 8 of the [register](docs/decisions-and-assumptions.md).
 
-Attendance identity method, QR rotation/validity and registration-window
+Attendance uses the shared D-24 identity method; QR rotation/validity and registration-window
 timings, transition rules, late-arrival handling, export fields, and any
 online correction behavior remain open (Q-01, Q-02). The QR mechanism does not
 conclusively prove physical presence or prevent real-time sharing of a
@@ -104,17 +105,20 @@ explicit disclosure and agreement on what must complete live (P-09).
 
 ## Confirmed Decisions and Unselected Technology
 
-- **Python** is the user-approved main language for the server and AI
-  processing (D-02).
-- The assignment handout does not restrict the implementation language;
-  inspection found no conflict with Python.
-- The web interface should favor simplicity, but no frontend solution,
-  framework, AI provider, database, or deployment platform has been selected.
-- Project documentation is written in English (D-03).
+- Python remains the main server/AI language (D-02).
+- The approved Unit A implementation uses Django 5.2 LTS (installed 5.2.19),
+  server-rendered Templates and CSS, and SQLite for initial development
+  (D-23/D-26). The current pages need no JavaScript; it can be added where useful.
+- Individual pre-created demo accounts use Django password hashing and sessions.
+  Roles belong to course memberships, not global account flags (D-24).
+- Lecturers create/edit meetings in their courses; students view only (D-25).
+- AI provider, production database, hosting and classroom capacity are unresolved.
+  Experiments do not establish a selected or integrated AI backend.
+- Documents are English. Current UI copy is English as a reversible implementation
+  choice; the final interface language remains open (Q-06).
 
-The assignment does not require integration with Moodle, Zoom, or the
-university personal-information system. This does not remove the requirement
-to process a class video or the other required inputs.
+The assignment requires no Moodle, Zoom or university information-system
+integration. This does not remove any of the five feature requirements.
 
 ## Assignment Deliverables
 
@@ -149,7 +153,7 @@ questions (`Q-*`). A draft
 requirement or planned acceptance check is not evidence of implementation.
 
 Section 9 of the [register](docs/decisions-and-assumptions.md) consolidates
-remaining decisions: identity/access, teaching context/capacity, AI/data/budget
+remaining decisions: production access, teaching context/capacity, AI/data/budget
 boundaries, and eligible-peer/revision policy affect technical choices;
 numeric limits and other details can be refined during later design or trials.
 Offline clarification gates that part of comments coverage, not unrelated
@@ -157,14 +161,75 @@ planning. The university-network study remains deferred and non-blocking.
 
 ## Project Status
 
-Initial README, SoW, SRS, and decisions-register drafts have been prepared
-(D-04). First-version design targets for all five capabilities are recorded,
-with the offline comments gap and other open parameters retained. Review has
-covered document consistency only; no application, AI workflow, network
-experiment, or runtime verification has been implemented. Build/run
-instructions and application test results are not yet
-available; AI quality, processing time, and classroom-scale behavior remain
-unmeasured.
+Unit A is implemented: sign-in/out, course-scoped permissions, course/meeting
+pages, lecturer meeting creation/editing, and isolated demo data. Unit B
+(attendance/comments) and all website AI workflows are not implemented.
+See [architecture](docs/architecture.md) and [verification](docs/testing.md).
+
+Local AI experiments produced measurable but mixed-quality results; Gemini
+was a partial connectivity experiment with no task-quality result. See
+[local AI feasibility](docs/local-ai-feasibility.md) and
+[Gemini feasibility](docs/gemini-free-feasibility.md). These are separate from
+website acceptance. No new AI experiment was run during Unit A.
+
+The foundation has automated server-side checks. The user reported successful
+manual browser checks for login, courses/roles, meeting creation, description
+persistence after refresh and absent student management buttons. These are
+separate from the server permission tests. Agent browser access was denied;
+viewport-specific visual and real-phone verification remain open.
+SQLite development success does not establish classroom load readiness.
+
+## Local Setup and Run
+
+Run PowerShell from the repository root. A separate `.venv` is already prepared
+on the current workstation. On a fresh checkout, use an installed Python 3.12
+interpreter to create it first: `python -m venv .venv`. The Windows `python`
+Store alias is not an interpreter; select the real interpreter if needed.
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe manage.py migrate
+.\.venv\Scripts\python.exe manage.py seed_demo
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+```
+
+Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/). If a development server
+is already running on port 8000, use it or stop that server before starting
+another. Stop a foreground development server with Ctrl+C.
+
+`seed_demo` generates individual random demo passwords in
+`.local/demo-credentials.json`. Open that **local file** to sign in; passwords
+are not printed or committed. Rerunning the command preserves passwords and
+existing meeting edits, but may restore a renamed initial sample meeting as a
+new sample. Do not use this sample-data command as a real-data management tool.
+It refuses to take over unrelated accounts with matching usernames.
+The SQLite database and generated signing key also stay in ignored `.local/`.
+No personal password, Gemini key, media or AI model is needed to run the site.
+
+| Account | DEMO-CS101 | DEMO-SE201 |
+|---|---|---|
+| lecturer_alpha | Lecturer | Student |
+| lecturer_beta | No access | Lecturer |
+| student_alex | Student | No access |
+| student_blair | No access | Student |
+| student_casey | Student | Student |
+| observer | No access | No access |
+
+Users see only their courses and meetings. A lecturer creates/edits meetings
+only in the course where their membership is Lecturer. Course/membership
+administration is prepared through demo data; no public signup, admin UI,
+meeting deletion, attendance or comments are included in this unit.
+Meeting times are entered and displayed in Asia/Jerusalem.
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+```
+
+This is loopback-only development with DEBUG enabled, not a production or
+phone-accessible deployment. Hosting, HTTPS, login throttling, retention and
+classroom concurrency need later work. No deployment claim is made.
 
 ## Source and Reference Material
 
