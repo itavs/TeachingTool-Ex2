@@ -1,0 +1,2 @@
+{% extends 'base.html' %}{% block title %}Participation unavailable{% endblock %}
+{% block content %}<section class="panel"><h1>Unable to complete this action</h1><p role="alert">{{ error }}</p>{% if meeting %}<a href="{% url 'meeting-detail' course.pk meeting.pk %}">Return to meeting</a>{% else %}<a href="{% url 'course-list' %}">Return to courses</a>{% endif %}</section>{% endblock %}

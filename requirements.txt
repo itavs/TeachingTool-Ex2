@@ -2,3 +2,7 @@ Django==5.2.19
 asgiref==3.13.0
 sqlparse==0.6.1
 tzdata==2026.6
+qrcode==8.2
+openpyxl==3.1.5
+et_xmlfile==2.0.0
+colorama==0.4.6

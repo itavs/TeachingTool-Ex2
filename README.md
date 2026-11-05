@@ -21,10 +21,10 @@ work** (D-01). This is our working target; the lecturer has not confirmed that
 all five must be implemented for the demo. User-approved directions now cover
 attendance D-05/D-06, connected comments D-18/D-19 with the D-17 offline gap,
 polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
-D-22. These are design targets, not implemented or verified capabilities;
+D-22. AI workflows remain design targets; attendance and connected comments now have a Unit B implementation and server checks;
 remaining operational parameters and open interpretations are explicit.
 The shared website foundation is now implemented under D-23 through D-26;
-none of the five feature workflows is implemented in the website yet.
+Unit B implements attendance/XLSX and connected comments under D-27 through D-30. The three AI workflows remain unimplemented.
 
 | Capability | Assignment behavior | Design direction and open proposals |
 |------------|---------------------|----------------------------------|
@@ -84,9 +84,7 @@ demo duration is fixed, and unlimited-length or full-lesson support is not
 claimed. Small experimental measurements exist, but approved numeric system limits do not. See
 Section 8 of the [register](docs/decisions-and-assumptions.md).
 
-Attendance uses the shared D-24 identity method; QR rotation/validity and registration-window
-timings, transition rules, late-arrival handling, export fields, and any
-online correction behavior remain open (Q-01, Q-02). The QR mechanism does not
+Attendance uses D-24 identity and the approved D-27 through D-29 timing, login-continuation and export rules. There are no manual corrections in this version (Q-01/Q-02 still track lecturer interpretation). The QR mechanism does not
 conclusively prove physical presence or prevent real-time sharing of a
 still-valid code. Lecturer acceptance of automatically and online/offline
 has not been verified. XLSX export does not imply disconnected registration.
@@ -108,7 +106,7 @@ explicit disclosure and agreement on what must complete live (P-09).
 - Python remains the main server/AI language (D-02).
 - The approved Unit A implementation uses Django 5.2 LTS (installed 5.2.19),
   server-rendered Templates and CSS, and SQLite for initial development
-  (D-23/D-26). The current pages need no JavaScript; it can be added where useful.
+  (D-23/D-26). Unit B adds small scripts for CSRF-protected scan submission and visible-page polling.
 - Individual pre-created demo accounts use Django password hashing and sessions.
   Roles belong to course memberships, not global account flags (D-24).
 - Lecturers create/edit meetings in their courses; students view only (D-25).
@@ -162,15 +160,14 @@ planning. The university-network study remains deferred and non-blocking.
 ## Project Status
 
 Unit A is implemented: sign-in/out, course-scoped permissions, course/meeting
-pages, lecturer meeting creation/editing, and isolated demo data. Unit B
-(attendance/comments) and all website AI workflows are not implemented.
+pages, lecturer meeting creation/editing, and isolated demo data. Unit B implements attendance, rotating QR windows, XLSX snapshots and connected private comments/history with lecturer polling. Website AI workflows remain unimplemented.
 See [architecture](docs/architecture.md) and [verification](docs/testing.md).
 
 Local AI experiments produced measurable but mixed-quality results; Gemini
 was a partial connectivity experiment with no task-quality result. See
 [local AI feasibility](docs/local-ai-feasibility.md) and
 [Gemini feasibility](docs/gemini-free-feasibility.md). These are separate from
-website acceptance. No new AI experiment was run during Unit A.
+website acceptance. No new AI experiment was run during Units A or B.
 
 The foundation has automated server-side checks. The user reported successful
 manual browser checks for login, courses/roles, meeting creation, description
@@ -180,6 +177,30 @@ viewport-specific visual and real-phone verification remain open.
 SQLite development success does not establish classroom load readiness.
 
 ## Local Setup and Run
+
+### Unit B quick check
+
+After applying migrations and restarting any `--noreload` development server,
+sign in as lecturer_alpha, open a DEMO-CS101 meeting and choose Attendance and
+QR. Open window starts 5 minutes; Close window invalidates every code; the next
+window lasts 2 minutes. QR rotates every 30 seconds and is valid for 45 seconds,
+bounded by closure. Use a separate private browser as student_alex to open a
+copied scan link: login returns to the scan and the page submits a CSRF-protected
+POST. Expiry requires a new scan. Without JavaScript press Register attendance.
+The lecturer roster and XLSX preserve first-registration time and use Registered
+in an additional window for a student's first registration in a later window.
+No manual corrections or spreadsheet synchronization are included.
+
+Comments and suggestions accepts 1–1000 trimmed Unicode characters; students
+see their own stored history and lecturers see all meeting requests, with
+5-second visible-page polling. No offline storage, send queue or synchronization
+is implemented. Connected use does not establish offline coverage.
+
+See [executed checks and limitations](docs/testing.md) and the
+[manual/private-LAN phone plan](docs/phone-testing.md). Phone access requires a
+separately authorized temporary LAN binding and exact allowed host; no network
+or firewall setting was changed during implementation. All website AI flows
+remain unimplemented.
 
 Run PowerShell from the repository root. A separate `.venv` is already prepared
 on the current workstation. On a fresh checkout, use an installed Python 3.12
@@ -218,7 +239,7 @@ No personal password, Gemini key, media or AI model is needed to run the site.
 Users see only their courses and meetings. A lecturer creates/edits meetings
 only in the course where their membership is Lecturer. Course/membership
 administration is prepared through demo data; no public signup, admin UI,
-meeting deletion, attendance or comments are included in this unit.
+meeting deletion is included. Attendance and comments are available from each meeting under Unit B.
 Meeting times are entered and displayed in Asia/Jerusalem.
 
 ```powershell

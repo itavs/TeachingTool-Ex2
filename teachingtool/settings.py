@@ -41,7 +41,16 @@ TEMPLATES = [{
     ]},
 }]
 WSGI_APPLICATION = "teachingtool.wsgi.application"
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": LOCAL_DIR / "db.sqlite3"}}
+DATABASES = {"default": {
+    "ENGINE": "django.db.backends.sqlite3", "NAME": LOCAL_DIR / "db.sqlite3",
+    # Acquire the writer reservation before reading state in short atomic writes.
+    # SQLite select_for_update alone does not lock rows.
+    "OPTIONS": {"transaction_mode": "IMMEDIATE", "timeout": 10},
+}}
+# Optional file-backed test DB for real multi-connection SQLite concurrency tests.
+# Does not change the development database or network configuration.
+if os.environ.get("DJANGO_TEST_SQLITE_NAME"):
+    DATABASES["default"]["TEST"] = {"NAME": os.environ["DJANGO_TEST_SQLITE_NAME"]}
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},

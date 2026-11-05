@@ -46,6 +46,7 @@ def meeting_detail(request, course_id, meeting_id):
         return unavailable(request)
     return render(request, "classroom/meeting_detail.html", {
         "membership": membership, "course": membership.course, "meeting": meeting,
+        "attendance_record": meeting.attendance_records.filter(student=request.user).first(),
     })
 
 

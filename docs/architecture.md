@@ -1,13 +1,110 @@
-# Unit A Architecture
+# Website Architecture — Units A and B
+
+## Unit B participation design
+
+`participation_views.py` enforces course-scoped attendance and request access;
+`attendance.py` isolates signed QR rules and write transactions. Dependencies
+added in the website `.venv`: qrcode 8.2 (SVG, no Pillow), openpyxl 3.1.5,
+et_xmlfile 2.0.0 and colorama 0.4.6. The website imports no AI provider.
+
+```mermaid
+sequenceDiagram
+    participant L as Lecturer
+    participant S as Student browser
+    participant D as Django
+    participant DB as SQLite
+    L->>D: CSRF POST open window
+    D->>DB: Create window atomically
+    L->>D: GET state while visible
+    D-->>L: Signed rotating QR and roster
+    S->>D: GET scanned URL
+    D-->>S: Login if needed, preserving safe next URL
+    S->>D: Login and GET continuation
+    D-->>S: Revalidate membership/code; CSRF form
+    S->>D: POST form automatically, or manual fallback
+    D->>DB: Serialize; revalidate time/access; unique registration
+    D-->>S: Confirmed status or rescan error
+```
+
+AttendanceWindow stores a public UUID, meeting, opening/closing timestamps,
+explicit closure and additional-window flag. Only one unclosed window per
+meeting is allowed; opening after expiry closes that row before creating the
+next. AttendanceRecord stores student, meeting, original window/time and
+additional-window flag, unique per student/meeting. MeetingRequest stores
+student, meeting, type, text, timestamp and per-form UUID for duplicate-POST
+deduplication. Recorded history is protected from accidental FK deletion;
+there is no deletion UI or approved retention period.
+
+```mermaid
+classDiagram
+    class AttendanceWindow {
+        UUID public_id
+        datetime opened_at
+        datetime closes_at
+        datetime closed_at
+        bool additional
+    }
+    class AttendanceRecord {
+        datetime registered_at
+        bool additional
+        registration_label
+    }
+    class MeetingRequest {
+        kind
+        text
+        datetime created_at
+        UUID submission_id
+    }
+    Meeting "1" --> "0..*" AttendanceWindow
+    Meeting "1" --> "0..*" AttendanceRecord
+    AttendanceWindow "1" --> "0..*" AttendanceRecord
+    User "1" --> "0..*" AttendanceRecord
+    Meeting "1" --> "0..*" MeetingRequest
+    User "1" --> "0..*" MeetingRequest
+```
+
+Signed QR payloads contain window UUID, meeting ID and a 30-second bucket,
+using a dedicated signing salt and the ignored local Django secret. No student
+identity is embedded. Codes stay stable within a bucket and expire at its
+start +45 seconds or window closure, whichever occurs first. Closed/replaced
+windows never become valid again. GET does not persist attendance or QR rows.
+After acquiring the write lock, validation uses current server time; client
+countdowns are informational. Valid signed links can still be forwarded.
+
+SQLite uses BEGIN IMMEDIATE with a 10-second busy timeout in short explicit
+atomic sections, not request-wide transactions. Writes serialize before reads,
+avoiding read-to-write upgrade races. Database uniqueness is the final duplicate
+safeguard. select_for_update expresses a possible future backend lock but is
+a no-op on SQLite. Export reads a consistent short snapshot, then builds XLSX
+outside the transaction; string cells prevent user-input formula execution.
+Database-busy errors return 503 without a save confirmation or automatic POST
+retry. Two concurrent requests are tested, not full classroom load.
+
+Every Unit B endpoint authenticates and freshly resolves course membership.
+Only lecturers access roster/state/export/window actions; scan/request writes
+require Student role. Parent mismatch/nonmembership gives generic 404; wrong
+role gives 403. Sensitive responses disable caching. Student history is filtered
+server-side and lecturer JSON feeds recheck roles. HTML is escaped; dynamic
+text uses textContent. No browser persistence or offline send queue exists.
+
+Lecturer requests poll every 5 seconds while visible; hidden pages cancel reads
+and resume on visibility. Attendance polls every 5 seconds or sooner at a QR
+boundary, with a local countdown. Read errors warn that prior data may be
+outdated. Composition, CSRF POST submission and confirmed database storage
+remain distinct, preserving the unresolved D-17 offline boundary.
+
+Official references consulted:
+[Django SQLite transactions](https://docs.djangoproject.com/en/5.2/ref/databases/#transactions-behavior),
+[Django atomic transactions](https://docs.djangoproject.com/en/5.2/topics/db/transactions/),
+[qrcode](https://pypi.org/project/qrcode/),
+[openpyxl](https://openpyxl.readthedocs.io/en/stable/).
 
 ## Implemented boundary
 
 Unit A implements the shared website foundation under D-23 through D-26.
 Django 5.2.19 uses server-rendered Templates, CSS, sessions, forms, ORM and
-migrations. The development database is SQLite. No client-side JavaScript is
-needed for the current pages. No AI SDK, provider key or AI experiment module
-is imported by the application. Attendance/comments and the other three
-feature workflows are not implemented.
+migrations. The development database is SQLite. Small Unit B scripts handle scan POST submission and visible-page polling. No AI SDK, provider key or AI experiment module
+is imported by the application. Attendance and connected comments are implemented under D-27 through D-30; the other three feature workflows remain unimplemented.
 
 ```mermaid
 flowchart LR

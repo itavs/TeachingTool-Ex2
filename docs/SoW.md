@@ -212,7 +212,7 @@ Unit A is implemented: Django/Templates, login/logout, course-scoped roles,
 course/meeting views, lecturer meeting creation/editing and isolated demo data
 (D-23 through D-26). Its server checks are recorded in [testing](testing.md)
 and its component/class design in [architecture](architecture.md).
-Attendance, comments and the other three website capabilities remain planned.
+Unit B implements attendance/XLSX and connected comments (D-27 through D-30); the other three website capabilities remain planned. Server verification is recorded in testing.md; actual browser/phone acceptance remains pending.
 The five-capability target and the D-17 offline gap are unchanged.
 
 Separate local AI experiments and a partial Gemini connectivity trial are

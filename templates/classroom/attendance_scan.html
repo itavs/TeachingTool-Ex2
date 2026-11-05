@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% load static %}{% block title %}Register attendance{% endblock %}
+{% block content %}<section class="panel"><h1>Register attendance</h1><p>{{ course.code }} · {{ meeting.title }}</p><p>Registering as {{ user.username }}. The server will check the code again when saving.</p>
+<form method="post" id="attendance-registration">{% csrf_token %}<button class="button" type="submit">Register attendance</button></form><p id="registration-progress" aria-live="polite"></p><noscript><p>JavaScript is disabled. Press Register attendance to complete the registration.</p></noscript></section>{% endblock %}
+{% block scripts %}<script src="{% static 'js/register.js' %}" defer></script>{% endblock %}

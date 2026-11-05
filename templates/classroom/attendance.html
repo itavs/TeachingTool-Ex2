@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% load static %}{% block title %}Attendance · {{ meeting.title }}{% endblock %}
+{% block content %}<a class="back-link" href="{% url 'meeting-detail' course.pk meeting.pk %}">← {{ meeting.title }}</a><h1>Attendance</h1>
+<section class="panel"><h2>Registration window</h2><p id="window-status" aria-live="polite"></p><img id="attendance-qr" class="qr-image" alt="Scan to register attendance" hidden><p><a id="scan-link" hidden>Open registration link</a></p>
+<div class="actions"><form method="post" action="{% url 'attendance-open' course.pk meeting.pk %}">{% csrf_token %}<button class="button" type="submit">Open window</button></form><form method="post" action="{% url 'attendance-close' course.pk meeting.pk %}">{% csrf_token %}<button class="button secondary" type="submit">Close window</button></form></div>
+<p class="muted">First window: 5 minutes. Further windows: 2 minutes. QR changes every 30 seconds; each code is valid for up to 45 seconds, until the window closes. Opening an active window keeps it unchanged.</p>
+<p>QR registration does not conclusively prove physical presence or prevent live forwarding of a valid code.</p></section>
+<section class="panel"><div class="page-heading"><h2>Student roster</h2><a class="button secondary" href="{% url 'attendance-export' course.pk meeting.pk %}">Export XLSX snapshot</a></div><p>Times: Asia/Jerusalem. “Not registered” is not a determination of absence. No manual corrections.</p><p id="refresh-status" role="status">Loading current status…</p>
+<div class="table-scroll"><table><thead><tr>{% for header in headers %}<th scope="col">{{ header }}</th>{% endfor %}</tr></thead><tbody id="participation-rows"></tbody></table></div></section>
+{{ initial|json_script:'initial-participation' }}
+<div id="participation-config" data-mode="attendance" data-url="{% url 'attendance-state' course.pk meeting.pk %}"></div><noscript><p>JavaScript is needed to display the rotating QR and live roster. The XLSX export remains available.</p></noscript>{% endblock %}
+{% block scripts %}<script src="{% static 'js/participation.js' %}" defer></script>{% endblock %}

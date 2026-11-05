@@ -1,7 +1,7 @@
-# Verification Record — Unit A
+# Verification Record — Units A and B
 
 Date: 2026-11-05. Environment: Windows 64-bit, Python 3.12.14, Django 5.2.19,
-SQLite. This record covers the shared website foundation only. It does not
+SQLite. The historical Unit A section below covers the shared foundation; the Unit B section records later attendance/comments checks. It does not
 mark any five-capability acceptance check AC-01 through AC-07 as passed.
 
 ## Executed checks
@@ -80,14 +80,103 @@ Additional manual browser checklist, not reported as completed:
 
 ## Unverified and deferred
 
-- Actual classroom user count, parallel writes and SQLite capacity.
+- Actual classroom user count and SQLite capacity. Unit B verifies only two simultaneous requests, not classroom load.
 - Hosting/HTTPS/phone access; current server listens only on loopback.
 - Production hardening, login throttling, retention/deletion and real identities.
-- Attendance, XLSX, comments/history/live updates, polls, video summaries and
-  homework feedback as integrated website features.
+- Browser/phone attendance scanning, XLSX UI/download and live-update usability; the server paths are covered under Unit B below. Polls, video summaries and homework feedback remain unimplemented website features.
 - Offline interpretation and university-network checks.
 - AI providers/adapters and AI correctness. Existing feasibility reports remain
   separate evidence; no new AI request occurred during this unit.
 
 The foundation is a meaningful commit unit, with user-reported manual checks
 and remaining UI limitations explicitly separated from server test evidence.
+
+## Unit B — Executed Attendance and Connected-Request Checks
+
+Date: 2026-11-05. Same Windows/Python/Django environment, with qrcode 8.2 and
+openpyxl 3.1.5. Tests use generated synthetic users/data and credentials;
+the development database, real passwords, media and AI keys are not test inputs.
+
+| Check | Observed result |
+|---|---|
+| Full Django suite with file-backed SQLite test DB | **48 passed**, 38.411 seconds, no skips. Includes 24 Unit A tests, 21 Unit B functional tests and 3 concurrency tests. |
+| `node --test tests_js/participation.test.cjs` | **3 passed**: visible-page polling pause/resume and 5-second schedule; safe text rendering and QR boundary refresh; scan form submission. Logic-only fake DOM/timers, no browser. |
+| Pre-commit rerun after shortening the request notice | **48 passed**, 39.928 seconds on file-backed SQLite; **3 JavaScript logic tests passed**. |
+| `manage.py check` | No issues |
+| `manage.py makemigrations --check --dry-run` | No changes detected |
+| `python -m pip check` | No broken requirements |
+| Local migration 0002 | Applied successfully to ignored development SQLite; demo seeding was not rerun. |
+
+The first test run found missing course context in the forbidden-response
+template. That caused 500 errors instead of the intended 403; it was fixed
+and the full suite rerun successfully. No failed run is treated as a pass.
+
+### Actual assertions
+
+- Initial 300-second and subsequent 120-second windows; active-open idempotency;
+  automatic-expiry reopening and invalidation of all explicitly closed codes.
+- Stable QR tokens within 30-second buckets, rotation at the boundary, valid
+  overlap through 44.999999 seconds, rejection at 45 seconds and at window end;
+  future/tampered/malformed/wrong-meeting codes are rejected.
+- GET scan does not register; CSRF-protected POST does. Login preserves the
+  attendance continuation. Expiry during login, between GET and POST, or closure
+  after GET requires a new scan. Membership/role is freshly checked.
+- Student/meeting uniqueness, preserved first timestamp/window/status, and exact
+  Registered in an additional window label. Two requests from the same student
+  create one record; two different students create two. Concurrent opens create
+  one window. These tests use a barrier, threads and separate database connections.
+- Lecturer-only roster/state/export/window actions; students denied management;
+  nonmembers/mismatched parent courses denied; per-course roles and removed or
+  changed memberships enforced. HTML/JSON are not substitutes for server checks.
+- Real XLSX bytes loaded with openpyxl: expected fields/current-student roster,
+  additional-window label, unchanged old snapshot after new registration, no
+  write-back on editing, and leading '=' in a display name stored as text.
+- Comment/suggestion history persistence and own-only student access; lecturer
+  all-meeting feed; 1/1000-character Unicode boundaries after trim, blank/1001
+  rejection, invalid type rejection, escaped script text and duplicate-form
+  submission deduplication. CSRF rejection and database-failure reporting tested.
+
+### Reproduce without touching the development database
+
+```powershell
+$env:DJANGO_TEST_SQLITE_NAME = Join-Path (Get-Location) ('.local/unit-b-test-' + [guid]::NewGuid().ToString('N') + '.sqlite3')
+.\.venv\Scripts\python.exe manage.py test --noinput
+Remove-Item Env:DJANGO_TEST_SQLITE_NAME
+node --test tests_js/participation.test.cjs
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run
+.\.venv\Scripts\python.exe -m pip check
+```
+
+The generated path is an isolated temporary test database managed by Django.
+Without the environment variable, regular tests use in-memory SQLite and the
+three real-connection concurrency tests explicitly skip; that run cannot be
+reported as equivalent concurrency evidence. The file-backed suite above ran
+all three. Two-request success does not establish classroom capacity.
+
+### User-reported Unit B manual checks
+
+The user reported the following checks; they were not performed or directly
+observed by the agent:
+
+| Reported action | Reported result |
+|---|---|
+| Manual QR check | The user reported checking the QR. Device, exact steps and successful attendance registration were not specified; no additional QR scenario is inferred. |
+| Submit a comment as student_alex and view it as lecturer_alpha in the same meeting | The comment appeared to the lecturer without a manual refresh. |
+
+These reports do not establish a successful phone test, an exact five-second
+latency, login continuation, expiry handling, additional windows, duplicate
+prevention, XLSX correctness, server authorization or classroom load. Server
+checks above remain separate evidence for their specific assertions.
+
+No agent-run Unit B browser, real-phone, native-camera scan or responsive
+screenshot check passed. JavaScript logic tests are not browser tests. The prior
+browser origin rejection was not bypassed. Existing Unit A user-reported checks
+above remain separate historical evidence.
+
+Use [phone-testing.md](phone-testing.md) for desktop/two-account and future
+private-LAN phone instructions. Current binding and ALLOWED_HOSTS remain
+loopback-only; no firewall/network changes were made. Offline meaning, lecturer
+acceptance of attendance automatically/online-offline, university-network
+feasibility, retention, production security and classroom load remain open.
+No AI experiment or AI website feature was started in Unit B.
