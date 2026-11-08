@@ -6,7 +6,7 @@ from .process_lock import exclusive_lock, WorkerBusy
 
 
 def job_path(job_id, filename):
-    if filename not in {'input.mp4', 'audio.wav', 'transcript.pending.json'}:
+    if filename not in {'input.mp4', 'audio.wav', 'transcript.pending.json', 'summary.input.json', 'summary.pending.json'}:
         raise ValueError('Unapproved private filename.')
     root = Path(settings.VIDEO_STORAGE_ROOT).resolve()
     directory = root / str(uuid.UUID(str(job_id)))

@@ -2,9 +2,9 @@
 (() => {
     const config=document.getElementById("video-config");if(!config)return;
     const notice=document.getElementById("video-refresh");
-    let timer,controller,clock,data=JSON.parse(document.getElementById("video-initial").textContent),seenAt=Date.now(),stopped=false;
+    let timer,controller,clock,data=JSON.parse(document.getElementById("video-initial").textContent),seenAt=Date.now(),stopped=false,summaryReloadRequested=false;
     const set=(id,value)=>{document.getElementById(id).textContent=value;};
-    const terminal=()=>["extracted","transcribed","failed"].includes(data.status);
+    const terminal=()=>["extracted","transcribed","summarized","failed"].includes(data.status);
     function display(value){
         data=value;seenAt=Date.now();set("video-stage",data.stage_label);
         set("video-failure",data.error?`Failed stage: ${data.failed_stage}. ${data.error}`:"");
@@ -13,11 +13,12 @@
         set("video-language",data.detected_language?`Detected language: ${data.detected_language} (automatic detection).`:"");
         set("video-transcript-expired",data.transcript_expired?"Transcript expired; its content is no longer available.":"");
         document.getElementById("video-transcript-link").hidden=!data.transcript_available;
+        if(data.summary_available && config.dataset.summaryRendered!=="true" && !summaryReloadRequested){summaryReloadRequested=true;window.location.reload();}
         set("video-source",data.source_removed?"Uploaded MP4 removed by cleanup.":"");tick();
     }
     function tick(){
         const age=(Date.now()-seenAt)/1000;
-        set("video-elapsed",(data.processing_seconds+(["validating","extracting","loading_asr","transcribing"].includes(data.status)?age:0)).toFixed(1));
+        set("video-elapsed",(data.processing_seconds+(["validating","extracting","loading_asr","transcribing","loading_sum","summarizing"].includes(data.status)?age:0)).toFixed(1));
         set("video-wait",(data.waiting_seconds+(data.status==="queued"?age:0)).toFixed(1));
     }
     async function refresh(){

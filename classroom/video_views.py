@@ -5,7 +5,7 @@ from .attendance import CourseAccessError
 from .models import VideoJob,Membership
 from .participation_views import scoped,context
 from .video_forms import VideoUploadForm
-from .video_jobs import save_upload,owned_job,payload,recover_jobs,transcript_available,purge_expired_transcripts
+from .video_jobs import save_upload,owned_job,payload,recover_jobs,transcript_available,purge_expired_transcripts,summary_available
 from django.utils import timezone
 from .transcript_display import reading_paragraphs
 
@@ -37,7 +37,9 @@ def video_list(request,meeting,membership):
 @scoped(Membership.Role.LECTURER)
 def video_detail(request,meeting,membership,job_id):
     job=owned_job(meeting.pk,job_id,request.user)
-    return render(request,'classroom/video_detail.html',{**context(meeting,membership),'job':payload(job)})
+    summary={'paragraph':job.summary_paragraph,'points':job.summary_points} if summary_available(job) else None
+    return render(request,'classroom/video_detail.html',{**context(meeting,membership),'job':payload(job),
+        'summary':summary,'text_direction':'rtl' if job.detected_language=='he' else 'ltr'})
 
 
 @scoped(Membership.Role.LECTURER)

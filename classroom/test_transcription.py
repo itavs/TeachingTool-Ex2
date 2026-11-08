@@ -56,7 +56,9 @@ class TranscriptionTests(ParticipationFixture,TransactionTestCase):
         self.override.disable();self.temp.cleanup()
 
     def new_job(self):
-        return save_upload(self.meeting.pk,self.teacher,SimpleUploadedFile('test.mp4',self.media))
+        job=save_upload(self.meeting.pk,self.teacher,SimpleUploadedFile('test.mp4',self.media))
+        VideoJob.objects.filter(pk=job.pk).update(summary_requested=False)
+        job.refresh_from_db();return job
 
     def finish(self):
         job=self.new_job();job=claim_job()

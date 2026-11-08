@@ -10,15 +10,15 @@ function harness(data){
     const elements=new Map(ids.map(id=>[id,{textContent:''}]));
     elements.set('video-config',{dataset:{url:'/fake-video-state/'}});
     elements.set('video-initial',{textContent:JSON.stringify(data)});
-    const timers=new Map(),listeners={};let counter=0,calls=0;
+    const timers=new Map(),listeners={};let counter=0,calls=0,reloads=0;
     const document={hidden:false,getElementById:id=>elements.get(id),addEventListener:(name,fn)=>listeners[name]=fn};
     vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../static/js/videos.js'),'utf8'),{
-        document,Date,JSON,AbortController,
+        document,Date,JSON,AbortController,window:{location:{reload:()=>reloads++}},
         setTimeout:(fn,delay)=>{let id=++counter;timers.set(id,{fn,delay});return id;},clearTimeout:id=>timers.delete(id),
         setInterval:()=>++counter,clearInterval:()=>{},
         fetch:async()=>{calls++;return {ok:true,redirected:false,status:200,json:async()=>data};},
     });
-    return {elements,timers,listeners,document,calls:()=>calls,settle:()=>new Promise(resolve=>setImmediate(resolve))};
+    return {elements,timers,listeners,document,reloads:()=>reloads,calls:()=>calls,settle:()=>new Promise(resolve=>setImmediate(resolve))};
 }
 
 test('extraction success displays audio-only completion and stops polling',async()=>{
@@ -65,4 +65,17 @@ test('expired transcript link is hidden even though processing completed',async(
     await h.settle();
     assert.equal(h.elements.get('video-transcript-link').hidden,true);
     assert.match(h.elements.get('video-transcript-expired').textContent,/expired/);
+});
+
+
+test('summary completion reloads once to render owner-only HTML and stops polling',async()=>{
+ const h=harness({status:'summarized',stage_label:'Summary completed',processing_seconds:65,waiting_seconds:2,summary_available:true,transcript_available:true,error:''});
+ await h.settle();assert.equal(h.reloads(),1);assert.equal(h.timers.size,0);
+ assert.equal(h.elements.get('video-transcript-link').hidden,false);
+});
+
+test('summary failure retains the transcript link without reloading',async()=>{
+ const h=harness({status:'failed',stage_label:'Processing failed',failed_stage:'Summarizing transcript locally',processing_seconds:600,waiting_seconds:2,transcript_available:true,error:'Summary failed'});
+ await h.settle();assert.equal(h.reloads(),0);assert.equal(h.elements.get('video-transcript-link').hidden,false);
+ assert.match(h.elements.get('video-failure').textContent,/Summarizing/);
 });

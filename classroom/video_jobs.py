@@ -11,8 +11,8 @@ from .models import VideoJob, Membership
 from .video_storage import job_path, remove_file
 from .asr_checkpoint import REPO, REVISION
 
-ACTIVE = ['validating', 'extracting', 'loading_asr', 'transcribing']
-TERMINAL = ['extracted', 'transcribed', 'failed']
+ACTIVE = ['validating', 'extracting', 'loading_asr', 'transcribing', 'loading_sum', 'summarizing']
+TERMINAL = ['extracted', 'transcribed', 'summarized', 'failed']
 HEARTBEAT_GRACE_SECONDS = 30
 ERRORS = {
     'invalid_mp4':'The file is not a supported valid MP4 video.',
@@ -38,6 +38,11 @@ ERRORS = {
     'asr_empty':'No speech transcript was produced.',
     'asr_language':'The detected language is outside the supported Hebrew/English scope.',
     'asr_output':'The transcription output was incomplete or invalid. No full transcript was saved.',
+    'summary_runtime':'The installed local summary runtime could not start. The completed transcript remains available until expiry.',
+    'summary_model':'The required installed Qwen3 8B checkpoint is unavailable or differs from the tested model. No other model was used.',
+    'summary_failed':'Local summarization failed. The completed transcript remains available until expiry.',
+    'summary_output':'The summary output was incomplete or invalid. No summary was saved; the transcript remains available until expiry.',
+    'summary_language':'The generated summary did not match the recording language. No summary is displayed; the transcript remains available until expiry.',
 }
 
 
@@ -54,7 +59,7 @@ def save_upload(meeting_id, user, upload):
         raise ValidationError('The upload exceeds 200 MB.')
     now = timezone.now()
     job = VideoJob.objects.create(meeting_id=meeting_id, owner=user, original_name=name[:255],
-        created_at=now, source_expires_at=now+timedelta(hours=24),transcription_requested=True,
+        created_at=now, source_expires_at=now+timedelta(hours=24),transcription_requested=True,summary_requested=True,
         asr_metadata={'requested_model':{'repo':REPO,'revision':REVISION}})
     try:
         target = job_path(job.pk,'input.mp4')
@@ -94,19 +99,29 @@ def fail_job(job_id, code, stage=None):
     if remove_file(job.pk,'audio.wav'):
         VideoJob.objects.filter(pk=job.pk).update(audio_removed_at=timezone.now())
     remove_file(job.pk,'transcript.pending.json')
+    remove_file(job.pk,'summary.input.json')
+    remove_file(job.pk,'summary.pending.json')
     return job
 
 
 def purge_expired_transcripts(now=None):
     now=now or timezone.now()
+    VideoJob.objects.filter(summary_expires_at__lte=now,summary_deleted_at__isnull=True).update(
+        summary_paragraph='',summary_points=[],summary_deleted_at=now)
     return VideoJob.objects.filter(transcript_expires_at__lte=now,transcript_deleted_at__isnull=True).update(
         transcript='',transcript_segments=[],transcript_deleted_at=now)
 
 
 def transcript_available(job,now=None):
     now=now or timezone.now()
-    return bool(job.status=='transcribed' and job.transcript and job.transcript_expires_at and
+    return bool(job.transcript and job.transcript_expires_at and
         job.transcript_expires_at>now and job.transcript_deleted_at is None)
+
+
+def summary_available(job,now=None):
+    now=now or timezone.now()
+    return bool(job.status=='summarized' and job.summary_paragraph and job.summary_expires_at and
+        job.summary_expires_at>now and job.summary_deleted_at is None and transcript_available(job,now))
 
 
 def recover_jobs(now=None, force_active=False):
@@ -138,6 +153,8 @@ def cleanup_video_files(now=None):
             if remove_file(job.pk,'audio.wav') and job.audio_removed_at is None:
                 VideoJob.objects.filter(pk=job.pk).update(audio_removed_at=now)
             remove_file(job.pk,'transcript.pending.json')
+            remove_file(job.pk,'summary.input.json')
+            remove_file(job.pk,'summary.pending.json')
         if job.source_expires_at <= now+timedelta(minutes=5) and job.source_deleted_at is None:
             if job.status not in TERMINAL:
                 fail_job(job.pk,'expired')
@@ -154,7 +171,7 @@ def cleanup_video_files(now=None):
             except ValueError: continue
             if directory.resolve().parent != root: continue
             if parsed not in known and directory.stat().st_mtime <= now.timestamp()-120:
-                for name in ['audio.wav','input.mp4','transcript.pending.json']:
+                for name in ['audio.wav','input.mp4','transcript.pending.json','summary.input.json','summary.pending.json']:
                     remove_file(parsed,name)
     temp = Path(settings.FILE_UPLOAD_TEMP_DIR).resolve()
     if temp.is_dir():
@@ -187,6 +204,8 @@ def payload(job, now=None):
         'source_removed':job.source_deleted_at is not None,
         'audio_removed':job.audio_removed_at is not None or (not job.transcription_requested and job.status=='extracted'),
         'transcription_requested':job.transcription_requested,'transcript_available':transcript_available(job,now),
+        'summary_requested':job.summary_requested,'summary_available':summary_available(job,now),
+        'summary_expired':bool(job.summary_expires_at and (job.summary_expires_at<=now or job.summary_deleted_at)),
         'transcript_expired':bool(job.transcript_expires_at and (job.transcript_expires_at<=now or job.transcript_deleted_at)),
         'detected_language':job.detected_language,'transcribed_until':job.transcribed_until,
         'model_load_seconds':job.model_load_seconds,'transcription_seconds':job.transcription_seconds,

@@ -1,4 +1,4 @@
-"""Separate local transcription and disabled summarization contracts. No API calls."""
+"""Replaceable local transcription and summary engines; no external providers."""
 from typing import Protocol
 
 
@@ -11,7 +11,7 @@ class Transcriber(Protocol):
 
 
 class Summarizer(Protocol):
-    def summarize(self, transcript: str, language: str) -> dict: ...
+    def summarize(self, transcript: str, language: str, *, work_dir, deadline, on_event, on_tick) -> dict: ...
 
 
 class DisabledTranscriber:
@@ -30,7 +30,8 @@ def get_transcriber() -> Transcriber:
 
 
 def get_summarizer() -> Summarizer:
-    return DisabledSummarizer()
+    from .local_summarizer import LocalQwenSummarizer
+    return LocalQwenSummarizer()
 
 
-FUTURE_TEXT_RETENTION_DAYS = 7  # Transcript retention is active; summaries stay disabled.
+FUTURE_TEXT_RETENTION_DAYS = 7  # Summaries never outlive their source transcript.

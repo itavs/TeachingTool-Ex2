@@ -10,9 +10,10 @@ from .models import VideoJob
 from .video_jobs import ACTIVE, fail_job, recover_jobs, cleanup_video_files, lecturer_still_allowed
 from .video_media import media_child
 from .video_storage import job_path, remove_file, exclusive_lock
-from .video_engines import get_transcriber, FUTURE_TEXT_RETENTION_DAYS
+from .video_engines import get_transcriber, get_summarizer, FUTURE_TEXT_RETENTION_DAYS
 from .local_transcriber import TranscriptionFailure,validate_result
 from .asr_checkpoint import is_expected_metadata
+from .local_summarizer import SummaryFailure, validate_result as validate_summary_result
 
 
 @transaction.atomic
@@ -28,7 +29,7 @@ def claim_job():
     return job
 
 
-def process_job(job, stop_requested=lambda:False, *, timeout_seconds=None, child_target=media_child,transcriber=None):
+def process_job(job, stop_requested=lambda:False, *, timeout_seconds=None, child_target=media_child,transcriber=None,summarizer=None):
     """Must run under coordinator lock. Test injection never comes from user input."""
     if job.status not in ACTIVE: return
     source, output = job_path(job.pk,'input.mp4'),job_path(job.pk,'audio.wav')
@@ -59,6 +60,12 @@ def process_job(job, stop_requested=lambda:False, *, timeout_seconds=None, child
             updates['asr_metadata']=event['model_loaded']
         if 'progress_seconds' in event:updates['transcribed_until']=max(0,min(float(event['progress_seconds']),settings.VIDEO_MAX_SECONDS))
         if updates:VideoJob.objects.filter(pk=job.pk,status__in=ACTIVE).update(**updates)
+    def summary_event(event):
+        updates={}
+        if event.get('stage') in ['loading_sum','summarizing']:updates['status']=event['stage']
+        if 'model_loaded' in event:updates['summary_metadata']=event['model_loaded']
+        if updates:VideoJob.objects.filter(pk=job.pk,status__in=ACTIVE).update(**updates)
+    summary_started=False
     try:
         child.start();sender.close()
         result=None
@@ -109,16 +116,35 @@ def process_job(job, stop_requested=lambda:False, *, timeout_seconds=None, child
                         current=VideoJob.objects.select_for_update().get(pk=job.pk)
                         if not lecturer_still_allowed(current):raise TranscriptionFailure('permission_revoked')
                         check_control()
-                        VideoJob.objects.filter(pk=job.pk,status__in=ACTIVE).update(status='transcribed' if transcript else 'extracted',finished_at=now,
+                        pending_summary=bool(transcript and job.summary_requested)
+                        VideoJob.objects.filter(pk=job.pk,status__in=ACTIVE).update(status='loading_sum' if pending_summary else ('transcribed' if transcript else 'extracted'),finished_at=None if pending_summary else now,
                         heartbeat_at=now,processing_seconds=max(0,(now-job.started_at).total_seconds()),
                         video_seconds=result['video_seconds'],audio_seconds=result['audio_seconds'],audio_samples=result['audio_samples'],
                         audio_removed_at=now,**updates)
+                    if pending_summary:
+                        summary_started=True
+                        check_control()
+                        engine=summarizer if summarizer is not None else get_summarizer()
+                        generated=validate_summary_result(engine.summarize(transcript['text'],transcript['language'],
+                            work_dir=output.parent,deadline=deadline,on_event=summary_event,on_tick=check_control),transcript['language'])
+                        check_control()
+                        with transaction.atomic():
+                            current=VideoJob.objects.select_for_update().get(pk=job.pk)
+                            if not lecturer_still_allowed(current):raise SummaryFailure('permission_revoked')
+                            check_control()
+                            now=timezone.now()
+                            if now>=current.transcript_expires_at:raise SummaryFailure('expired')
+                            VideoJob.objects.filter(pk=job.pk,status__in=ACTIVE).update(status='summarized',
+                                summary_paragraph=generated['paragraph'],summary_points=generated['key_points'],
+                                summary_metadata=generated['metadata'],summary_seconds=generated['summary_seconds'],
+                                summary_created_at=now,summary_expires_at=min(now+timedelta(days=FUTURE_TEXT_RETENTION_DAYS),current.transcript_expires_at),
+                                finished_at=now,heartbeat_at=now,processing_seconds=max(0,(now-job.started_at).total_seconds()))
             else:
                 fail_job(job.pk,result.get('code','processing_error'),result.get('stage'))
-    except TranscriptionFailure as error:
+    except (TranscriptionFailure, SummaryFailure) as error:
         fail_job(job.pk,error.code)
     except Exception:
-        fail_job(job.pk,'processing_error')
+        fail_job(job.pk,'summary_failed' if summary_started else 'processing_error')
     finally:
         if child.is_alive(): child.terminate()
         if child.pid is not None: child.join(timeout=3)
@@ -126,6 +152,8 @@ def process_job(job, stop_requested=lambda:False, *, timeout_seconds=None, child
         if remove_file(job.pk,'audio.wav'):
             VideoJob.objects.filter(pk=job.pk).update(audio_removed_at=timezone.now())
         remove_file(job.pk,'transcript.pending.json')
+        remove_file(job.pk,'summary.input.json')
+        remove_file(job.pk,'summary.pending.json')
 
 
 def run_worker(*,once=False,stop_requested=lambda:False,child_target=media_child):

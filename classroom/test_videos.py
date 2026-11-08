@@ -256,7 +256,8 @@ class VideoTests(ParticipationFixture,TransactionTestCase):
     def test_legacy_extraction_does_not_call_transcriber_or_summarizer(self):
         from .local_transcriber import LocalWhisperTranscriber
         self.assertIsInstance(get_transcriber(),LocalWhisperTranscriber)
-        with self.assertRaises(EngineUnavailable):get_summarizer().summarize('unused','he')
+        from .local_summarizer import LocalQwenSummarizer
+        self.assertIsInstance(get_summarizer(),LocalQwenSummarizer)
         self.queued()
         with patch('classroom.video_worker.get_transcriber',side_effect=AssertionError('ASR forbidden for legacy fixture')),patch('classroom.video_engines.get_summarizer',side_effect=AssertionError('Summary forbidden')):
             run_worker(once=True)

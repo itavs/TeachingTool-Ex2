@@ -72,3 +72,7 @@ Normal-route STATIC acceptance for D-41: new job 489f75a2-bca3-4c0a-a9fc-3cc6026
 The user reported opening the STATIC full transcript in the website and understanding the object-variable versus shared-static-variable explanation. Garbled words remain, and part of a negated sentence was unclear even on source listening. No word-by-word accuracy was measured. This is user-reported understandability evidence, not verified verbatim accuracy or phone acceptance. The user approved completing local transcription with turbo as the new-upload default; summaries remain disabled and separate.
 
 The reading page is titled Automatic transcript, with the concise warning Some words and code terms may be transcribed incorrectly. The speech-only notice is retained. Model/worker details remain in technical documentation. Published reports contain measurements and assessments; raw transcript outputs stay in ignored local storage.
+
+## Subsequent summary integration
+
+New uploads now continue to local automatic Qwen3 8B summarization after the transcript is saved. The transcript survives a summary failure; existing completed tasks remain unchanged. Statements above that summaries were disabled describe the earlier transcription-only stage. See [local-summaries.md](local-summaries.md) for current behavior and quality limitations.

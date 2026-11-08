@@ -112,6 +112,13 @@ three weeks, as provided by the user; the exact deadline is not confirmed.
 |---|---|---|
 | D-41 | Use the already tested local large-v3-turbo checkpoint as the default for new video transcriptions through the existing adapter. Persist actual model identity/revision, preserve all existing transcripts, and fail clearly if turbo is unavailable rather than silently substituting a model. | Pinned repo dropbox-dash/faster-whisper-large-v3-turbo, revision 0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf. Per-file SHA-256 verification and actual-loaded metadata are enforced. Full STATIC/SHORT experiment results are documented separately. Hebrew accuracy remains limited/unverified against manual transcription. Summary stays disabled. A new normal upload/worker acceptance and subsequent user-reported browser review are recorded in testing.md. The user approved stage completion: the explanation is understandable, with remaining garbled words/unclear negation and no measured word-by-word accuracy. |
 
+### Approved initial local summarization — 2026-11-08
+
+| ID | User-approved decision | Implemented boundary |
+|---|---|---|
+| D-42 | Connect installed local Qwen3 8B after saving transcription. Produce a short paragraph and 3–5 points in the recording language. Request actually explained topics, preserved negations/relationship direction, example-scoped code claims and omission of unsupported garbled details. | Replaceable local adapter and pinned installed model, prompt lecture-grounding-v3. Output is Automatic summary with an automatic-transcript/error warning and transcript link. Functional checks do not establish grounded accuracy; STATIC still includes inferred class-access claims. |
+| D-43 | Keep the completed transcript accessible when summarization fails; preserve existing permissions, retention and the original overall processing limit. | No new per-stage budget. Transcript survives summary failure; owner/current Lecturer checks remain. Summary expires no later than its source transcript, max seven days; cleanup clears generated text. Unexpected output script is an explicit failure rather than edited output. |
+
 ## 4. Proposal Register
 
 P-02 and P-03 retain the history of the earlier attendance proposals and their
