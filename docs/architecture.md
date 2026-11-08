@@ -1,4 +1,36 @@
-# Website Architecture — Units A, B and C
+# Website Architecture — Units A, B, C and D
+
+## Unit D video infrastructure
+
+Detailed state/sequence, storage, limits and retention are in
+[video-processing.md](video-processing.md). VideoJob is the persistent aggregate:
+it references a meeting/uploader, original display name, actual byte count,
+state, timestamps/heartbeat, failure stage/code and media measurements. UUID
+paths use fixed filenames under private ignored storage, never the uploaded name.
+
+`video_uploads.py` bounds multipart bytes before disk; `video_forms.py` checks
+input shape/extension/size; `video_jobs.py` streams a private copy and manages
+authorization, recovery and retention; `video_views.py` exposes owner-only
+HTML/JSON. No decoding or AI wait occurs in the request. `video_worker.py` claims
+one queued job at a time under a coordinator OS lock and supervises the isolated
+`video_media.py` PyAV decoder. Parent/child deadlines and a parent-death watchdog
+bound processing. A decoder lock prevents overlapping orphan/new processing.
+The maintenance command runs independently of the worker and handles stale jobs,
+temporary audio and source expiry. Lock files contain no credentials.
+
+PyAV 16.0.0 is pinned from the previous tested media configuration. Decoding uses
+CPU and direct audio-plane bytes; no NumPy, ASR, LLM or FFmpeg CLI is needed.
+Explicit MP4 demuxing/file-only protocols and disabled external references avoid
+interpreting playlists or arbitrary remote media paths. Checking video frames is
+integrity validation, not visual-content analysis. JSON exposes only safe state
+and measurements, never private paths or raw decoder errors.
+
+`video_engines.py` defines separate Transcriber/Summarizer contracts with disabled
+factories; the extraction worker never calls them. Fake execution fixtures in
+tests_support are only subprocess lifecycle tests and have no runtime switch.
+No actual AI or seven-day text-result cleanup is claimed: no text result exists
+yet. The approved future retention policy is recorded separately from the
+implemented 24-hour source/temporary-audio cleanup.
 
 ## Unit C poll lifecycle
 

@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from . import participation_views as participation
 from . import poll_views as polls
+from . import video_views as videos
 
 urlpatterns = [
     path("", views.course_list, name="course-list"),
@@ -29,4 +30,7 @@ urlpatterns += [
     path(meeting_prefix + 'polls/<int:poll_id>/publish/', polls.poll_publish, name='poll-publish'),
     path(meeting_prefix + 'polls/<int:poll_id>/close/', polls.poll_close, name='poll-close'),
     path(meeting_prefix + 'polls/<int:poll_id>/vote/', polls.poll_vote, name='poll-vote'),
+    path(meeting_prefix + 'videos/',videos.video_list,name='video-list'),
+    path(meeting_prefix + 'videos/<uuid:job_id>/',videos.video_detail,name='video-detail'),
+    path(meeting_prefix + 'videos/<uuid:job_id>/state/',videos.video_state,name='video-state'),
 ]

@@ -71,3 +71,12 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 X_FRAME_OPTIONS = "DENY"
+# Private, never exposed through MEDIA_URL/static routes.
+VIDEO_STORAGE_ROOT = LOCAL_DIR / 'videos'
+VIDEO_MAX_BYTES = 200_000_000  # 200 MB, decimal, not MiB.
+VIDEO_MAX_SECONDS = 240
+VIDEO_PROCESS_SECONDS = 600
+FILE_UPLOAD_TEMP_DIR = LOCAL_DIR / 'video-upload-temp'
+FILE_UPLOAD_TEMP_DIR.mkdir(exist_ok=True)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 0
+FILE_UPLOAD_HANDLERS = ['classroom.video_uploads.BoundedUploadHandler', 'django.core.files.uploadhandler.TemporaryFileUploadHandler']

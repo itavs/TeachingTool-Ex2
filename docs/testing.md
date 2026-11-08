@@ -1,4 +1,89 @@
-# Verification Record — Units A, B and C
+# Verification Record — Units A, B, C and D
+
+## Unit D — Video Infrastructure — 2026-11-08
+
+Implemented boundary: private upload, queued persistent state, real MP4 checks
+and audio extraction. No transcription/summarization/model request, download,
+billing or agent-run browser test occurred. Gemini experiment files were left unchanged.
+
+| Executed check | Observed result |
+|---|---|
+| Focused video suite, file-backed SQLite | **20 passed**, 5.343 s, no skips |
+| Full website suite, file-backed SQLite | **94 passed**, 44.669 s, no skips: previous 74 plus 20 video tests |
+| `node --test tests_js/*.test.cjs` | **8 passed**, including 3 video polling/state tests; fake DOM, not a browser |
+| Dependency installation | Only PyAV 16.0.0 added to the website .venv; 32.3 MB official wheel; no model/driver/system change |
+| Migration 0004 / dependency / schema checks | Local migration applied; no broken requirements or pending migration changes |
+| Actual existing MP4 clips | Both within 240 s and 200,000,000 bytes; real extraction completed via local queued jobs and separate worker commands; temporary WAV absent after each |
+
+Sample evidence (not an AI benchmark): SHORT-EXPLAIN.mp4, 14,645,300 bytes,
+56.74957 s video, 56.74956 s extracted audio, 4.43773 s worker elapsed;
+STATIC-EXPLNATION.mp4, 10,477,365 bytes, 235.28780 s video, 235.28781 s extracted
+audio, 2.919206 s worker elapsed. Elapsed times include startup and integrity
+decoding; neither predicts AI latency/quality. Originals were opened read-only;
+private uploaded copies and run metadata are ignored by Git.
+
+### Actual assertions
+
+- Real generated MP4 audio/video data, streaming save, queued POST redirect and
+  use of another site page; actual worker extraction; verified 16-kHz mono PCM
+  WAV samples and deletion before success.
+- Corrupt bytes, no-audio video and audio-only container rejected by worker with
+  persisted Checking video failure stage/code. Extension and multi-file forms
+  rejected; MIME/extension alone never establish successful decoding.
+- Size is 200,000,000 bytes. Declared 200,000,001 rejects before saving; actual
+  multipart/copy byte boundaries are exercised with lowered test limits rather
+  than allocating a 200-MB fixture. Both existing real clips pass the actual cap.
+- Duration enforcement uses real media under lowered test limits; exact measured
+  duration accepted, just-above boundary rejected. Both supplied clips pass the
+  production 240-second cap; no full 241-second fixture was generated.
+- Owner-only HTML/JSON including same-course second Lecturer denial, students,
+  foreign/mismatched paths, anonymous login, CSRF, demotion and removed membership.
+  Queued role revocation prevents decoding. Private paths do not appear in pages.
+- Queue wait is distinct from processing time; one-hour-old queue entry still
+  gets a fresh worker-start budget. Single-worker OS lock and FIFO are checked.
+- Actual subprocess termination under a shortened test timeout, plus persisted
+  started-at >600-second recovery; no 10-minute wall-clock wait is claimed.
+- Graceful stop and stale heartbeat recovery; actual hard termination of a test
+  coordinator, parent-death watchdog/decoder-lock release, failed persisted state
+  and partial-WAV removal. Test subprocess helpers are test-only, not runtime modes.
+- Independent maintenance command, expired queued-source cleanup, orphan WAV and
+  old multipart cleanup, fixed-path/traversal protection and unrelated-file safety.
+- Separate disabled transcription/summary contracts, neither invoked by extraction.
+  No synthetic text is presented as actual AI processing.
+
+The local worker and separate maintenance process were started for current demo
+use; the web server remains 127.0.0.1:8000. They must be restarted after a machine
+restart. Maintenance is required independently of the worker for 24-hour cleanup;
+offline/stopped services cannot guarantee physical deletion on schedule. See
+[video-processing.md](video-processing.md) for commands and the early-purge margin.
+
+Agent-run browser interactions, phone upload/layout, class load, pathological
+codecs and real AI quality are not verified here. The previously denied browser-
+origin gate was not bypassed. The later user-reported manual result below is
+separate evidence for its reported path only. Full AS-04/AC-04 remains incomplete;
+this stage establishes extraction infrastructure.
+
+### Unit D pre-commit verification
+
+After recording the user report, the full suite passed **94 tests**, 45.239 s,
+on isolated file-backed SQLite, with no skips. All **8 JavaScript logic tests**
+passed. Django check, migration drift, dependency consistency and diff whitespace
+checks passed. No AI request or billing action was part of this verification.
+
+### User-reported manual video check — 2026-11-08
+
+The user reported testing SHORT-EXPLAIN.mp4 in the browser. After starting the
+worker, the already queued task changed to **Audio extraction completed**.
+The UI displayed **118.2 seconds waiting**, **4.5 seconds processing**, and
+**56.75 seconds of audio**. The site reported that temporary audio had been
+deleted. These are user-reported browser observations, not actions directly
+performed or observed by the agent; the UI deletion notice is not a separate
+user inspection of files on disk.
+
+This report does not establish other media cases, phone layout, permissions,
+recovery, timeouts, 24-hour expiry or AI quality; their specific automated evidence
+and remaining limitations are recorded separately. **Transcription and summaries
+remain disabled and unverified.** No additional AI request is implied by this check.
 
 Date: 2026-11-05. Environment: Windows 64-bit, Python 3.12.14, Django 5.2.19,
 SQLite. The historical Unit A section below covers the shared foundation; the Unit B section records later attendance/comments checks. It does not

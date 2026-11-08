@@ -37,7 +37,7 @@ Polling decisions D-08 through D-11 are also user-approved project choices,
 not additional requirements stated by the lecturer. D-31 resolves Q-03: Hebrew/English with lecturer-selected output language and a 6,000-character material ceiling.
 Video decisions D-12 through D-16 define unverified language, audio-processing,
 input/output, terminology-test, and limit-setting targets. P-06 retains pending
-numeric limits and quality questions; its input/output choices are now approved.
+real-model quality questions; D-34 now fixes initial numeric input limits, while its input/output choices remain approved.
 D-18/D-19 now approve the connected comments scope while retaining D-17's
 separate creation/submission/storage and unresolved offline coverage.
 D-20 through D-22 approve the first-version homework scope. These are project
@@ -219,16 +219,9 @@ unconfirmed; the handout does not explicitly prescribe an audio-only approach.
 file from the computer. MP4 is the initial supported format. The result
 includes a summary paragraph and 3-5 key points, with an option to view the
 full transcript. Other input formats, link import, and transcript editing or
-export are not established by this decision. Actual MP4 processing, language
-support, and result display remain implementation and verification targets.
+export are not established by this decision. Unit D now implements MP4 validation/audio extraction; transcription, language support and full summary/transcript display remain future verification targets.
 
-Under D-16, maximum recording duration and file size will be set after
-measuring processing time and cost. Demo-segment duration is a separate
-parameter. No numeric duration or byte-size cap, including a one-to-two-minute
-cap, is fixed. This does not claim unlimited-length or full-lesson support.
-The measurement-first policy is approved; actual limits still require measured
-evidence and a later decision. See Section 8 of the
-[register](decisions-and-assumptions.md). Small experimental measurements exist in local-ai-feasibility.md; numeric system limits remain undecided.
+D-34 approves initial limits of 240 seconds and 200,000,000 bytes, enforced server-side. D-35 limits worker processing to 600 seconds from claim, excluding queue wait. These limits follow the earlier D-16 measurement-first policy; demo duration remains separate and undecided. This does not establish full-lesson support or real AI quality. See video-processing.md and the decisions register.
 
 Providing only a prepared transcript is not equivalent to the approved
 video-to-audio-to-summary processing direction. A prewritten summary does
@@ -457,7 +450,7 @@ interpretation or evidence of completed implementation.
 | AC-01 | AS-01, D-01, D-05, D-06 | FR-01, FR-02; UC-01 | Using D-24 and D-27 through D-29, use two identified students and a rotating temporary QR in an open meeting window. Check valid registrations and recorded times; reject an expired code, a wrong-meeting code, and normal registration after window closure. Verify the displayed QR changes and apply the agreed validity rule across rotation boundaries, without assuming an unapproved grace period. Repeated scans by the same student produce one record for that meeting; the second student's valid scan produces a separate record. Export XLSX, open it and compare it with the online list at export time. Add a later valid attendance record and confirm the earlier file remains a snapshot; editing a copy does not change online records. These checks do not establish physical presence or prevent real-time sharing of valid codes. | D-27 through D-29 fix identity continuation, timings, additional windows, fields and no manual correction. Q-01/Q-02 lecturer interpretation and Q-07 production safeguards remain open. D-07 is not a required network gate. |
 | AC-02 | AS-02, D-01, D-17 through D-19 | FR-03; UC-02 | Create identified comment and suggestion samples associated with a meeting, with at least two test students. Verify creation/submission/storage are distinct and failed or uncertain saves are not reported as stored. Check storage/history, student-own visibility without another student's requests, and the lecturer's all-meeting view with new requests appearing without manual refresh. Check the agreed retention policy once defined. Verify first-version scope excludes lecturer replies, threads, attachments, votes, and notifications. Do not add local persistence, queues, or disconnected synchronization; define an offline acceptance case only after lecturer/teaching-assistant clarification. An after-class online flow does not establish offline coverage. | D-30 fixes request length and visible-page refresh. Unit B server evidence is in testing.md; browser auto-refresh, phone/classroom capacity and retention remain unverified. Q-02 preserves the offline gap; Q-06/Q-07 retain capacity/data-policy questions. |
 | AC-03 | AS-03, D-01, D-08 through D-11 | FR-04; UC-03 | Exercise both lecturer-selected types using real generation from known pasted material. Inspect relevance, four options, and, for comprehension, one correct option plus a short explanation. Edit all applicable draft fields and verify publication uses the approved version; reject later content edits. Cast known votes from two identified students and verify live lecturer counts/percentages, one final response each, no vote changes, and no second active poll in that meeting. Before closure, verify student-facing content exposes neither aggregates nor the comprehension answer/explanation. Close manually; reject later votes and show student aggregates without identities, plus the correct answer/explanation only for comprehension. Confirm opinion polls never designate or evaluate correctness and neither type assigns grades. Create a further poll after closure. Exercise generation failure and retry without a prepared-content substitution. Verify the basic flow has no file upload, open-ended response, or automatic scheduling. | D-31 resolves poll language/input length. Lifecycle evidence uses test fixtures and explicitly labeled demo data under D-32/D-33, not real generation. Q-06/Q-07 retain capacity and integrated-AI/data questions. Approved workflow is not conditional on P-05 approval. |
-| AC-04 | AS-04, D-01, D-12 through D-16 | FR-05; UC-04 | Manually upload permitted MP4 files for three planned cases: Hebrew speech, English speech, and a Hebrew lecture with English technical terms. Using agreed quality criteria, verify genuine audio extraction/transcription/model summarization, inspect known spoken facts and the intended meaning of technical terms, and confirm output is in the spoken language without translation (Hebrew for the terminology case). Verify a summary paragraph, 3-5 key points, and an option that exposes the full transcript rather than a partial excerpt. Compare the transcript and summary with the actual speech. Check each result clearly states that unspoken visual content is excluded. Check the candidate failed/unsupported-input path without false success after its details are agreed. Measure time and cost for samples of different durations/file sizes before proposing maximum duration and file size; choose demo duration separately. After numeric limits are agreed and implemented, add boundary checks at and above each limit without inventing thresholds now. | Q-04 for numeric limits, demo duration, quality, and lecturer interpretation; Q-07/Q-09 for resources and demo expectations. All three language cases are planned, not passed; sustained language switching is outside the commitment. No completed benchmark or numeric cap is assumed. |
+| AC-04 | AS-04, D-01, D-12 through D-16 | FR-05; UC-04 | Manually upload permitted MP4 files for three planned cases: Hebrew speech, English speech, and a Hebrew lecture with English technical terms. Using agreed quality criteria, verify genuine audio extraction/transcription/model summarization, inspect known spoken facts and the intended meaning of technical terms, and confirm output is in the spoken language without translation (Hebrew for the terminology case). Verify a summary paragraph, 3-5 key points, and an option that exposes the full transcript rather than a partial excerpt. Compare the transcript and summary with the actual speech. Check each result clearly states that unspoken visual content is excluded. Check the candidate failed/unsupported-input path without false success after its details are agreed. Measure time and cost for samples of different durations/file sizes before proposing maximum duration and file size; choose demo duration separately. After numeric limits are agreed and implemented, add boundary checks at and above each limit without inventing thresholds now. | D-34 through D-37 cover initial limits and extraction infrastructure; Q-04 retains demo duration, real-model quality and lecturer interpretation; Q-07/Q-09 for resources and demo expectations. All three language cases are planned, not passed; sustained language switching is outside the commitment. Extraction-only measurements/limits are recorded separately; no end-to-end AI quality pass is assumed. |
 | AC-05 | AS-05, D-01, D-20 through D-22 | FR-06, FR-07; UC-05 | Use sample theoretical assignments and Hebrew/English pasted submissions with known differences in coverage, strengths, gaps, and approaches. Supply lecturer instructions/criteria and verify real LLM processing produces relevant strengths, gaps, and actionable recommendations. Compare actual other works for the same assignment; verify cross-assignment inputs are not used as peers. Check student-own review requests and feedback/comparison without peer identities/full works; check the lecturer can request any submission and view all assignment submissions/feedback. With no peers, permit personal feedback but explicitly state that no comparison occurred. Verify no grades, plagiarism determinations, or code execution. Sample count is not a system cap; do not require identical model wording. | Q-05/Q-07/Q-09 for eligible-peer selection/revisions, review output language, quality, numeric limits, data/resources, and demo timing. Hebrew/English support, review quality, access, and comparison remain unverified targets. |
 | AC-06 | AS-06, AS-07 | NFR-01, NFR-02; UC-01 through UC-05 | Exercise the relevant student flows on the agreed smartphone/browser set and all flows in the intended classroom environment at the agreed load; record devices, network conditions, observed durations, and failures. | Q-06; P-01. |
 | AC-07 | AS-09, D-01 | NFR-06; UC-01 through UC-05 | Rehearse the approximately ten-minute presentation and record what ran live, actual processing times, any earlier outputs, and any failures. Confirm all five capabilities have genuine execution evidence; label sample data and any separately approved presentation shortcuts. | Q-09; P-09. |
@@ -479,13 +472,12 @@ The register remains authoritative for open items. In particular, resolve:
    submission, and storage remain separate. Connected comments scope is now
    approved by D-18/D-19 with D-30 length/update defaults. Capacity and data-lifecycle details remain Q-06/Q-07.
 3. Real poll-generation provider/data permissions and successful integration/quality evidence remain open. Q-03 is resolved by D-31; D-32/D-33 distinguish disabled generation, test-only fake providers and local labeled demo drafts. D-08 through D-11 lifecycle/visibility rules are unchanged.
-4. Video numeric maximum duration/file size, separate demo duration, quality,
+4. Separate video demo duration, real-model quality,
    and lecturer interpretation (Q-04). Manual MP4 upload, a summary paragraph
    with 3-5 key points and full-transcript viewing, Hebrew/English targets
    including Hebrew with English technical terms, same-language output without
    translation, and audio-only processing/disclosure are approved (D-12 through
-   D-16). Sustained language switching is outside the commitment. Determine
-   numeric system limits after processing-time/cost measurements.
+   D-16). Sustained language switching is outside the commitment. D-34 through D-37 now fix initial limits, worker/privacy/retention and disabled engines.
 5. Homework eligible-peer selection, revision/review associations, output
    language, numeric limits, and measurable quality (Q-05). Theoretical
    Hebrew/English pasted work, lecturer criteria, review/comparison behavior,
@@ -576,3 +568,33 @@ is an explicitly approved separate fixture path, producing labeled non-AI demo
 drafts without a model. It does not satisfy the original automatic-generation
 requirement. AC-03 lifecycle checks have server evidence in testing.md; real-model
 creation/quality and browser/phone/classroom acceptance remain incomplete.
+
+## 12. Unit D — Video Infrastructure, Extraction Only
+
+D-34 through D-37 approve this stage, not a reduction of the full AS-04 target.
+Upload UI explains before submission that checking and audio extraction alone
+are available, and shows both caps: 240 seconds and 200,000,000 bytes. The server
+enforces actual byte counts and media duration, verifies MP4 structure, video
+and audio tracks, and decodes media. Unsupported/corrupt/no-audio files fail
+with an actual stage and safe teacher-facing reason.
+
+Tasks persist meeting/uploader, state, heartbeat, timestamps and measurements.
+The independent single-video worker starts a 600-second budget at claim, separate
+from queue wait, and isolates decoding in a subprocess. Success means Audio
+extraction completed; temporary WAV must be removed. Graceful stops, hard worker
+death, stale heartbeat and deadline expiry cannot remain indefinitely Active:
+independent maintenance and status recovery mark failure, and restart recovers
+formerly active tasks under an exclusive OS lock.
+
+Only the uploader, still an active Lecturer member in the course, can access
+task HTML/JSON, including direct URLs. Private UUID files have no public media
+or download route. MP4 copies expire within 24 hours while maintenance operates;
+an early purge margin and independent cleanup cover a stopped worker. Physical
+deletion while the machine/maintenance is off cannot be guaranteed and resumes
+on startup. This limitation is explicitly documented in video-processing.md.
+Future transcript/summary retention is at most 7 days; neither is generated or
+stored now. Separate engine interfaces always return disabled implementations.
+
+Executed evidence is in testing.md, including real extraction of the two sample
+clips, both within limits. This is not a transcription, language-fidelity,
+summary-quality or full AC-04 pass. UI/phone and classroom acceptance remain open.

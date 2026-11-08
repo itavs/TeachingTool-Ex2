@@ -161,3 +161,37 @@ class PollVote(models.Model):
             models.UniqueConstraint(fields=['poll', 'student'], name='one_final_vote_per_student_poll'),
             models.CheckConstraint(condition=models.Q(option_index__gte=0, option_index__lte=3), name='valid_vote_option_index'),
         ]
+
+
+class VideoJob(models.Model):
+    class Status(models.TextChoices):
+        UPLOADING = 'uploading', 'Saving upload'
+        QUEUED = 'queued', 'Waiting for worker'
+        VALIDATING = 'validating', 'Checking video'
+        EXTRACTING = 'extracting', 'Extracting audio'
+        EXTRACTED = 'extracted', 'Audio extraction completed'
+        FAILED = 'failed', 'Processing failed'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    meeting = models.ForeignKey(Meeting, on_delete=models.PROTECT, related_name='video_jobs')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='video_jobs')
+    original_name = models.CharField(max_length=255)
+    file_size = models.PositiveBigIntegerField(default=0)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.UPLOADING)
+    created_at = models.DateTimeField()
+    queued_at = models.DateTimeField(null=True)
+    started_at = models.DateTimeField(null=True)
+    heartbeat_at = models.DateTimeField(null=True)
+    finished_at = models.DateTimeField(null=True)
+    source_expires_at = models.DateTimeField()
+    source_deleted_at = models.DateTimeField(null=True)
+    failed_stage = models.CharField(max_length=12, blank=True)
+    error_code = models.CharField(max_length=32, blank=True)
+    processing_seconds = models.FloatField(default=0)
+    video_seconds = models.FloatField(null=True)
+    audio_seconds = models.FloatField(null=True)
+    audio_samples = models.PositiveIntegerField(null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        constraints = [models.CheckConstraint(condition=models.Q(status__in=['uploading','queued','validating','extracting','extracted','failed']), name='valid_video_job_status')]

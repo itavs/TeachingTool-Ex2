@@ -6,3 +6,4 @@ qrcode==8.2
 openpyxl==3.1.5
 et_xmlfile==2.0.0
 colorama==0.4.6
+av==16.0.0
