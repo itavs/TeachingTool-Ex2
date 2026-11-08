@@ -169,6 +169,9 @@ class VideoJob(models.Model):
         QUEUED = 'queued', 'Waiting for worker'
         VALIDATING = 'validating', 'Checking video'
         EXTRACTING = 'extracting', 'Extracting audio'
+        LOADING_ASR = 'loading_asr', 'Loading local transcription model'
+        TRANSCRIBING = 'transcribing', 'Transcribing speech locally'
+        TRANSCRIBED = 'transcribed', 'Transcription completed'
         EXTRACTED = 'extracted', 'Audio extraction completed'
         FAILED = 'failed', 'Processing failed'
 
@@ -191,7 +194,19 @@ class VideoJob(models.Model):
     video_seconds = models.FloatField(null=True)
     audio_seconds = models.FloatField(null=True)
     audio_samples = models.PositiveIntegerField(null=True)
+    transcription_requested = models.BooleanField(default=False)
+    transcript = models.TextField(blank=True)
+    transcript_segments = models.JSONField(default=list, blank=True)
+    detected_language = models.CharField(max_length=8, blank=True)
+    transcript_created_at = models.DateTimeField(null=True)
+    transcript_expires_at = models.DateTimeField(null=True)
+    transcript_deleted_at = models.DateTimeField(null=True)
+    transcribed_until = models.FloatField(default=0)
+    model_load_seconds = models.FloatField(null=True)
+    transcription_seconds = models.FloatField(null=True)
+    asr_metadata = models.JSONField(default=dict, blank=True)
+    audio_removed_at = models.DateTimeField(null=True)
 
     class Meta:
         ordering = ['-created_at']
-        constraints = [models.CheckConstraint(condition=models.Q(status__in=['uploading','queued','validating','extracting','extracted','failed']), name='valid_video_job_status')]
+        constraints = [models.CheckConstraint(condition=models.Q(status__in=['uploading','queued','validating','extracting','extracted','loading_asr','transcribing','transcribed','failed']), name='valid_video_job_status')]

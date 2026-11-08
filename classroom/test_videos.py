@@ -78,7 +78,12 @@ class VideoTests(ParticipationFixture,TransactionTestCase):
         return SimpleUploadedFile(name,self.valid if data is None else data,content_type='video/mp4')
 
     def queued(self,data=None):
-        return save_upload(self.meeting.pk,self.teacher,self.upload(data))
+        job=save_upload(self.meeting.pk,self.teacher,self.upload(data))
+        # Preserve the Unit D extraction-only fixtures; current-upload ASR has
+        # separate injected-engine tests and must never run a real model here.
+        VideoJob.objects.filter(pk=job.pk).update(transcription_requested=False)
+        job.refresh_from_db()
+        return job
 
     def test_upload_returns_queued_task_with_private_streamed_file(self):
         self.client.force_login(self.teacher)
@@ -248,11 +253,12 @@ class VideoTests(ParticipationFixture,TransactionTestCase):
         unrelated.parent.mkdir(exist_ok=True);unrelated.write_text('keep')
         cleanup_video_files();self.assertTrue(unrelated.exists())
 
-    def test_ai_contracts_disabled_and_not_called_on_success(self):
-        with self.assertRaises(EngineUnavailable):get_transcriber().transcribe('unused')
+    def test_legacy_extraction_does_not_call_transcriber_or_summarizer(self):
+        from .local_transcriber import LocalWhisperTranscriber
+        self.assertIsInstance(get_transcriber(),LocalWhisperTranscriber)
         with self.assertRaises(EngineUnavailable):get_summarizer().summarize('unused','he')
         self.queued()
-        with patch('classroom.video_engines.get_transcriber',side_effect=AssertionError('AI forbidden')),patch('classroom.video_engines.get_summarizer',side_effect=AssertionError('AI forbidden')):
+        with patch('classroom.video_worker.get_transcriber',side_effect=AssertionError('ASR forbidden for legacy fixture')),patch('classroom.video_engines.get_summarizer',side_effect=AssertionError('Summary forbidden')):
             run_worker(once=True)
         self.assertEqual(VideoJob.objects.get().status,'extracted')
 

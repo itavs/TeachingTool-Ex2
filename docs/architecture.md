@@ -1,6 +1,10 @@
-# Website Architecture — Units A, B, C and D
+# Website Architecture — Units A, B, C, D and E
 
-## Unit D video infrastructure
+## Unit E local transcription
+
+New uploads use the pinned local large-v3-turbo checkpoint (D-41) in the existing offline ASR environment in a supervised subprocess after decoding and before WAV deletion. The original 600-second deadline covers both. The database stores full text, timed segments, detected language and a seven-day expiry; no transcript appears in polling JSON. Owner/current-Lecturer authorization and expiry are enforced on the full-text route. Maintenance purges content; legacy extraction-only jobs are unchanged. See [local-transcription.md](local-transcription.md) for configuration, state, retention and measured evidence. Summary remains disabled.
+
+## Unit D video infrastructure (initial extraction stage)
 
 Detailed state/sequence, storage, limits and retention are in
 [video-processing.md](video-processing.md). VideoJob is the persistent aggregate:
@@ -363,3 +367,7 @@ Loopback-only Django development server, DEBUG enabled, and development
 SQLite are not production deployment. HTTPS, rate limiting, real identity,
 data lifecycle and classroom write concurrency remain later work. No campus
 IP gate, offline queue or synchronization mechanism is implemented.
+
+## Checkpoint provenance and no-fallback contract
+
+asr_checkpoint.py is stdlib-only and pins the tested turbo repo/revision plus SHA-256 of model/config/tokenizer files. The isolated runner verifies these before CUDA loading; a missing/mismatched checkpoint produces a typed teacher-facing failure. It cannot substitute medium or download a model. New jobs record requested identity in asr_metadata; actual-loaded identity/library versions/configuration replace this on the verified model-loaded event and remain if later inference fails. validate_result rejects another revision. Existing completed jobs are not migrated/retranscribed; their persisted metadata remains authoritative.

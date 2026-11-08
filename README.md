@@ -24,14 +24,14 @@ polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
 D-22. AI workflows remain design targets; attendance and connected comments now have a Unit B implementation and server checks;
 remaining operational parameters and open interpretations are explicit.
 The shared website foundation is now implemented under D-23 through D-26;
-Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Real AI generation is disabled and unverified; Unit D implements private MP4 validation/audio extraction; transcription, summaries and homework website AI remain unimplemented.
+Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Real AI generation is disabled and unverified; Unit D implements private MP4 validation/audio extraction; Unit E now transcribes new video uploads locally and exposes private full transcripts; summaries and homework website AI remain unimplemented.
 
 | Capability | Assignment behavior | Design direction and open proposals |
 |------------|---------------------|----------------------------------|
 | Attendance | Automatic student attendance; lecturer receives an online/offline spreadsheet. | Approved D-05/D-06: lecturer opens a meeting and registration window; an identified student scans a temporary QR displayed in class and rotated during the window. The system validates code validity and meeting association, records attendance and time, and prevents duplicates per student and meeting. Lecturer views an online list and exports a point-in-time XLSX snapshot without synchronization back. |
 | Comments and suggestions | Students contribute in real time / offline. | Approved D-18/D-19: identified comment/suggestion requests associated with a meeting, storage/history, student-own visibility, and lecturer access to all meeting requests with new requests appearing without manual refresh. D-17 preserves separate creation/submission/storage; offline meaning and coverage remain unresolved. |
 | Polls | Lecturers create automatic, simple polls about current learning material. | Approved D-08 through D-11: lecturer selects comprehension or opinion before real model generation from pasted text. Both have one question and four single-choice options. Comprehension also includes one correct answer and a short explanation; opinion has no correct answer or correctness evaluation. Lecturer reviews/edits before publication only; identified students submit one final response. |
-| Video summary | Lecturer obtains an ML summary of a class video. | Approved D-12 through D-16: manually upload an MP4 file from the computer; extract audio, transcribe speech, and summarize through a model in the recording's spoken language without translation. Target Hebrew and English, including a Hebrew lecture with English technical terms. Return a summary paragraph, 3-5 key points, full-transcript viewing, and an explicit notice that unspoken visual information is excluded. Validation/audio extraction is implemented under Unit D; genuine transcription/summary and language quality remain unverified. |
+| Video summary | Lecturer obtains an ML summary of a class video. | Approved D-12 through D-16: manually upload an MP4 file from the computer; extract audio, transcribe speech, and summarize through a model in the recording's spoken language without translation. Target Hebrew and English, including a Hebrew lecture with English technical terms. Return a summary paragraph, 3-5 key points, full-transcript viewing, and an explicit notice that unspoken visual information is excluded. Validation/audio extraction is implemented under Unit D; Unit E adds real local transcription and full-transcript viewing. Word accuracy remains unverified; summarization remains disabled. |
 | Homework review | Students and teachers obtain deep LLM reviews including comparison with other students' work. | Approved D-20 through D-22: theoretical Hebrew/English pasted-text assignments, lecturer instructions/criteria, actual LLM feedback and processing of same-assignment peer submissions, student-own review/comparison without peer identities/full works, and lecturer access to all submissions/feedback. No-peer feedback explicitly states that no comparison occurred. |
 
 One course, one lecturer, and one active meeting are proposed simplifications
@@ -76,7 +76,7 @@ Video input/output direction is approved: manual file upload, initial MP4
 support, a summary paragraph and 3-5 key points, with an option to view the
 full transcript (D-14). Planned verification includes Hebrew, English, and a
 Hebrew lecture using English technical terms (D-15); sustained language
-switching is outside the current commitment. These are unverified targets.
+switching is outside the current commitment. Word accuracy and summary quality remain unverified targets.
 D-34 now approves initial system limits of 4 minutes and 200 MB after the earlier measurements. Demo duration remains separate and undecided; unlimited-length/full-lesson support is not claimed. Actual checking/extraction is implemented under D-34 through D-37, while speech/summary quality remains unverified. See
 Section 8 of the [register](docs/decisions-and-assumptions.md).
 
@@ -156,7 +156,7 @@ planning. The university-network study remains deferred and non-blocking.
 ## Project Status
 
 Unit A is implemented: sign-in/out, course-scoped permissions, course/meeting
-pages, lecturer meeting creation/editing, and isolated demo data. Unit B implements attendance, rotating QR windows, XLSX snapshots and connected private comments/history with lecturer polling. The poll lifecycle is implemented with labeled local demo drafts; real AI generation remains disabled and unverified. Video/homework website flows remain unimplemented.
+pages, lecturer meeting creation/editing, and isolated demo data. Unit B implements attendance, rotating QR windows, XLSX snapshots and connected private comments/history with lecturer polling. The poll lifecycle is implemented with labeled local demo drafts; real AI generation remains disabled and unverified. Video upload/extraction and local transcription are implemented; summaries and homework AI remain unimplemented.
 See [architecture](docs/architecture.md) and [verification](docs/testing.md).
 
 Local AI experiments produced measurable but mixed-quality results; Gemini
@@ -174,14 +174,13 @@ SQLite development success does not establish classroom load readiness.
 
 ## Local Setup and Run
 
-### Unit D — MP4 checks and audio extraction only
+### Units D/E — MP4 checks, extraction and local transcription
 
 From a meeting choose **Video processing** as its Lecturer. Upload an MP4 of at
 most **4 minutes and 200 MB**; both limits and actual video/audio structure are
 checked by the server. After upload, keep using the site and return to the task
 to see persistent stage, separate queue/processing elapsed times and failure
-reasons. A successful task says **Audio extraction completed**. Transcription,
-AI summaries and language quality remain disabled/unverified; no AI request occurs.
+reasons. New successful tasks say **Transcription completed** and provide detected language and a private full-transcript link. Legacy extraction-only jobs retain **Audio extraction completed**. Word accuracy remains unverified against manual transcription; summaries remain disabled and no external AI request occurs.
 
 Run the separate services from the project root in two PowerShell windows:
 
@@ -328,3 +327,9 @@ The local Exercise 1 README and relevant `docs` files were consulted read-only
 for documentation style and structure. They are not sources of Exercise 2
 requirements or technology decisions. See
 [Plane-Projection-of-3D-volume](https://github.com/itavs/Plane-Projection-of-3D-volume).
+
+## Local video transcription — Unit E
+
+New MP4 uploads now run extraction and real offline CUDA speech transcription in the separate worker. The uploader can open full text with detected Hebrew/English; direct access requires current Lecturer membership and expires seven days after transcription creation. Old extraction-only results remain unchanged. Word accuracy is not verified against a manual reference; summarization is still disabled. See [local-transcription.md](docs/local-transcription.md) for run commands, actual sample timings and manual checks.
+
+D-41 makes the verified local large-v3-turbo checkpoint the default for new video uploads; existing transcripts keep their original text/model provenance. Each task records the actual loaded model revision. Missing/mismatched turbo fails explicitly with no fallback. Hebrew transcription still needs accuracy review; improved readability is not proof of faithful meaning. Summary generation remains disabled. See [local-transcription.md](docs/local-transcription.md) and [testing.md](docs/testing.md) for measured results and current manual-review status.

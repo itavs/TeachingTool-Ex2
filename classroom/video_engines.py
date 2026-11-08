@@ -1,4 +1,4 @@
-"""Separate future contracts; no model, HTTP, credentials or runtime fake option."""
+"""Separate local transcription and disabled summarization contracts. No API calls."""
 from typing import Protocol
 
 
@@ -7,7 +7,7 @@ class EngineUnavailable(Exception):
 
 
 class Transcriber(Protocol):
-    def transcribe(self, audio_path: str) -> dict: ...
+    def transcribe(self, audio_path: str, *, deadline: float, on_event, on_tick) -> dict: ...
 
 
 class Summarizer(Protocol):
@@ -25,11 +25,12 @@ class DisabledSummarizer:
 
 
 def get_transcriber() -> Transcriber:
-    return DisabledTranscriber()
+    from .local_transcriber import LocalWhisperTranscriber
+    return LocalWhisperTranscriber()
 
 
 def get_summarizer() -> Summarizer:
     return DisabledSummarizer()
 
 
-FUTURE_TEXT_RETENTION_DAYS = 7  # No transcript/summary is produced or stored yet.
+FUTURE_TEXT_RETENTION_DAYS = 7  # Transcript retention is active; summaries stay disabled.

@@ -1,4 +1,13 @@
-# Verification Record — Units A, B, C and D
+# Verification Record — Units A, B, C, D and E
+
+## Unit E — Local Transcription — 2026-11-08
+
+- **106 website tests passed**, file-backed SQLite, 48.750 s, no skips; 32 focused video/transcription checks passed in 15.381 s. Tests inject ASR fixtures only; actual GPU evidence is separate below.
+- **10 JavaScript tests passed**, fake DOM, not a browser. New cases cover real-stage labels, audio deletion state, successful transcript link visibility and expiry hiding.
+- Tests cover normal transcription-before-WAV-cleanup, private escaped full text, mixed-language markup, no text in polling JSON, same-course other Lecturer/student/anonymous denial, revoked/demoted owner, mismatched parent URLs, exact seven-day expiry/HTTP 410 and content purge, cleanup, model failure, invalid output, missing runtime/no download, original shared deadline and legacy extraction-only behavior. Existing timeout/stop/watchdog tests cover shared worker recovery; no real GPU hard-kill test is claimed.
+- Two **new actual sample uploads**, real offline CUDA float16 medium inference: SHORT detected en, load 2.837 s, ASR 12.439 s, total 26.666 s; STATIC detected he, load 1.578 s, ASR 190.870 s, total 195.856 s. WAV/pending JSON absent after both. Both owner-authenticated detail/full-text responses returned HTTP 200 and included the complete escaped text. This used the upload service, real separate worker and in-process Django requests, not browser automation or a new browser-upload report.
+- The user reported difficulty preparing a reliable listening-only reference and approved continuing functional checks. **Word accuracy and English programming-term accuracy have not been verified against manual transcription.** No verified word examples or WER are claimed. Mixed-language visual layout still needs user/browser inspection.
+- Summary remains disabled. No API calls, model downloads, installations or billing occurred in this stage. The 13 pre-existing Gemini experiment changes remain separate/unchanged. See [local-transcription.md](local-transcription.md) for exact local versions, privacy/expiry, timing boundaries and manual steps.
 
 ## Unit D — Video Infrastructure — 2026-11-08
 
@@ -407,3 +416,52 @@ migration drift, dependency consistency and diff whitespace checks passed.
 Real AI generation remains disabled/unverified; no AI request was sent. General
 visual redesign is deferred. User manual observations and unverified keyboard,
 phone and other scenarios remain distinguished above.
+
+## Transcript readability correction — 2026-11-08
+
+User feedback on the existing STATIC task prompted a presentation-only correction. Stored words/order are unchanged. Paragraphs use saved segment boundaries, >=0.8-second gaps, roughly 25-second groups or a 360-character target (individual segments stay intact). The renderer falls back to exact stored text if segment reconstruction differs. A constrained reading width, mobile padding, explicit Hebrew RTL/English LTR and isolated Latin phrases keep mixed text such as New Car in its original order. The teacher-facing explanation is now one sentence in the English UI; GPU/loading/worker details remain in technical documentation.
+
+Executed: **15 focused transcription/display tests passed**, 3.711 s. Existing authorization/expiry/cleanup tests remained green. Actual saved tasks returned owner-authenticated HTTP 200: STATIC now has 13 reading paragraphs; SHORT has 4. HTML text extraction (with paragraph separators) matched every original word and punctuation in order; database text hashes remained unchanged. The existing STATIC New Car phrase is enclosed in a left-to-right bdi element inside RTL text. UTF-8 response decoding was strict and the document declares UTF-8. These are server-response/markup checks, not visual browser/phone verification; the previously denied browser gate was not bypassed.
+
+Encoding/content audit: the saved direct model segment text, the full database transcript and the HTML text all contain the same **four U+FFFD replacement characters** and **one dishwasher**. The segment 57.72–64.60 seconds starts with two replacement characters; others occur in 82.16–86.52 and 86.52–89.48. Dishwasher occurs in 77.56–82.16. The affected segment strings match the full stored text and response text exactly. The worker constructs full text by joining original model segments; JSON file IO uses explicit UTF-8 and strict decoding. No replacement-character decoding is performed by the application. Thus no application transport/render encoding fault was found, and no guessed replacement or word rewrite was applied.
+
+Evidence limitation: the original temporary model-result JSON from these jobs was intentionally deleted. This comparison uses the original model segment strings persisted losslessly in VideoJob, not an independent retained pre-database file. The earlier independent local-experiment raw STATIC result also contains U+FFFD, but it is a different run and contains no dishwasher; it is not evidence that the current sentence was identical across runs. Word/term accuracy (including dishwasher) remains pending comparison with the source audio. No new inference/API request was performed for this correction.
+
+## Focused STATIC quality probe — 2026-11-08
+
+Executed two genuine local CUDA medium transcriptions of the same 00:55–01:35 audio copy: automatic language (detected he), then fixed he, task transcribe unchanged. Roughly 34.7/34.5 s, one shared model load. Outputs differ slightly; both omit the prior dishwasher/U+FFFD artifacts on this cropped context but still contain suspicious words/unclear meaning. Human-reference accuracy/code terminology remain unverified; cropping prevents attributing improvements over the full-video run to the language argument. The existing task text was not replaced. No other local ASR model was found in inspected model/cache locations. A roughly 1.63-GB turbo download is proposed, not performed. Experiment findings and limits: [static-asr-quality.md](static-asr-quality.md). No application code changed in this probe; no website regression run is claimed for it.
+
+## Full STATIC turbo comparison — 2026-11-08
+
+Following explicit download approval, downloaded 1,621,665,983 bytes of public CTranslate2 checkpoint/config/tokenizer files from dropbox-dash/faster-whisper-large-v3-turbo, pinned revision 0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf. Actual full-recording CUDA float16 transcribe succeeded offline with automatic Hebrew detection, using the same ASR arguments as the existing full-medium job. Model load 1.822 s; transcription 54.893 s versus existing medium 190.870 s. Sampled maximum process RSS 1.301 GiB, total GPU-used memory 2,723 MiB; roughly one-second sampling is not an exact peak, GPU value includes other device users. No API/paid inference or application provider change.
+
+Raw full output/model manifest/audio are stored separately under ignored .ai-lab/results/static-turbo; existing website transcript/segments and active medium setting were asserted unchanged. The source-timestamp comparison for 00:55–01:35 is described in [static-turbo-quality.md](static-turbo-quality.md), with the 01:17.560–01:22.160 listening window identified. Turbo is more readable but still has an unclear negation around 00:58–01:02. Human-source accuracy, code-identifier fidelity and the belongs/does-not-belong distinction in that unclear region remain unverified. No WER/quality pass is claimed. The 13 outstanding Gemini files were unchanged. Website regression tests were not rerun because only isolated experiment code/documentation changed in this step.
+
+## Full SHORT-EXPLAIN turbo comparison — 2026-11-08
+
+Actual full-English turbo transcription completed locally on CUDA float16 using the existing verified model, no download/network request. Same arguments as full medium, automatic en detection. Turbo load 1.749 s / transcription 4.824 s versus saved medium 2.837 s / 12.439 s. Sampled maximum process RSS 1.385 GiB and total GPU-used memory 2,715 MiB (sampling and shared-device limitations apply). Both inheritance excerpts retain class/boat/vehicle/inheritance and coherent high-level meaning. Turbo's drop an anchor differs from medium's drop and anchor; this is not verified against human listening. Full outputs are very similar, with no reference-based accuracy/WER claim. Existing website transcript/segments/medium setting and Gemini files remained unchanged. Raw results are ignored local artifacts; comparison findings and reproducibility are in [short-turbo-quality.md](short-turbo-quality.md). No website regression suite was run for this isolated experiment.
+
+## Approved turbo default and normal STATIC upload — 2026-11-08
+
+Executed **113 website tests passed**, file-backed SQLite, 52.562 s, no skips. New checks reject missing/modified checkpoint files, reject another model/revision or unverified result, assert requested/actual identity persistence, exercise unavailable-turbo failure with no fallback/subprocess, and retain loaded identity on later inference failure. Existing privacy/expiry/cleanup/legacy/display tests remain green. The earlier focused set had 37 passed before the final two failure/provenance tests; the full 113-test run includes both additions.
+
+Actual new STATIC upload used the normal authenticated CSRF-enforced multipart POST view/form/upload middleware and real separate background worker, not the standalone experiment or a fake ASR. Upload returned 302 to a queued task. This was an in-process Django client request, not agent-operated browser automation. User manual browser acceptance is pending.
+
+- Course DEMO-CS101, meeting **Test Meeting** (meeting 5), owner lecturer_alpha.
+- Job **489f75a2-bca3-4c0a-a9fc-3cc602636ce5**.
+- Actual persisted model dropbox-dash/faster-whisper-large-v3-turbo, revision 0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf, sha256_verified=true, CUDA float16.
+- Model load **1.574 s**, transcription **54.555 s**, total worker processing **60.549 s**; automatic detected language he. Model-file hashing/decoder/startup/cleanup share the total budget, so total exceeds load + ASR.
+- Owner full-transcript page returned **HTTP 200**; parsed reading text matched all stored words/punctuation in order. Actual audio.wav and transcript.pending.json were absent and audio removal was recorded. The page uses the existing paragraph/RTL/Latin-isolation rendering.
+- All six pre-existing tasks retained identical transcript hashes, timed segments and asr_metadata. No retranscription or metadata backfill was applied to old jobs. Gemini-file hashes remained unchanged.
+
+Task page: /courses/1/meetings/5/videos/489f75a2-bca3-4c0a-a9fc-3cc602636ce5/ ; full text: append transcript/ . The loopback server and single worker were restarted with current settings; independent maintenance remains running. No new model downloads, API calls, payment, commit or push occurred in this switch stage. Hebrew readability is improved, but meaning/negation, word accuracy and exact technical identifiers remain unverified against a manual source reference (see static-turbo-quality.md); no quality acceptance or summary capability is claimed. The subsequent user-reported browser review is recorded below.
+
+## User-reported STATIC browser review and stage completion — 2026-11-08
+
+**Provenance: reported by the user, not an agent-executed browser test.** The user opened the full STATIC transcript on the website. The explanation of variables belonging to an object versus a shared static variable was understandable. Some words remained garbled, and part of a sentence containing a negation remained unclear even when listening to the recording. No word-by-word accuracy measurement was performed.
+
+This supports usability/understandability of that reviewed result, not verbatim fidelity, exact code-identifier accuracy, a quantified accuracy score or a phone/layout acceptance pass. The user approved completing the local transcription stage with large-v3-turbo as the new-upload default. Summary generation remains a separate, disabled stage. Existing transcripts remain unchanged.
+
+The reading page now uses the heading **Automatic transcript** and the warning **Some words and code terms may be transcribed incorrectly.** It retains the short speech-only explanation. Server template assertions cover the heading, warning and speech-only notice; raw transcript outputs remain local/ignored and are not published in the quality reports.
+
+Final pre-commit verification for this completed stage: **113 server tests passed** in 49.785 s using file-backed SQLite; **10 JavaScript tests passed** in the fake-DOM harness. Migration drift check reported no changes; dependency check reported no broken requirements. These checks include the final Automatic transcript heading and warning. Documentation links and the explicit publication file list were checked; raw transcript tables were removed from published quality reports while the original local artifacts remain unchanged.

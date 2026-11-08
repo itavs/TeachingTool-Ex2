@@ -6,7 +6,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 
 function harness(data){
-    const ids=['video-refresh','video-stage','video-wait','video-elapsed','video-failure','video-audio','video-source'];
+    const ids=['video-refresh','video-stage','video-wait','video-elapsed','video-failure','video-audio','video-source','video-asr-progress','video-language','video-transcript-expired','video-transcript-link'];
     const elements=new Map(ids.map(id=>[id,{textContent:''}]));
     elements.set('video-config',{dataset:{url:'/fake-video-state/'}});
     elements.set('video-initial',{textContent:JSON.stringify(data)});
@@ -45,4 +45,24 @@ test('failed task shows the actual failed stage as text without a success claim'
     assert.equal(h.elements.get('video-failure').textContent,'Failed stage: Checking video. <script>invalid MP4</script>');
     assert.equal(h.elements.get('video-audio').textContent,'');
     assert.match(h.elements.get('video-source').textContent,/removed/);
+});
+
+test('ASR keeps audio while processing and reveals the full-transcript link on success',async()=>{
+    const active=harness({status:'transcribing',stage_label:'Transcribing speech locally',processing_seconds:20,waiting_seconds:3,audio_seconds:56,transcribed_until:10,audio_removed:false,error:''});
+    await active.settle();
+    assert.match(active.elements.get('video-audio').textContent,/retained temporarily/);
+    assert.match(active.elements.get('video-asr-progress').textContent,/10.0/);
+    assert.equal(active.elements.get('video-transcript-link').hidden,true);
+    const ready=harness({status:'transcribed',stage_label:'Transcription completed',processing_seconds:30,waiting_seconds:3,audio_seconds:56,audio_removed:true,transcript_available:true,detected_language:'he',error:''});
+    await ready.settle();
+    assert.equal(ready.elements.get('video-transcript-link').hidden,false);
+    assert.match(ready.elements.get('video-language').textContent,/he/);
+    assert.equal(ready.timers.size,0);
+});
+
+test('expired transcript link is hidden even though processing completed',async()=>{
+    const h=harness({status:'transcribed',stage_label:'Transcription completed',processing_seconds:30,waiting_seconds:3,audio_seconds:56,audio_removed:true,transcript_available:false,transcript_expired:true,error:''});
+    await h.settle();
+    assert.equal(h.elements.get('video-transcript-link').hidden,true);
+    assert.match(h.elements.get('video-transcript-expired').textContent,/expired/);
 });

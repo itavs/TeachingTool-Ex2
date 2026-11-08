@@ -1,3 +1,9 @@
+# Video Processing Infrastructure
+
+## Current behavior — Unit E
+
+New uploads now continue from real extraction into local GPU transcription, then delete temporary audio and expose the private full transcript. Summarization remains disabled. See [local-transcription.md](local-transcription.md) for current behavior, configuration, seven-day content retention and acceptance evidence. Existing extraction-only jobs retain their original result. The commands below now process transcription for new uploads; the following Unit D record describes the historical extraction-only stage.
+
 # Unit D — Private MP4 Validation and Audio Extraction
 
 Status: implemented extraction infrastructure, not a completed video-summary
@@ -106,7 +112,7 @@ keep these commands running in **separate PowerShell windows**:
 
 Use Ctrl+C for a graceful stop. A second coordinator/maintenance instance refuses
 its OS lock. `--once` handles at most one queued video, or one maintenance pass,
-for diagnosis. These commands never call transcription/summarization engines.
+for diagnosis. For legacy extraction-only jobs these commands do not invoke transcription. New uploads now invoke the local transcription engine under Unit E; summarization remains disabled.
 No OS scheduler or firewall/network settings were changed.
 
 ## Actual sample results — 2026-11-08

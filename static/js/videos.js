@@ -4,16 +4,20 @@
     const notice=document.getElementById("video-refresh");
     let timer,controller,clock,data=JSON.parse(document.getElementById("video-initial").textContent),seenAt=Date.now(),stopped=false;
     const set=(id,value)=>{document.getElementById(id).textContent=value;};
-    const terminal=()=>["extracted","failed"].includes(data.status);
+    const terminal=()=>["extracted","transcribed","failed"].includes(data.status);
     function display(value){
         data=value;seenAt=Date.now();set("video-stage",data.stage_label);
         set("video-failure",data.error?`Failed stage: ${data.failed_stage}. ${data.error}`:"");
-        set("video-audio",data.audio_seconds?`Extracted audio: ${data.audio_seconds.toFixed(2)} seconds. Temporary audio has been deleted.`:"");
+        set("video-audio",data.audio_seconds?`Extracted audio: ${data.audio_seconds.toFixed(2)} seconds. ${data.audio_removed||data.status==='extracted'?"Temporary audio has been deleted.":"Audio is retained temporarily for transcription."}`:"");
+        set("video-asr-progress",data.transcribed_until?`Completed transcript segments through ${data.transcribed_until.toFixed(1)} seconds of audio.`:"");
+        set("video-language",data.detected_language?`Detected language: ${data.detected_language} (automatic detection).`:"");
+        set("video-transcript-expired",data.transcript_expired?"Transcript expired; its content is no longer available.":"");
+        document.getElementById("video-transcript-link").hidden=!data.transcript_available;
         set("video-source",data.source_removed?"Uploaded MP4 removed by cleanup.":"");tick();
     }
     function tick(){
         const age=(Date.now()-seenAt)/1000;
-        set("video-elapsed",(data.processing_seconds+(["validating","extracting"].includes(data.status)?age:0)).toFixed(1));
+        set("video-elapsed",(data.processing_seconds+(["validating","extracting","loading_asr","transcribing"].includes(data.status)?age:0)).toFixed(1));
         set("video-wait",(data.waiting_seconds+(data.status==="queued"?age:0)).toFixed(1));
     }
     async function refresh(){

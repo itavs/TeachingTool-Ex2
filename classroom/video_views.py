@@ -5,7 +5,9 @@ from .attendance import CourseAccessError
 from .models import VideoJob,Membership
 from .participation_views import scoped,context
 from .video_forms import VideoUploadForm
-from .video_jobs import save_upload,owned_job,payload,recover_jobs
+from .video_jobs import save_upload,owned_job,payload,recover_jobs,transcript_available,purge_expired_transcripts
+from django.utils import timezone
+from .transcript_display import reading_paragraphs
 
 
 @scoped(Membership.Role.LECTURER,('GET','POST'))
@@ -42,3 +44,20 @@ def video_detail(request,meeting,membership,job_id):
 def video_state(request,meeting,membership,job_id):
     job=owned_job(meeting.pk,job_id,request.user)
     return JsonResponse(payload(job))
+
+
+@scoped(Membership.Role.LECTURER)
+def video_transcript(request,meeting,membership,job_id):
+    job=owned_job(meeting.pk,job_id,request.user)
+    now=timezone.now()
+    if job.transcript_expires_at and (job.transcript_expires_at<=now or job.transcript_deleted_at):
+        purge_expired_transcripts(now)
+        return render(request,'classroom/participation_error.html',{**context(meeting,membership),
+            'error':'This transcript has expired. Its content is no longer available.'},status=410)
+    if not transcript_available(job,now):
+        return render(request,'classroom/participation_error.html',{**context(meeting,membership),
+            'error':'A completed transcript is not available for this task.'},status=409)
+    return render(request,'classroom/video_transcript.html',{**context(meeting,membership),'job':payload(job),
+        'paragraphs':reading_paragraphs(job.transcript,job.transcript_segments),
+        'text_direction':'rtl' if job.detected_language=='he' else 'ltr','language_label':{'he':'Hebrew','en':'English'}.get(job.detected_language,job.detected_language),
+        'expires':job.transcript_expires_at})

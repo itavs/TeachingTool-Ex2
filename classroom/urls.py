@@ -33,4 +33,5 @@ urlpatterns += [
     path(meeting_prefix + 'videos/',videos.video_list,name='video-list'),
     path(meeting_prefix + 'videos/<uuid:job_id>/',videos.video_detail,name='video-detail'),
     path(meeting_prefix + 'videos/<uuid:job_id>/state/',videos.video_state,name='video-state'),
+    path(meeting_prefix + 'videos/<uuid:job_id>/transcript/',videos.video_transcript,name='video-transcript'),
 ]

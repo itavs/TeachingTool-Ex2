@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Automatic transcript{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'video-detail' course.pk meeting.pk job.id %}">← Video task</a>
+<section class="panel transcript-panel">
+  <h1>Automatic transcript</h1>
+  <p>{{ job.filename }} · Detected language: {{ language_label }}</p>
+  <p class="muted">Available until {{ expires|date:'j F Y H:i' }} (Asia/Jerusalem).</p>
+  <p class="notice">Some words and code terms may be transcribed incorrectly.</p>
+  <p class="muted">The transcript is based on speech in the recording. Content shown only on screen is not included.</p>
+  <div class="transcript-body" lang="{{ job.detected_language }}" dir="{{ text_direction }}">
+    {% for paragraph in paragraphs %}<p>{% for run in paragraph %}{% if run.latin %}<bdi dir="ltr">{{ run.text }}</bdi>{% else %}{{ run.text }}{% endif %}{% endfor %}</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

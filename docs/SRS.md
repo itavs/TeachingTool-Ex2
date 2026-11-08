@@ -219,7 +219,7 @@ unconfirmed; the handout does not explicitly prescribe an audio-only approach.
 file from the computer. MP4 is the initial supported format. The result
 includes a summary paragraph and 3-5 key points, with an option to view the
 full transcript. Other input formats, link import, and transcript editing or
-export are not established by this decision. Unit D now implements MP4 validation/audio extraction; transcription, language support and full summary/transcript display remain future verification targets.
+export are not established by this decision. Unit D now implements MP4 validation/audio extraction; Unit E adds local Hebrew/English detection and full-transcript display; word accuracy and summaries remain future verification targets.
 
 D-34 approves initial limits of 240 seconds and 200,000,000 bytes, enforced server-side. D-35 limits worker processing to 600 seconds from claim, excluding queue wait. These limits follow the earlier D-16 measurement-first policy; demo duration remains separate and undecided. This does not establish full-lesson support or real AI quality. See video-processing.md and the decisions register.
 
@@ -569,7 +569,7 @@ drafts without a model. It does not satisfy the original automatic-generation
 requirement. AC-03 lifecycle checks have server evidence in testing.md; real-model
 creation/quality and browser/phone/classroom acceptance remain incomplete.
 
-## 12. Unit D — Video Infrastructure, Extraction Only
+## 12. Unit D — Initial Video Infrastructure (Historical Stage)
 
 D-34 through D-37 approve this stage, not a reduction of the full AS-04 target.
 Upload UI explains before submission that checking and audio extraction alone
@@ -598,3 +598,13 @@ stored now. Separate engine interfaces always return disabled implementations.
 Executed evidence is in testing.md, including real extraction of the two sample
 clips, both within limits. This is not a transcription, language-fidelity,
 summary-quality or full AC-04 pass. UI/phone and classroom acceptance remain open.
+
+## Unit E — Implemented Local Transcription
+
+D-38 through D-40 extend normal new MP4 uploads with real local speech transcription before temporary-audio deletion. The single worker's original 600-second budget covers validation, extraction, model loading and transcription; queue wait remains separate. Stages show loading/transcribing/completed or the actual failed stage. Success exposes detected Hebrew/English and an owner-only full-transcript link. Summary is still disabled, so full AS-04/AC-04 acceptance is not claimed.
+
+The uploader must remain a Lecturer in the course. Access expires exactly seven days after transcript creation, including direct URLs; maintenance clears text and segments. Previously extracted jobs remain extraction-only. Current 240-second/200,000,000-byte input and 24-hour source retention limits remain unchanged. See [local-transcription.md](local-transcription.md).
+
+Acceptance evidence distinguishes functional transcription from word accuracy: actual new uploads of both supplied clips produced nonempty transcripts and owner HTTP 200 full-text pages. Automated tests cover unauthorized/demoted users, escaped mixed-language display markup, exact expiry, cleanup, failure, shared deadline and legacy compatibility. Manual-reference word/English-term accuracy and real-browser/phone layout remain unverified. No translation or summarization is performed.
+
+D-41 subsequently selects the tested local large-v3-turbo revision as the default for new uploads. Validate the checkpoint files before loading, record requested identity separately from actual-loaded repo/revision/configuration, and retain actual metadata even when inference subsequently fails. Unavailable/mismatched turbo fails explicitly without model substitution, downloads or an API fallback. Existing transcripts/model provenance are preserved. Full STATIC/SHORT experimental timing and the unresolved Hebrew wording/negation accuracy limitation are in local-transcription.md and the linked experiment reports; functional success is not an accuracy acceptance pass. Summarization remains separate and disabled.
