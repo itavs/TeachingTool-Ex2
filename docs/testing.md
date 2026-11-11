@@ -502,3 +502,19 @@ STATIC evidence remains distinct: the saved-transcript v3 summary check succeede
 Language regression coverage explicitly accepts a Hebrew paragraph and points containing English code terms **static** and **Car**, with exact generated strings retained. The unexpected-script rejection check remains separate, so rejecting the Korean-script case does not require rejecting ordinary Hebrew/English technical mixtures.
 
 Final pre-commit verification after the user report and mixed-language regression addition: **127 server tests passed** in 53.362 s using file-backed SQLite, no skips; **12 JavaScript tests passed**. The new acceptance test covers a Hebrew summary paragraph and points with static and Car without rewriting, alongside rejection of unexpected script. Schema drift/system/dependency checks passed. Publication review covered only stage code/tests/documentation; Gemini files and ignored raw/media/model/database/secret artifacts were excluded.
+
+## Clarified comments timing (D-17) — 2026-11-11
+
+The user reported the resolved assignment interpretation: online means during class and offline means outside class. Both use normal connected website submission to an associated meeting. Local persistence, a send queue and disconnected synchronization are not required. This clarification applies to comments/suggestions only; attendance interpretation remains separate.
+
+Code inspection found no meeting-time, attendance-window or simultaneous-lecturer-login gate in the existing request submission/history paths. Runtime submission/storage/authorization logic was unchanged. The student-facing notice now reads: You can send comments and suggestions during or outside class.
+
+**Executed automated server checks: 25 participation tests passed in 31.285 s**, file-backed SQLite, no skips; system check reported no issues. The added regression exercises both comment and suggestion through the normal form/view/middleware path with CSRF enforcement:
+
+- Set the meeting date seven days before submission; no attendance window exists.
+- Submit each type using a fresh submission ID and a valid CSRF token. Verify the redirect and persisted meeting ID, student ID, kind, exact text and submission timestamp.
+- Log the student out, use a fresh authenticated client, and verify both requests in personal history. Verify neither appears under a different meeting.
+- Create a fresh Lecturer client with the clock advanced two days, and verify stored requests on the meeting page and lecturer feed. This is a mocked later timestamp, not a real two-day wait.
+- Use another student account in the same course: neither private request is present in its page, and the lecturer feed returns HTTP 403.
+
+This is automated request/database/rendering evidence, not a manual browser/phone or classroom-capacity test. Existing participation tests also cover identity/role revalidation, failed-save reporting, escaping, duplicate submission and input boundaries. README, SoW, SRS and the decision register now consistently record the resolved comments timing; the former unresolved-offline statements in older dated test records describe historical decisions and are superseded by this entry. No disconnected feature, database migration, AI request, commit or push was introduced.

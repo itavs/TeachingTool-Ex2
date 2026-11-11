@@ -38,8 +38,7 @@ not additional requirements stated by the lecturer. D-31 resolves Q-03: Hebrew/E
 Video decisions D-12 through D-16 define unverified language, audio-processing,
 input/output, terminology-test, and limit-setting targets. P-06 retains pending
 real-model quality questions; D-34 now fixes initial numeric input limits, while its input/output choices remain approved.
-D-18/D-19 now approve the connected comments scope while retaining D-17's
-separate creation/submission/storage and unresolved offline coverage.
+D-18/D-19 approve the comments scope. D-17 now clarifies online/offline as during/outside class through the same connected website flow, retaining separate creation/submission/storage.
 D-20 through D-22 approve the first-version homework scope. These are project
 choices, not additional requirements explicitly prescribed by the handout.
 
@@ -120,13 +119,9 @@ been confirmed by the lecturer as satisfying online/offline.
 Students shall be able to submit comments and suggestions in real time and
 in the mode described by the handout as offline.
 
-**User-approved preparation boundary (D-17):** keep the meaning of offline
-open for clarification with the lecturer or teaching assistant (Q-02).
-Coverage of the offline portion of AS-02 is pending; online use after class
-must not be presented as an approved way of meeting it.
+**Clarified interpretation (D-17, user report on 2026-11-11):** online means during class and offline means outside class. Both use normal website submission by an identified student to an associated meeting. A past meeting remains eligible, independently of attendance windows or whether the lecturer is currently signed in. No local storage, send queue or disconnected synchronization is required.
 
-Prepare separate design responsibilities so the later interpretation can be
-accommodated without conflating these actions:
+Keep creation, submission and storage separate:
 
 | Responsibility | Meaning in the design | What it does not establish |
 |----------------|-----------------------|----------------------------|
@@ -134,10 +129,7 @@ accommodated without conflating these actions:
 | Submit | Request delivery of the created content for acceptance by the system. | A submission attempt is not confirmed storage; no automatic send queue or later replay is approved. |
 | Store | Record accepted requests and provide history under D-18; retention/deletion parameters remain to be decided. | No local persistence or disconnected synchronization mechanism is selected or approved. |
 
-The D-17 separation approves no local storage, send queue, or synchronization
-without a network. No offline capability or successful test is claimed.
-Here, local offline persistence means client-side disconnected storage; it
-does not remove the approved application-side request-history requirement.
+D-17 requires no disconnected functionality. Outside-class requests use the same server-side persistence and private history as during-class requests; the lecturer can read them on a later login.
 
 **User-approved connected scope (D-18/D-19):** identified students create
 requests of type comment or suggestion associated with a meeting. Students
@@ -146,9 +138,7 @@ Requests are stored with history, and new requests appear to the lecturer
 without manual refresh. The first version excludes lecturer replies,
 discussion threads, attachments, votes, and notifications.
 
-Initial identity follows D-24. D-30 fixes trimmed request length at 1–1000 Unicode code points and lecturer refresh at 5 seconds while visible. No editing/deletion UI is included. Retention/deletion policy and classroom capacity remain open. Connected
-submission, stored history, or later online access cannot be claimed as
-coverage of offline. P-04 records the resolved connected scope and that gap.
+Initial identity follows D-24. D-30 fixes trimmed request length at 1–1000 Unicode code points and lecturer refresh at 5 seconds while visible. No editing/deletion UI is included. Retention/deletion policy and classroom capacity remain open. D-17 resolves both timing modes through connected submission and stored history. P-04 records this scope; comments timing is no longer an open part of Q-02.
 
 ### FR-04 - Automatic Poll Creation
 
@@ -278,7 +268,7 @@ UC-01 incorporates approved attendance direction D-05/D-06, and UC-03 follows
 approved polling decisions D-08 through D-11, with remaining details explicit.
 UC-04 incorporates video decisions D-12 through D-16 while retaining pending
 numeric limits and quality criteria. UC-02 follows D-18/D-19 while preserving
-the D-17 offline gap; UC-05 follows homework decisions D-20 through D-22.
+the resolved D-17 during/outside-class interpretation; UC-05 follows homework decisions D-20 through D-22.
 Each use case retains its unresolved parameters and distinguishes approved
 direction from implementation or completed checks.
 
@@ -317,15 +307,12 @@ direction from implementation or completed checks.
 - **Expected outcome:** A successfully stored request is available in the
   permitted history views. Students cannot see another student's requests.
   Lecturer replies, threads, attachments, votes, and notifications are excluded.
-  A stored request or successful connected flow does not establish offline
-  coverage; that part still awaits lecturer/teaching-assistant clarification.
+  Under D-17 this applies during or outside class, including a past meeting, with later lecturer access to stored requests.
 - **Failure/alternative:** An unsuccessful or uncertain submission/save must
   not be described as confirmed storage. Recovery behavior is undecided;
   no persistent local draft, automatic queue, disconnected synchronization,
-  or automatic replay is approved. After-class online activity is not an
-  approved offline acceptance case.
-- **Dependencies:** FR-03; D-17 through D-19; P-04 history and Q-02/Q-06/Q-07
-  for offline clarification, identity, capacity, and operational/data policy.
+  or automatic replay is required. Outside-class connected submission is an approved D-17 acceptance case.
+- **Dependencies:** FR-03; D-17 through D-19; P-04 history and Q-06/Q-07 for capacity and operational/data policy; D-17 resolves comments timing.
 
 ### UC-03 - Generate, Publish, and Answer a Poll
 
@@ -439,16 +426,14 @@ does not block any other project work.
 
 The table describes acceptance targets, not a blanket pass. Unit B server checks cover parts of AC-01/AC-02; executed evidence and browser/phone gaps are recorded separately in testing.md. AC-01 follows attendance
 D-05/D-06, AC-02 follows connected comments D-18/D-19 with the D-17 separation
-and offline gap, AC-03 follows polls D-08 through D-11, AC-04 follows video
+and clarified during/outside-class timing, AC-03 follows polls D-08 through D-11, AC-04 follows video
 D-12 through D-16, and AC-05 follows homework D-20 through D-22. Remaining
-parameters are explicit. No offline-specific comments acceptance case is
-approved, and no test below establishes lecturer confirmation of an unresolved
-interpretation or evidence of completed implementation.
+parameters are explicit. AC-02 includes outside-class connected submission under D-17. The table is not evidence of a completed test or confirmation of unrelated unresolved assignment interpretations.
 
 | Check | Source | Requirement / use case | Planned evidence and expected result | Open dependencies |
 |-------|--------|------------------------|--------------------------------------|-------------------|
 | AC-01 | AS-01, D-01, D-05, D-06 | FR-01, FR-02; UC-01 | Using D-24 and D-27 through D-29, use two identified students and a rotating temporary QR in an open meeting window. Check valid registrations and recorded times; reject an expired code, a wrong-meeting code, and normal registration after window closure. Verify the displayed QR changes and apply the agreed validity rule across rotation boundaries, without assuming an unapproved grace period. Repeated scans by the same student produce one record for that meeting; the second student's valid scan produces a separate record. Export XLSX, open it and compare it with the online list at export time. Add a later valid attendance record and confirm the earlier file remains a snapshot; editing a copy does not change online records. These checks do not establish physical presence or prevent real-time sharing of valid codes. | D-27 through D-29 fix identity continuation, timings, additional windows, fields and no manual correction. Q-01/Q-02 lecturer interpretation and Q-07 production safeguards remain open. D-07 is not a required network gate. |
-| AC-02 | AS-02, D-01, D-17 through D-19 | FR-03; UC-02 | Create identified comment and suggestion samples associated with a meeting, with at least two test students. Verify creation/submission/storage are distinct and failed or uncertain saves are not reported as stored. Check storage/history, student-own visibility without another student's requests, and the lecturer's all-meeting view with new requests appearing without manual refresh. Check the agreed retention policy once defined. Verify first-version scope excludes lecturer replies, threads, attachments, votes, and notifications. Do not add local persistence, queues, or disconnected synchronization; define an offline acceptance case only after lecturer/teaching-assistant clarification. An after-class online flow does not establish offline coverage. | D-30 fixes request length and visible-page refresh. Unit B server evidence is in testing.md; browser auto-refresh, phone/classroom capacity and retention remain unverified. Q-02 preserves the offline gap; Q-06/Q-07 retain capacity/data-policy questions. |
+| AC-02 | AS-02, D-01, D-17 through D-19 | FR-03; UC-02 | Submit identified comment and suggestion samples through normal website POST during and outside class, including a meeting dated in the past. Verify the selected meeting and submitting student are persisted, personal history survives a fresh login, and a lecturer signing in later sees the stored requests in that meeting. Another student must not see them through the meeting page or access the lecturer feed. Retain checks for failed-save reporting, boundaries, duplicate submission, escaping and live lecturer updates. No local persistence, queues or disconnected synchronization is required. | D-17 resolves timing. D-30 fixes request length and visible-page refresh. Executed server evidence is in testing.md; browser/phone/classroom capacity and retention remain separate questions under Q-06/Q-07. |
 | AC-03 | AS-03, D-01, D-08 through D-11 | FR-04; UC-03 | Exercise both lecturer-selected types using real generation from known pasted material. Inspect relevance, four options, and, for comprehension, one correct option plus a short explanation. Edit all applicable draft fields and verify publication uses the approved version; reject later content edits. Cast known votes from two identified students and verify live lecturer counts/percentages, one final response each, no vote changes, and no second active poll in that meeting. Before closure, verify student-facing content exposes neither aggregates nor the comprehension answer/explanation. Close manually; reject later votes and show student aggregates without identities, plus the correct answer/explanation only for comprehension. Confirm opinion polls never designate or evaluate correctness and neither type assigns grades. Create a further poll after closure. Exercise generation failure and retry without a prepared-content substitution. Verify the basic flow has no file upload, open-ended response, or automatic scheduling. | D-31 resolves poll language/input length. Lifecycle evidence uses test fixtures and explicitly labeled demo data under D-32/D-33, not real generation. Q-06/Q-07 retain capacity and integrated-AI/data questions. Approved workflow is not conditional on P-05 approval. |
 | AC-04 | AS-04, D-01, D-12 through D-16 | FR-05; UC-04 | Manually upload permitted MP4 files for three planned cases: Hebrew speech, English speech, and a Hebrew lecture with English technical terms. Using agreed quality criteria, verify genuine audio extraction/transcription/model summarization, inspect known spoken facts and the intended meaning of technical terms, and confirm output is in the spoken language without translation (Hebrew for the terminology case). Verify a summary paragraph, 3-5 key points, and an option that exposes the full transcript rather than a partial excerpt. Compare the transcript and summary with the actual speech. Check each result clearly states that unspoken visual content is excluded. Check the candidate failed/unsupported-input path without false success after its details are agreed. Measure time and cost for samples of different durations/file sizes before proposing maximum duration and file size; choose demo duration separately. After numeric limits are agreed and implemented, add boundary checks at and above each limit without inventing thresholds now. | D-34 through D-37 cover initial limits and extraction infrastructure; Q-04 retains demo duration, real-model quality and lecturer interpretation; Q-07/Q-09 for resources and demo expectations. All three language cases are planned, not passed; sustained language switching is outside the commitment. Extraction-only measurements/limits are recorded separately; no end-to-end AI quality pass is assumed. |
 | AC-05 | AS-05, D-01, D-20 through D-22 | FR-06, FR-07; UC-05 | Use sample theoretical assignments and Hebrew/English pasted submissions with known differences in coverage, strengths, gaps, and approaches. Supply lecturer instructions/criteria and verify real LLM processing produces relevant strengths, gaps, and actionable recommendations. Compare actual other works for the same assignment; verify cross-assignment inputs are not used as peers. Check student-own review requests and feedback/comparison without peer identities/full works; check the lecturer can request any submission and view all assignment submissions/feedback. With no peers, permit personal feedback but explicitly state that no comparison occurred. Verify no grades, plagiarism determinations, or code execution. Sample count is not a system cap; do not require identical model wording. | Q-05/Q-07/Q-09 for eligible-peer selection/revisions, review output language, quality, numeric limits, data/resources, and demo timing. Hebrew/English support, review quality, access, and comparison remain unverified targets. |
@@ -465,12 +450,7 @@ actual tool experiments (AS-11), or recorded test and demo outcomes (AS-14).
 The register remains authoritative for open items. In particular, resolve:
 
 1. Lecturer acceptance of automatically (Q-01); D-24 and D-27/D-28 now resolve initial identity, timings, code transitions and additional-window registration.
-2. Lecturer acceptance of the attendance online/offline interpretation, separately from comments offline meaning
-   (Q-02). Attendance list/XLSX snapshot behavior is approved (D-06). Comments
-   offline coverage awaits lecturer/teaching-assistant clarification under
-   D-17; after-class online use is not an approved substitute. Creation,
-   submission, and storage remain separate. Connected comments scope is now
-   approved by D-18/D-19 with D-30 length/update defaults. Capacity and data-lifecycle details remain Q-06/Q-07.
+2. Lecturer acceptance of the attendance online/offline interpretation (Q-02) remains open; D-06 approves the list/XLSX snapshot. Comments timing is separately resolved by D-17: online means during class and offline outside class, using the same website submission/history flow. Creation, submission and storage remain separate. D-18/D-19/D-30 scope and defaults are unchanged; capacity/data lifecycle remain Q-06/Q-07.
 3. Real poll-generation provider/data permissions and successful integration/quality evidence remain open. Q-03 is resolved by D-31; D-32/D-33 distinguish disabled generation, test-only fake providers and local labeled demo drafts. D-08 through D-11 lifecycle/visibility rules are unchanged.
 4. Separate video demo duration, real-model quality,
    and lecturer interpretation (Q-04). Manual MP4 upload, a summary paragraph
@@ -516,7 +496,7 @@ Automated server evidence is in [testing.md](testing.md). Responsive CSS is
 implemented but browser/phone rendering was not verified because browser
 permission for localhost was declined. These foundation tests are separate
 from the future AC-01 through AC-07 checks and do not establish classroom load
-or coverage of offline comments. The current English UI is a reversible
+or comments timing behavior (which has separate D-17 regression coverage). The current English UI is a reversible
 implementation choice, not an approved final language restriction.
 
 ## 10. Unit B Implementation and Verification Boundary
@@ -539,7 +519,7 @@ server privacy and role revalidation, escaped text and failed-save reporting.
 
 Executed server/JavaScript logic results are recorded in testing.md; they do
 not prove native camera scanning, visual layout, browser polling behavior,
-classroom capacity, physical presence or offline coverage. The manual phone
+classroom capacity or physical presence; clarified comments timing has separate server regression coverage. The manual phone
 plan is in phone-testing.md and has not been executed.
 
 ## 11. Unit C — Implemented Poll Lifecycle, Unverified Generation

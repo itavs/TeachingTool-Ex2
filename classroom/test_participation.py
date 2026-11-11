@@ -253,6 +253,44 @@ class ParticipationTests(ParticipationFixture, TestCase):
         self.post_request("Changed", nonce=nonce)
         self.assertEqual(MeetingRequest.objects.filter(submission_id=nonce).get().text, "Original")
 
+    def test_outside_class_requests_for_past_meeting_persist_for_later_lecturer(self):
+        submitted_at=self.now
+        self.meeting.starts_at=submitted_at-timedelta(days=7)
+        self.meeting.save(update_fields=['starts_at'])
+        self.assertFalse(self.meeting.attendance_windows.exists())
+        url=self.url('meeting-requests')
+        student=Client(enforce_csrf_checks=True)
+        student.force_login(self.student)
+        form=student.get(url)
+        self.assertContains(form,'You can send comments and suggestions during or outside class.')
+        texts={'comment':'After-class comment for this past meeting',
+               'suggestion':'After-class suggestion for this past meeting'}
+        for kind,text in texts.items():
+            with self.subTest(kind=kind),patch('classroom.participation_views.timezone.now',return_value=submitted_at):
+                nonce=uuid.uuid4()
+                response=student.post(url,{'kind':kind,'text':text,'submission_id':nonce,
+                    'csrfmiddlewaretoken':student.cookies['csrftoken'].value})
+                self.assertRedirects(response,url)
+                stored=MeetingRequest.objects.get(submission_id=nonce)
+                self.assertEqual((stored.meeting_id,stored.student_id,stored.text,stored.kind,stored.created_at),
+                                 (self.meeting.pk,self.student.pk,text,kind,submitted_at))
+        student.logout()
+        history=Client();history.force_login(self.student)
+        for text in texts.values():self.assertContains(history.get(url),text)
+        another=Meeting.objects.create(course=self.course,title='Another meeting',starts_at=submitted_at)
+        for text in texts.values():self.assertNotContains(history.get(self.url('meeting-requests',meeting=another)),text)
+        later=submitted_at+timedelta(days=2)
+        with patch('classroom.participation_views.timezone.now',return_value=later):
+            lecturer=Client();lecturer.force_login(self.teacher)
+            page=lecturer.get(url)
+            for text in texts.values():self.assertContains(page,text)
+            rows=lecturer.get(self.url('requests-feed')).json()['rows']
+            self.assertEqual({row['text'] for row in rows},set(texts.values()))
+        other=Client();other.force_login(self.other)
+        for text in texts.values():self.assertNotContains(other.get(url),text)
+        self.assertEqual(other.get(self.url('requests-feed')).status_code,403)
+        self.assertEqual(MeetingRequest.objects.filter(meeting=self.meeting,student=self.student).count(),2)
+
     def test_requests_history_is_private_feed_is_lecturer_only(self):
         self.client.force_login(self.student)
         self.post_request("Student private")

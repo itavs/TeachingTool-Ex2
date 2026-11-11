@@ -31,8 +31,8 @@ Detailed behavior and proposed acceptance checks belong in the
 | D-07 | University-network-origin checking is conditional on feasibility and a later decision; it is not an approved implementation requirement or a completed experiment. |
 | D-08 through D-11 | Approved polling design: lecturer-selected comprehension or opinion, real model generation from pasted text, four options, lecturer review/editing before publication only, final student responses, manual closure, role-specific results, and defined exclusions/error handling. D-31 resolves language and input length; real generation remains disabled/unverified under D-32. |
 | D-12 through D-16 | Target Hebrew and English video recordings, including Hebrew with English technical terms, through manual computer-file upload with initial MP4 support. Use audio extraction/transcription/model summarization, same-language output without translation, and an explicit unspoken-visual-content notice. Return a summary paragraph, 3-5 key points, and full-transcript viewing. Sustained language switching is outside the commitment. Set maximum duration/file size after time/cost measurements; demo duration is separate. Unit D implements validation/audio extraction; local transcription is implemented under Unit E; word accuracy and summary quality remain unverified. |
-| D-17 | Separate comments creation, submission, and storage; offline meaning/coverage awaits lecturer/teaching-assistant clarification. No local persistence, send queue, or disconnected synchronization is approved. Later D-18 through D-22 approve the connected comments and homework scope without closing the offline gap. |
-| D-18/D-19 | Identified meeting comments/suggestions, storage/history, student-own and lecturer-meeting views, and live lecturer updates. No lecturer replies, threads, attachments, votes, or notifications. D-17 remains in force; offline is not covered. |
+| D-17 | Clarified by the user on 2026-11-11: online means during class; offline means outside class. Both use normal website submission to a meeting, including a past meeting. Creation, submission and storage remain distinct; no local persistence, send queue or disconnected synchronization is required. |
+| D-18/D-19 | Identified meeting comments/suggestions, storage/history, student-own and lecturer-meeting views, and live lecturer updates. No lecturer replies, threads, attachments, votes, or notifications. D-17 resolves during/outside-class use through the same connected workflow. |
 | D-20 through D-22 | Theoretical Hebrew/English pasted homework, lecturer criteria, real LLM review and same-assignment comparison, student-own feedback without peer identities/full works, lecturer access to all assignment submissions/feedback, and explicit no-peer comparison notice. No grades, plagiarism determinations, or code execution. Demo uses sample works only; sample count is not a system limit. |
 
 The reviewed handout does not specify a programming language. No conflict with
@@ -44,7 +44,7 @@ management. AI provider and production hosting remain open.
 ## 3. Planned Capability Coverage
 
 The baseline covers approved first-version directions for all five capabilities:
-attendance D-05/D-06, connected comments D-18/D-19 with D-17's offline gap,
+attendance D-05/D-06, comments D-18/D-19 with the resolved D-17 timing interpretation,
 polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
 D-22. Open parameters and lecturer interpretations remain explicit. Approval
 is not implementation evidence or lecturer confirmation. Changing or dropping
@@ -53,7 +53,7 @@ a capability requires a user decision.
 | Capability and source | Required planning outcome | Approved direction or open proposal | Remaining boundaries |
 |-----------------------|---------------------------|--------------------------|--------------------------------------|
 | Attendance (AS-01) | Automatic attendance and lecturer access to an online/offline spreadsheet of student details. | Approved D-05/D-06: lecturer opens a meeting and a registration window; identified student scans a temporary QR displayed in class and rotated during the window. Validate code validity and meeting association, record attendance and time, prevent duplicates per student and meeting, and provide an online list and XLSX snapshot without synchronization back. | Identity follows D-24; code/window rules and additional-window registration follow D-27/D-28; fields/no manual corrections follow D-29. Lecturer interpretation remains Q-01/Q-02. Physical presence is not proven conclusively and real-time sharing of a valid code is not prevented. Lecturer acceptance of automatically and online/offline is unverified. |
-| Comments and suggestions (AS-02) | Student comments and suggestions in real time / offline. | D-18/D-19 approve identified meeting requests of type comment/suggestion, storage/history, student-own visibility, lecturer access to all meeting requests, and new requests appearing without manual refresh. Exclude lecturer replies, threads, attachments, votes, and notifications. | D-17 preserves separate creation/submission/storage and pending offline clarification (Q-02). After-class online use is not an approved offline substitute; no local persistence, send queue, or disconnected synchronization is approved. Identity follows D-24; retention periods and operational details remain open. |
+| Comments and suggestions (AS-02) | Student comments and suggestions in real time / offline. | D-17 clarifies online as during class and offline as outside class, both through normal connected website submission to an associated meeting, including a past meeting. D-18/D-19 retain identified comment/suggestion requests, stored history, student-own visibility, lecturer access and live lecturer updates. | No local persistence, send queue or disconnected synchronization is required. Lecturer replies, threads, attachments, votes and notifications remain excluded. Identity follows D-24; retention and classroom capacity remain open. |
 | Automatic polls (AS-03) | Lecturers can create simple polls automatically about current learning material. | Approved D-08 through D-11: lecturer selects comprehension or opinion before real model generation from pasted text. Both types have one question and four single-choice options; comprehension adds one correct answer and short explanation, while opinion has no correct answer or correctness evaluation. All generated content can be reviewed/edited before publication only. Each identified student submits one final response; one active poll per meeting, with further creation after manual closure. Lecturer sees live counts/percentages; students see aggregates without identities only after closure, plus comprehension answer/explanation then. | D-31 fixes lecturer-selected Hebrew/English output and 6,000 material characters; shared identity/capacity/AI constraints remain Q-06/Q-07. These detailed rules are project choices, not explicit handout requirements. No grades, file uploads, open-ended questions, or automatic scheduling. Generation failure provides an error and retry without prepared-content substitution. |
 | Class-video summary (AS-04) | The lecturer receives an ML-generated summary derived from a class video. | Approved D-12 through D-16: manually upload an MP4 from the computer; extract audio, transcribe speech, and summarize through a model in the recording's spoken language without translation. Target Hebrew, English, and Hebrew with English technical terms. Display a summary paragraph, 3-5 key points, an option to view the full transcript, and a notice that unspoken visual information is excluded. | Targets are unverified. Sustained language switching is outside the commitment. D-34 fixes initial system limits at 4 minutes/200 MB. Separate demo duration, model quality and lecturer interpretation remain open (P-06/Q-04). Unit D validates/extracts audio; Unit E adds full-transcript viewing, with word accuracy unverified and summaries disabled. |
 | Homework review and comparison (AS-05) | Students and teachers receive deep LLM reviews, including comparison with other students' work. | D-20 through D-22 approve theoretical Hebrew/English pasted submissions, lecturer instructions/criteria, strengths/gaps/actionable recommendations, and actual same-assignment peer comparison of topic coverage and solution approaches. Student requests/views own feedback/comparison without peer identities/full works; lecturer may review any submission and sees all submissions/feedback. No-peer feedback explicitly says no comparison occurred. | No grades, plagiarism determinations, or code execution. Demo uses sample works only; sample count is not a system cap. Peer selection/revisions, output language, numeric workload/input limits, quality, and data/resource details remain Q-05/Q-07. No capability has been verified. |
@@ -68,12 +68,7 @@ Moodle, Zoom, and university personal-information-system integrations are not
 required by the handout (AS-08). Their absence does not remove the requirement
 to process a video or perform any other capability.
 
-For comments, keep creation, submission, and storage distinct in the design
-without selecting an offline mechanism (D-17). Creation alone is not delivery,
-and a submission attempt is not confirmed storage. Coverage of the offline
-portion of AS-02 is pending clarification; after-class online access does not
-establish it. D-18/D-19 approve the connected comments scope; remaining
-operational parameters are not permission to add an offline mechanism.
+For comments, keep creation, submission and storage distinct (D-17). Creation alone is not delivery, and a submission attempt is not confirmed storage. The user has resolved online/offline as during/outside class; both use the connected website and keep the request associated with the selected meeting. Past meetings remain eligible. No disconnected mechanism is needed.
 
 Homework demo works are samples only (D-22). Their number does not define a
 submission limit or restrict the system to one assignment. The approved
@@ -170,7 +165,7 @@ than silently reducing the deliverables.
 
 | Dependency or risk | Required handling |
 |--------------------|-------------------|
-| Remaining scope parameters and lecturer interpretations | Approved targets cover all five capabilities. Preserve D-17's offline comments gap; Q-01 through Q-07 track unresolved identity, operating parameters, capacity, resources, quality, and lecturer interpretation. Do not reopen approved comments/homework behavior or silently invent numeric caps. |
+| Remaining scope parameters and lecturer interpretations | Approved targets cover all five capabilities. D-17 resolves comments timing; Q-01 through Q-07 track unresolved identity, operating parameters, capacity, resources, quality, and lecturer interpretation. Do not reopen approved comments/homework behavior or silently invent numeric caps. |
 | Conditional university-network option | Investigate the proposed P-10 study and Q-10 before any separate adoption decision. Do not treat university-origin traffic as proof of identity or physical classroom presence (D-07). |
 | Actual class conditions and smartphone access | Confirm devices, user count, connectivity, and access location; do not equate a small local demo with classroom readiness (Q-06). |
 | Identity, authorization, and student-data exposure | Enforce approved visibility from D-10/D-18/D-21. Initial identity/access is D-24; production safeguards, permitted integrated AI inputs, consent, retention/deletion and budget remain Q-07. Homework demo inputs are sample works only under D-22. |
@@ -181,17 +176,14 @@ than silently reducing the deliverables.
 Section 9 of the [register](decisions-and-assumptions.md) distinguishes decisions
 needed before fixing affected technical choices from details that can be
 refined later. Shared identity, teaching context/capacity, data/AI/budget
-boundaries, and peer-selection/revision policy affect architecture. Offline
-clarification gates its own comments path and full AS-02 coverage; it does not
-block unrelated conceptual planning. Numeric video limits remain measurement-
+boundaries, and peer-selection/revision policy affect architecture. D-17 resolves the comments timing interpretation without requiring disconnected functionality. Numeric video limits remain measurement-
 dependent, and the university-network study remains deferred.
 
 ## 8. Demo and Assignment Acceptance
 
 Future acceptance requires genuine operation of the approved first-version
 workflows across all five capabilities, with evidence of actual classroom and
-smartphone suitability. The connected comments workflow alone cannot establish
-full AS-02 acceptance: offline coverage still awaits clarification. Detailed
+smartphone suitability. The clarified D-17 timing scenarios must be verified through the normal comments workflow; this does not establish phone or classroom-capacity acceptance. Detailed
 checks are drafted in SRS.md, with unresolved parameters explicit; they are
 not completed tests or final acceptance thresholds.
 
@@ -208,7 +200,7 @@ course/meeting views, lecturer meeting creation/editing and isolated demo data
 (D-23 through D-26). Its server checks are recorded in [testing](testing.md)
 and its component/class design in [architecture](architecture.md).
 Unit B implements attendance/XLSX and connected comments (D-27 through D-30). Unit C adds the poll lifecycle and labeled local demo drafts (D-31 through D-33); real AI generation remains disabled and unverified, and Unit D implements private upload/validation/audio extraction (D-34 through D-37); local transcription is implemented under Unit E; summaries and homework AI remain planned. Server verification is recorded in testing.md; actual browser/phone acceptance remains pending.
-The five-capability target and the D-17 offline gap are unchanged.
+The five-capability target is unchanged; D-17 now resolves the comments timing interpretation.
 
 Separate local AI experiments and a partial Gemini connectivity trial are
 recorded in the feasibility reports. They do not establish reliable AI quality
