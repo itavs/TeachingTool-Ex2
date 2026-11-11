@@ -1,8 +1,19 @@
 # Video Processing Infrastructure
 
-## Current behavior — Unit E
+## Current behavior
 
-New uploads now continue from real extraction into local GPU transcription, then delete temporary audio and expose the private full transcript. Summarization remains disabled. See [local-transcription.md](local-transcription.md) for current behavior, configuration, seven-day content retention and acceptance evidence. Existing extraction-only jobs retain their original result. The commands below now process transcription for new uploads; the following Unit D record describes the historical extraction-only stage.
+New uploads validate/extract audio, transcribe through local turbo, remove WAV,
+persist the transcript and then run local Qwen3 summarization. Summary failure
+retains the saved transcript until expiry. See the [current video sequence](architecture.md#video-sequence),
+[transcription](local-transcription.md) and [summaries](local-summaries.md) for the
+implemented pipeline, permissions, shared deadline and text retention. Existing
+extraction/transcription-only jobs retain their original result. Commands below
+now run the current pipeline for new uploads.
+
+The following Unit D record is **historical extraction-only evidence**. Its
+extraction-only states and disabled-engine statements are not today's factories.
+The three lecturer interpretation questions have been sent by the user and are
+awaiting replies; see the [register](decisions-and-assumptions.md#lecturer-clarification-requests---sent-awaiting-reply).
 
 # Unit D — Private MP4 Validation and Audio Extraction
 
@@ -48,8 +59,8 @@ sequenceDiagram
     participant P as Isolated media process
     L->>D: CSRF multipart MP4 upload
     D->>DB: Persist owner/meeting and Queued state
-    D-->>L: Redirect to task page; other site pages remain usable
-    W->>DB: Claim oldest queued job; persist start and heartbeat
+    D-->>L: Redirect to task page, other site pages remain usable
+    W->>DB: Claim oldest queued job, persist start and heartbeat
     W->>P: Check MP4 and decode/extract under remaining deadline
     P-->>W: Actual stage and verified audio measurements
     W->>W: Remove temporary audio

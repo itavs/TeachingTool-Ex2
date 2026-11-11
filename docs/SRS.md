@@ -4,14 +4,29 @@
 
 ## 1. Purpose and Status
 
+The user has sent the lecturer three interpretation questions: rotating-QR
+attendance, online attendance list with XLSX snapshot, and speech-only video
+summary. All three await replies; implemented behavior is not lecturer acceptance.
+D-17 comments during/outside class is already resolved. See the
+[clarification register](decisions-and-assumptions.md#lecturer-clarification-requests---sent-awaiting-reply).
+
 This document defines the intended behavior of a web-based classroom teaching
 tool for Exercise 2. It supports scope decisions, later design, implementation,
 and verification. It is a draft, not a fully approved requirements baseline.
 
-The user approved planning for all five capabilities to operate genuinely in
-the demo. This coverage target has not been confirmed with the lecturer as the
-required implementation coverage. Units A/B implement the shared foundation, attendance/XLSX and connected comments with server checks. Full AC-01 through AC-07 acceptance is not established: browser/phone and classroom evidence remains outstanding, and AI website flows remain planned. See testing.md. Experimental AI results are not website
-acceptance results.
+The website implements Django/Templates authentication and course-membership roles,
+meeting management, attendance/QR/XLSX, connected comments during or outside class,
+and the complete poll lifecycle. Local Qwen3 8B generates **English** editable poll
+drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
+generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
+pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
+A failed summary retains an available saved transcript; legacy completed jobs are
+unchanged. Homework review/comparison remains **feasibility experiments only**, not
+a website feature. Functional operation does not establish reliable AI accuracy,
+phone usability, classroom capacity or a completed in-class demonstration.
+
+The five-capability target is user-approved, not lecturer-confirmed. Full AC-01
+through AC-07 acceptance is not established; see [test evidence](testing.md).
 
 See the [project overview](../README.md), [draft SoW](SoW.md), and
 [decisions and assumptions register](decisions-and-assumptions.md).
@@ -31,7 +46,7 @@ goals. Detailed candidate behavior marked **Open proposal** is conditional:
 it does not become approved merely because it appears beside a requirement.
 The same distinction applies to use cases and future acceptance criteria.
 Attendance direction D-05 and D-06 is user-approved; its remaining details
-and lecturer interpretation are unresolved. Approval is not evidence of
+follow D-24/D-27 through D-29; lecturer interpretation remains pending. Approval is not evidence of
 implementation. The university-network option in D-07 remains conditional.
 Polling decisions D-08 through D-11 are also user-approved project choices,
 not additional requirements stated by the lecturer. D-31 resolves Q-03: Hebrew/English with lecturer-selected output language and a 6,000-character material ceiling.
@@ -46,7 +61,7 @@ The handout does not prescribe a programming language. Python for the server
 and AI processing is approved by the user (D-02); no conflicting language rule
 was found in the handout. This is not separate lecturer confirmation.
 D-23/D-26 select Django/Templates and SQLite for initial development.
-AI provider, hosting and classroom readiness remain open. English project documents and Hebrew user-facing project
+Local turbo/Qwen adapters serve video and English polls; homework engine selection, hosting and classroom readiness remain open. English project documents and Hebrew user-facing project
 discussion follow D-03. Video-summary language targets follow D-12: Hebrew
 and English, with output in the recording's spoken language and no translation.
 Hebrew lectures with English technical terms are included in planned checks;
@@ -59,15 +74,15 @@ claiming tested support. Application-interface language and homework review outp
 | Actor | Intended responsibilities | Unresolved boundary |
 |-------|---------------------------|---------------------|
 | Student | Participate in attendance, send meeting comments/suggestions, respond to polls, and request/view review of their own homework. | Visibility follows D-10/D-18/D-21; initial identity/access follows D-24; feature-specific checks, resources and operational parameters remain open. |
-| Lecturer | Obtain attendance, view all meeting requests, create polls, request video summaries, and request review of any assignment submission while viewing all submissions/feedback. | Course/membership data is prepared under D-25; Unit A enforces course access, while detailed review operations remain open; approved visibility/request rights are not reopened. |
+| Lecturer | Obtain attendance, view all meeting requests, create polls, request video summaries, and request review of any assignment submission while viewing all submissions/feedback. | Course/membership data is prepared under D-25; current website features enforce course access; homework review operations remain open; approved visibility/request rights are not reopened. |
 
 AI processing supports application behavior; it is not an additional user role.
 No integration with Moodle, Zoom, or the university personal-information
 system is required by the handout (AS-08). This does not establish how source
 recordings or other learning materials will enter the application.
 
-One course, one lecturer, and one active meeting are proposed constraints
-(P-01), not approved system limits. Actual class capacity and deployment
+P-01 is historical simplification advice, not a system limit: the implemented
+foundation supports multiple courses, memberships and meetings. Actual class capacity and deployment
 conditions remain unresolved (Q-06).
 
 ## 4. Functional Requirements
@@ -180,7 +195,13 @@ For both types:
 - Generation failure produces an error and a retry option; prepared content
   must not be presented as generated from the supplied material.
 
-D-31 approves Hebrew/English with lecturer-selected output language and a 6,000-Unicode-character material limit, enforced in forms and the service. Unit C implements draft editing, publication, final voting, manual closing and role-specific results. The normal AI adapter is disabled (D-32); only tests inject a fake provider. D-33 permits a separate local CLI command to create clearly labeled demo drafts, not generated by AI. Django is selected; a real AI provider and generation quality remain unverified. See testing.md for actual lifecycle evidence; full AS-03/AC-03 acceptance is not established.
+D-31 sets the approved Hebrew/English output target and 6,000-character material
+limit. Current generation uses local Qwen3 8B in English only (D-44/D-45), with
+validated editable drafts and separate Lecturer publication. Hebrew lifecycle
+support remains, but automatic Hebrew generation is unavailable. D-32 is the
+historical disabled-provider stage; test fakes and D-33 labeled demo data are
+separate paths. Real English samples do not establish broad semantic quality or
+full AS-03/AC-03 acceptance; see local-poll-generation.md and testing.md.
 
 ### FR-05 - Class Video Summary
 
@@ -190,8 +211,8 @@ The lecturer shall be able to obtain an ML-generated summary of a class video.
 
 **User-approved design direction:** D-12 targets Hebrew and English recordings,
 with the summary in the spoken language of the recording and no translation
-in the first version. Support for both languages must be implemented and
-verified; it has not been demonstrated. Under D-15, planned verification also
+in the first version. Both languages have been exercised locally; reliable accuracy in both has not
+been established, and the uploaded STATIC summary failed language validation. Under D-15, planned verification also
 includes a Hebrew lecture with English technical terms; its summary remains
 in Hebrew without a translation stage. Sustained switching between languages
 is outside the current commitment. No automatic rejection/detection policy
@@ -209,7 +230,7 @@ unconfirmed; the handout does not explicitly prescribe an audio-only approach.
 file from the computer. MP4 is the initial supported format. The result
 includes a summary paragraph and 3-5 key points, with an option to view the
 full transcript. Other input formats, link import, and transcript editing or
-export are not established by this decision. Unit D now implements MP4 validation/audio extraction; Unit E adds local Hebrew/English detection and full-transcript display; word accuracy and summaries remain future verification targets.
+export are not established by this decision. Unit D now implements MP4 validation/audio extraction; Unit E adds local Hebrew/English detection and full-transcript display; local summaries are implemented under D-42/D-43, with source accuracy and broad quality still unaccepted.
 
 D-34 approves initial limits of 240 seconds and 200,000,000 bytes, enforced server-side. D-35 limits worker processing to 600 seconds from claim, excluding queue wait. These limits follow the earlier D-16 measurement-first policy; demo duration remains separate and undecided. This does not establish full-lesson support or real AI quality. See video-processing.md and the decisions register.
 
@@ -303,7 +324,8 @@ direction from implementation or completed checks.
 - **Approved steps:** Create the typed request, submit it, and store accepted
   content as distinct responsibilities. The student sees their own requests
   and history; the lecturer sees all meeting requests, with new ones appearing
-  without manual refresh. Storage/retention technology is not selected.
+  without manual refresh. Accepted requests persist in SQLite through MeetingRequest;
+  the comments retention/deletion duration remains open.
 - **Expected outcome:** A successfully stored request is available in the
   permitted history views. Students cannot see another student's requests.
   Lecturer replies, threads, attachments, votes, and notifications are excluded.
@@ -316,58 +338,70 @@ direction from implementation or completed checks.
 
 ### UC-03 - Generate, Publish, and Answer a Poll
 
-- **Actors:** Lecturer and students.
-- **Trigger/preconditions:** The lecturer has learning text for a meeting and
-  selects comprehension or opinion before requesting generation. A previous
-  poll for that meeting is closed; for the first poll, none is active. Poll
-  language and input limits still require a decision.
-- **Approved steps:** The lecturer pastes the material; the model proposes a
-  question and four options, plus one correct answer and short explanation
-  only for comprehension. The lecturer reviews and can edit all applicable
-  content, then approves publication. Identified students each submit one
-  final choice. The lecturer sees updated respondent counts and distribution
-  as counts and percentages during voting, and closes the poll manually.
-- **Expected outcome:** Published content reflects the approved draft and
-  becomes uneditable. Submitted choices cannot be changed; further responses
-  are not accepted after closure. Students then see aggregate results without
-  identities and, for comprehension only, the correct answer and explanation.
-  No grades are assigned, and opinion responses are not evaluated for
-  correctness. Another poll can be created for the meeting after closure.
-- **Failure/alternative:** Generation failure displays an error with retry and
-  never substitutes prepared content as if generated. Duplicate responses,
-  attempts to change a submitted choice, post-publication content edits, and
-  responses after closure must not change the accepted poll content or votes.
-  Missing input, unusable model output, and feature-specific access details
-  require validation during later design; no framework or provider is chosen.
-- **Dependencies:** FR-04; D-08 through D-11; Q-03, Q-06, Q-07.
-  P-05 is resolved proposal history, not pending approval of this workflow.
+- **Actors/preconditions:** A current course Lecturer selects comprehension or
+  opinion and pastes 1-6,000 Unicode characters. The approved language target is
+  Hebrew/English; current automatic generation is **English only** (D-44).
+  Existing Hebrew drafts remain editable, publishable and answerable. The
+  single-active-poll check applies to publication, not model execution.
+- **Current steps:** The CSRF POST calls `create_generated_draft` and the local
+  `PollGenerator` adapter outside a database transaction. Validate the question,
+  four distinct options and type-specific fields; recheck membership before
+  saving an unpublished draft. Comprehension includes one answer index and an
+  explanation; opinion has neither. The Lecturer reviews meaning, edits/saves,
+  then separately publishes. Students cannot access drafts.
+- **Participation/result:** One final vote per Student; Lecturer counts and
+  percentages during voting; manual close; Student aggregates only afterward.
+  Correct answer/explanation are withheld from Student HTML/JSON until closure
+  for comprehension, and never exist for opinion. No grades/respondent identities.
+  Published content cannot be edited or reopened. Another poll may be published
+  after closing the active one.
+- **Failures:** Unavailable/busy/timed-out/invalid generation retains the material
+  in the form and saves no prepared fallback. Hebrew generation explains the
+  English-only restriction before inference. Explicit retry is a user action,
+  not an automatic loop. Rejected stale edit/publication, duplicate vote or a
+  race with close leaves accepted data consistent. Structural checks cannot
+  certify correctness or that an opinion question truly asks for a preference.
+- **Evidence/dependencies:** FR-04, D-08 through D-11, D-31/D-44;
+  [real-model checks](local-poll-generation.md#actual-local-validation-on-a-new-topic),
+  [software strategy](testing.md#current-component-to-test-strategy). Q-03 parameters
+  are resolved; Hebrew generation quality, broader quality and classroom Q-06
+  remain unaccepted. P-05 is proposal history.
 
 ### UC-04 - Summarize the Speech in a Class Video
 
-- **Actor:** Lecturer.
-- **Trigger/preconditions:** An MP4 video containing Hebrew or English speech
-  is available on the lecturer's computer and permitted for processing.
-  Hebrew speech with English technical terms is included as a planned case;
-  sustained language switching is outside the current commitment.
-- **Approved processing:** The lecturer manually uploads the file and requests
-  summarization. The system extracts audio, transcribes speech, and uses a
-  model to summarize the transcript in the recording's spoken language,
-  without translation. These are targets, not verified capabilities.
-- **Approved result:** Display a summary paragraph and 3-5 key points with
-  an option to view the full transcript. No transcript editing/export or
-  link-import workflow is implied. A demo clip does not define a system cap;
-  numeric maximum duration and file size follow time/cost measurements.
-- **Expected outcome:** A summary derived from actual audio processing, in the
-  recording's spoken language, with an explicit result notice that unspoken
-  visual information is excluded. No analysis of video frames is implied.
-- **Existing candidate failure handling:** Unsupported input, absent intelligible
-  speech, failed transcription, or failed summarization is reported without
-  a false success; exact validation and recovery rules remain to be refined.
-  A previously processed result, if permitted for presentation, is labeled
-  rather than attributed to the current request.
-- **Dependencies:** FR-05; D-12 through D-16; remaining P-06/P-09 items and
-  Q-04/Q-07/Q-09 for numeric duration/file-size limits, separate demo duration,
-  quality, lecturer interpretation, data-use, cost, and live-demo expectations.
+- **Actor/preconditions:** The uploader is a current Lecturer in the meeting's
+  course. Manually provide a permitted MP4 with video and audio, at most
+  **240 seconds and 200,000,000 bytes**, enforced by the server. Hebrew/English
+  speech and Hebrew with English technical terms are intended; sustained
+  language switching is outside the commitment.
+- **Current processing:** Persist the private upload and queued `VideoJob`;
+  a separate single worker claims it, validates/decodes media, extracts WAV and
+  runs pinned local large-v3-turbo CUDA transcription. Remove WAV and persist
+  transcript, timed segments, detected language, actual model metadata and
+  seven-day expiry before calling local Qwen3 8B for a short paragraph and 3-5
+  points in the detected recording language. There is no translation or visual
+  content analysis. The website remains usable while the job runs.
+- **Progress/result:** Show actual stage, separate queue/processing elapsed
+  times, automatic-result warnings and an owner-only full-transcript link.
+  One 600-second budget starts when the worker claims the job and includes
+  decoding, loading, transcription and summarization; it excludes queue wait.
+- **Partial failure:** If summarization fails after transcript persistence,
+  show the failed stage/reason and retain the full transcript for authorized
+  access until expiry. Do not display a rejected summary or claim summary
+  success. Transcription failure has no completed transcript to expose. Stopped
+  workers/deadlines are recovered explicitly; there is no silent model fallback.
+- **Access/retention:** Require uploader identity and current course Lecturer
+  membership on direct task/transcript URLs. Transcript expires seven days
+  after creation; summary never outlives it. Direct access is blocked at expiry,
+  and maintenance clears content. Uploaded MP4 expires within 24 hours while
+  maintenance operates; physical deletion cannot run on a powered-off machine.
+  Old extraction/transcription-only jobs keep their original outcomes.
+- **Evidence/dependencies:** FR-05, D-12 through D-16 and D-34 through D-43;
+  [sequence](architecture.md#video-sequence), [actual results](local-summaries.md#actual-full-route-acceptance).
+  Functional success is not speech-reference accuracy: Hebrew wording/negation
+  and summary grounding remain limited. Separate demo duration, acceptable
+  quality, audio-only lecturer interpretation and live-demo expectations remain
+  Q-04/Q-09. Transcript editing/export and link import are not approved.
 
 ### UC-05 - Review Homework and Compare Submissions
 
@@ -399,8 +433,8 @@ direction from implementation or completed checks.
 |----|-------------------|---------------------------------|-----------------|
 | NFR-01 | Assignment requirement: AS-07 | Provide a simple smartphone web application suitable for student participation. | Supported devices/browsers, interface language, and observable usability criteria; Q-06. |
 | NFR-02 | Assignment requirement: AS-06 | Work in the actual class rather than only as a disconnected mockup. | Class size, concurrent activity, connectivity, deployment/access, and acceptable response times; Q-06. |
-| NFR-03 | Assignment guidance AS-08; approved D-02 | Keep design implementable, consider reuse, and use Python as the main server/AI language. | Django/Templates and development SQLite follow D-23/D-26; AI provider, production hosting and classroom suitability remain open. |
-| NFR-04 | Approved attendance/poll controls D-05/D-09/D-11, separate comments stages D-17/D-18, and truthful no-peer behavior D-21 | Distinguish pending, successful, partial, and failed operations; avoid duplicate records or false success after errors. Attendance deduplication, final poll responses, and poll generation-error/retry behavior follow approved decisions. Creation/submission is not confirmed storage; individual homework feedback is not peer comparison. | Detailed persistence/recovery policies remain open. Attendance timing and additional-window behavior follow D-27/D-28; no provider-specific retry policy is selected. |
+| NFR-03 | Assignment guidance AS-08; approved D-02 | Keep design implementable, consider reuse, and use Python as the main server/AI language. | Django/Templates and development SQLite follow D-23/D-26; Local video/English-poll adapters are selected; homework AI, production hosting and classroom suitability remain open. |
+| NFR-04 | Approved attendance/poll controls D-05/D-09/D-11, separate comments stages D-17/D-18, and truthful no-peer behavior D-21 | Distinguish pending, successful, partial, and failed operations; avoid duplicate records or false success after errors. Attendance deduplication, final poll responses, and poll generation-error/retry behavior follow approved decisions. Creation/submission is not confirmed storage; individual homework feedback is not peer comparison. | Detailed persistence/recovery policies remain open. Attendance timing and additional-window behavior follow D-27/D-28; current local video/poll adapters have no automatic generation retry; broader recovery policies remain open. |
 | NFR-05 | Approved visibility D-10/D-18/D-21 and sample-only homework demo D-22; enforcement/lifecycle remain Q-07 | Preserve poll disclosure rules, student-own comments, lecturer-meeting comments, student-own homework feedback/comparison without peer identities/full works, and lecturer access to all assignment submissions/feedback. Disclose external data processing. | Initial identity/access follows D-24; consent, retention/deletion, production safeguards and permitted integrated AI processing remain open. No external service, paid use, or real-homework demo data is authorized by visibility approval. |
 | NFR-06 | Approved planning target D-01; assignment AS-09; open P-09 | Plan a roughly ten-minute demo with actual functioning capabilities; disclose sample inputs, earlier results, limitations, and failures. | Live-completion expectations, acceptable AI latency/quality, and any approved use of earlier outputs; Q-09. |
 
@@ -440,9 +474,8 @@ parameters are explicit. AC-02 includes outside-class connected submission under
 | AC-06 | AS-06, AS-07 | NFR-01, NFR-02; UC-01 through UC-05 | Exercise the relevant student flows on the agreed smartphone/browser set and all flows in the intended classroom environment at the agreed load; record devices, network conditions, observed durations, and failures. | Q-06; P-01. |
 | AC-07 | AS-09, D-01 | NFR-06; UC-01 through UC-05 | Rehearse the approximately ten-minute presentation and record what ran live, actual processing times, any earlier outputs, and any failures. Confirm all five capabilities have genuine execution evidence; label sample data and any separately approved presentation shortcuts. | Q-09; P-09. |
 
-The later testing strategy must expand these checks into component and
-integration cases, including checks for the classes identified in subsequent
-design work (AS-13). These draft criteria are not a substitute for that strategy,
+The [current testing strategy](testing.md#current-component-to-test-strategy) maps
+these checks to actual components/classes and unit/integration evidence (AS-13). These draft criteria are not a substitute for that strategy,
 actual tool experiments (AS-11), or recorded test and demo outcomes (AS-14).
 
 ## 8. Baseline Decisions Still Needed
@@ -451,13 +484,13 @@ The register remains authoritative for open items. In particular, resolve:
 
 1. Lecturer acceptance of automatically (Q-01); D-24 and D-27/D-28 now resolve initial identity, timings, code transitions and additional-window registration.
 2. Lecturer acceptance of the attendance online/offline interpretation (Q-02) remains open; D-06 approves the list/XLSX snapshot. Comments timing is separately resolved by D-17: online means during class and offline outside class, using the same website submission/history flow. Creation, submission and storage remain separate. D-18/D-19/D-30 scope and defaults are unchanged; capacity/data lifecycle remain Q-06/Q-07.
-3. Real poll-generation provider/data permissions and successful integration/quality evidence remain open. Q-03 is resolved by D-31; D-32/D-33 distinguish disabled generation, test-only fake providers and local labeled demo drafts. D-08 through D-11 lifecycle/visibility rules are unchanged.
+3. Local English poll generation is implemented under D-44. Hebrew automatic generation and broad semantic/language acceptance remain open. Q-03 parameters are resolved; D-32 is historical disabled-provider behavior and D-33 remains a separate labeled demo path. No external-provider approval or paid fallback is implied.
 4. Separate video demo duration, real-model quality,
    and lecturer interpretation (Q-04). Manual MP4 upload, a summary paragraph
    with 3-5 key points and full-transcript viewing, Hebrew/English targets
    including Hebrew with English technical terms, same-language output without
    translation, and audio-only processing/disclosure are approved (D-12 through
-   D-16). Sustained language switching is outside the commitment. D-34 through D-37 now fix initial limits, worker/privacy/retention and disabled engines.
+   D-16). Sustained language switching is outside the commitment. D-34 through D-43 fix current limits, worker/privacy/retention and local video engines; disabled engines describe the historical infrastructure stage.
 5. Homework eligible-peer selection, revision/review associations, output
    language, numeric limits, and measurable quality (Q-05). Theoretical
    Hebrew/English pasted work, lecturer criteria, review/comparison behavior,
@@ -502,8 +535,8 @@ implementation choice, not an approved final language restriction.
 ## 10. Unit B Implementation and Verification Boundary
 
 D-27 through D-30 are user-approved implementation decisions, separate from
-AS-01/AS-02. Attendance and connected requests are now implemented; the three
-AI workflows remain planned. The 5-minute/30-second/45-second and subsequent
+AS-01/AS-02. Attendance and connected requests are implemented. Video AI and
+English poll generation were added in later stages; homework remains experimental. The 5-minute/30-second/45-second and subsequent
 2-minute timing rules are server-enforced, including 15-second overlap bounded
 by closure. Login continuation and POST both revalidate code and course role.
 GET must never persist attendance. Duplicate and additional-window registration
@@ -522,77 +555,31 @@ not prove native camera scanning, visual layout, browser polling behavior,
 classroom capacity or physical presence; clarified comments timing has separate server regression coverage. The manual phone
 plan is in phone-testing.md and has not been executed.
 
-## 11. Unit C — Implemented Poll Lifecycle, Unverified Generation
+## 11. Current Implementation and Historical Milestones
 
-D-31 through D-33 approve Hebrew/English output selection, a server-side limit
-of 6,000 material characters and a separate clearly labeled local demo command.
-Count Unicode code points including whitespace; reject whitespace-only input.
-No new question/option content-length policy or numeric classroom limit is implied.
+The website implements Django/Templates authentication and course-membership roles,
+meeting management, attendance/QR/XLSX, connected comments during or outside class,
+and the complete poll lifecycle. Local Qwen3 8B generates **English** editable poll
+drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
+generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
+pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
+A failed summary retains an available saved transcript; legacy completed jobs are
+unchanged. Homework review/comparison remains **feasibility experiments only**, not
+a website feature. Functional operation does not establish reliable AI accuracy,
+phone usability, classroom capacity or a completed in-class demonstration.
 
-The lifecycle supports validated draft edits before publication, CSRF POST
-publication, one active poll per meeting, one final single-choice student vote,
-manual closure, live lecturer counts/percentages and post-close student aggregates.
-Published content cannot be edited or reopened; additional polls may be published
-after closure. A version check rejects stale draft edits/publication. Percentages
-use accepted votes, rounded to two decimal places; no votes displays zero values.
+Unit A supplied the shared foundation; Unit B added attendance/comments; the
+initial Unit C used disabled generation plus labeled demo fixtures; Unit D
+initially stopped after extraction; Unit E added transcription. These are
+historical milestones. D-38 enables local transcription, D-39 defines private access/expiry and D-40
+records functional acceptance without a manual reference. D-41 selects turbo for
+new uploads, D-42/D-43 add local
+summaries and D-44 adds English poll generation. Previously completed jobs are
+not retroactively processed. Disabled/test providers are not normal runtime
+alternatives and never establish automatic-generation acceptance.
 
-Student responses omit answer keys/explanations and all aggregate counts before
-closure, including JSON and hidden HTML. Drafts are invisible to students.
-Closed opinion polls still have no answer key or correctness evaluation. No
-respondent identities or grades appear in student results.
-
-Real generation is disabled behind a replaceable Python interface. A normal
-generation attempt reports unavailable and does not persist a prepared draft.
-Automated tests alone inject a fake provider. The local seed_demo_polls command
-is an explicitly approved separate fixture path, producing labeled non-AI demo
-drafts without a model. It does not satisfy the original automatic-generation
-requirement. AC-03 lifecycle checks have server evidence in testing.md; real-model
-creation/quality and browser/phone/classroom acceptance remain incomplete.
-
-## 12. Unit D — Initial Video Infrastructure (Historical Stage)
-
-D-34 through D-37 approve this stage, not a reduction of the full AS-04 target.
-Upload UI explains before submission that checking and audio extraction alone
-are available, and shows both caps: 240 seconds and 200,000,000 bytes. The server
-enforces actual byte counts and media duration, verifies MP4 structure, video
-and audio tracks, and decodes media. Unsupported/corrupt/no-audio files fail
-with an actual stage and safe teacher-facing reason.
-
-Tasks persist meeting/uploader, state, heartbeat, timestamps and measurements.
-The independent single-video worker starts a 600-second budget at claim, separate
-from queue wait, and isolates decoding in a subprocess. Success means Audio
-extraction completed; temporary WAV must be removed. Graceful stops, hard worker
-death, stale heartbeat and deadline expiry cannot remain indefinitely Active:
-independent maintenance and status recovery mark failure, and restart recovers
-formerly active tasks under an exclusive OS lock.
-
-Only the uploader, still an active Lecturer member in the course, can access
-task HTML/JSON, including direct URLs. Private UUID files have no public media
-or download route. MP4 copies expire within 24 hours while maintenance operates;
-an early purge margin and independent cleanup cover a stopped worker. Physical
-deletion while the machine/maintenance is off cannot be guaranteed and resumes
-on startup. This limitation is explicitly documented in video-processing.md.
-Future transcript/summary retention is at most 7 days; neither is generated or
-stored now. Separate engine interfaces always return disabled implementations.
-
-Executed evidence is in testing.md, including real extraction of the two sample
-clips, both within limits. This is not a transcription, language-fidelity,
-summary-quality or full AC-04 pass. UI/phone and classroom acceptance remain open.
-
-## Unit E — Implemented Local Transcription
-
-D-38 through D-40 extend normal new MP4 uploads with real local speech transcription before temporary-audio deletion. The single worker's original 600-second budget covers validation, extraction, model loading and transcription; queue wait remains separate. Stages show loading/transcribing/completed or the actual failed stage. Success exposes detected Hebrew/English and an owner-only full-transcript link. Summary is still disabled, so full AS-04/AC-04 acceptance is not claimed.
-
-The uploader must remain a Lecturer in the course. Access expires exactly seven days after transcript creation, including direct URLs; maintenance clears text and segments. Previously extracted jobs remain extraction-only. Current 240-second/200,000,000-byte input and 24-hour source retention limits remain unchanged. See [local-transcription.md](local-transcription.md).
-
-Acceptance evidence distinguishes functional transcription from word accuracy: actual new uploads of both supplied clips produced nonempty transcripts and owner HTTP 200 full-text pages. Automated tests cover unauthorized/demoted users, escaped mixed-language display markup, exact expiry, cleanup, failure, shared deadline and legacy compatibility. Manual-reference word/English-term accuracy and real-browser/phone layout remain unverified. No translation or summarization is performed.
-
-D-41 subsequently selects the tested local large-v3-turbo revision as the default for new uploads. Validate the checkpoint files before loading, record requested identity separately from actual-loaded repo/revision/configuration, and retain actual metadata even when inference subsequently fails. Unavailable/mismatched turbo fails explicitly without model substitution, downloads or an API fallback. Existing transcripts/model provenance are preserved. Full STATIC/SHORT experimental timing and the unresolved Hebrew wording/negation accuracy limitation are in local-transcription.md and the linked experiment reports; functional success is not an accuracy acceptance pass. Summarization remains separate and disabled.
-
-## Local automatic video summaries — subsequent approved stage
-
-New MP4 uploads now use the existing local Qwen3 8B adapter after the full turbo transcript is saved. Output is an automatic paragraph plus 3–5 points in the detected recording language, owner-only with a transcript link and an error warning. Failed summaries retain the completed transcript. The same overall 600-second processing budget, course-membership/uploader authorization and at-most-seven-day text retention apply; summaries never outlive their source. Existing completed tasks remain unchanged. No external provider, model download or canned fallback is used. Current implementation, setup, measured checks and unresolved Hebrew grounding errors are in [local-summaries.md](local-summaries.md). Earlier statements that website summarization was disabled describe the preceding transcription stage and are superseded by this section for new uploads.
-
-## Subsequent local English poll-draft integration — D-44
-
-The initial generation adapter now uses installed local Qwen3 8B for English only, through the existing provider contract and 6,000-character limit. It validates exact fields, question/four distinct options, English script and comprehension-only answer index/complete-sentence explanation before saving an editable unpublished draft. Opinion output has no answer/explanation metadata. Failure preserves the form/material without a saved placeholder or automatic retry; Lecturer publication remains separate after semantic review. Hebrew automatic generation is explicitly unavailable, while existing Hebrew editing/publication/voting remains supported. Earlier disabled-provider statements describe the initial lifecycle stage; full bilingual generation and classroom/quality acceptance are not claimed. Source/implementation, normal-route model measurements and the initially rejected factual opinion question are in [local-poll-generation.md](local-poll-generation.md). No video-engine or Gemini changes are part of this stage.
+AC-01 through AC-07 remain acceptance targets. Software checks, real-model
+samples, user-reported interface checks and open phone/classroom/quality gaps
+are separated in the [testing strategy](testing.md#current-component-to-test-strategy).
+See [current components and diagrams](architecture.md) and the
+[tools report](local-ai-feasibility.md#current-tools-and-evidence-index).

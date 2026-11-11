@@ -4,6 +4,10 @@ An individual Exercise 2 project for Introduction to Software Engineering
 (OOP / OOD): design a practical, simple web application for classroom teaching
 and demonstrate its behavior in approximately ten minutes.
 
+## Problem and Scope
+
+The sections below distinguish assignment capabilities from approved design choices.
+
 ## Problem Definition
 
 The assignment asks for simpler, LLM-ready teaching tools that support classroom
@@ -61,7 +65,7 @@ after closure; comprehension answers and explanations are also revealed only
 then. The scope excludes grades, file uploads, open-ended questions, and
 automatic scheduling. Generation failure displays an error and permits retry,
 without presenting prepared content as generated from the material. Poll
-language is lecturer-selected Hebrew/English and material is limited to 6,000 characters under D-31 (Q-03 resolved); website identification follows D-24 and AI-service constraints remain unresolved. These are project decisions,
+language is lecturer-selected Hebrew/English and material is limited to 6,000 characters under D-31 (Q-03 resolved); website identification follows D-24; local English generation is implemented and Hebrew generation remains unavailable. These are project decisions,
 not details explicitly prescribed by AS-03.
 
 Video input/output direction is approved: manual file upload, initial MP4
@@ -89,7 +93,7 @@ must not silently stand in for a required action. Demo input examples may be
 prepared and clearly labeled. Any use of previously computed results needs
 explicit disclosure and agreement on what must complete live (P-09).
 
-## Confirmed Decisions and Unselected Technology
+## Confirmed Decisions and Remaining Technology Boundaries
 
 - Python remains the main server/AI language (D-02).
 - The approved Unit A implementation uses Django 5.2 LTS (installed 5.2.19),
@@ -98,8 +102,8 @@ explicit disclosure and agreement on what must complete live (P-09).
 - Individual pre-created demo accounts use Django password hashing and sessions.
   Roles belong to course memberships, not global account flags (D-24).
 - Lecturers create/edit meetings in their courses; students view only (D-25).
-- AI provider, production database, hosting and classroom capacity are unresolved.
-  Experiments do not establish a selected or integrated AI backend.
+- Local turbo transcription and Qwen3 8B summary/English poll adapters are integrated.
+  Homework engine selection, production database/hosting and classroom capacity remain open.
 - Documents are English. Current UI copy is English as a reversible implementation
   choice; the final interface language remains open (Q-06).
 
@@ -108,21 +112,26 @@ integration. This does not remove any of the five feature requirements.
 
 ## Assignment Deliverables
 
-The full project includes:
+The numbering below reproduces the eleven populated To Do items on page 2 of
+the local assignment PDF (not included in Git). Read the scope here, then the
+linked sections; detailed historical evidence is separate from current status.
 
-- A repository and README defining the problem and project scope.
-- A technical tools evaluation report based on actual trials of every
-  suggested tool.
-- SoW, SRS, and the main use cases / client stories.
-- Main software components, low-level class diagrams, and sequence diagrams.
-- A testing strategy addressing the classes, with actual verification
-  outcomes recorded separately from planned checks.
-- An implemented or composed web demo, an approximately ten-minute in-class
-  demonstration, and a short results conclusion.
+| To Do | Required deliverable | Short reading route | Current status |
+|---|---|---|---|
+| 1 | Repository; problem and scope in README | [Problem and scope](#problem-and-scope) | Repository and scope exist; five-feature demo remains a user-approved target, not lecturer-confirmed coverage. |
+| 2 | Technical tools report, with actual trials of suggested tools | [Tools and evidence index](docs/local-ai-feasibility.md#current-tools-and-evidence-index) | Trials and failures documented; homework quality insufficient, Gemini partial; some evidence local-only/uncommitted. |
+| 3 | SoW document | [Scope and deliverables](docs/SoW.md#3-planned-capability-coverage) | Draft maintained against implemented boundaries and open interpretations. |
+| 4 | SRS document | [Functional requirements](docs/SRS.md#4-functional-requirements) | FR/NFR and acceptance targets defined; full acceptance not claimed. |
+| 5 | Main use cases / client stories | [UC-01 through UC-05](docs/SRS.md#5-main-use-cases) | Five main flows documented; homework details remain open. |
+| 6 | Main software components | [Current components](docs/architecture.md#current-components) | Implemented responsibilities/interfaces mapped; homework remains outside website. |
+| 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence) | Current video/poll paths and shared domain covered; homework design deferred. |
+| 8 | Testing strategy addressing the classes in item 7 | [Component-to-test strategy](docs/testing.md#current-component-to-test-strategy) | Software checks mapped separately from real-model evidence and open acceptance. |
+| 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Foundation/participation/polls/video implemented; homework website capability missing. |
+| 10 | Perform a demo in class | [Classroom/demo acceptance](docs/SRS.md#7-future-acceptance-checks-and-traceability) | Not recorded as performed; phone, network, load and ten-minute rehearsal outstanding. |
+| 11 | Conclude; write a short account of results | [Interim results](#interim-results-and-final-conclusion-status) | Interim findings available; final conclusion awaits remaining work and actual class demo. |
 
-The working horizon is about three weeks for an individual assignment.
-The exact deadline, submission rules, actual class conditions, spending
-limits, and live-processing expectations still need confirmation.
+The exact deadline, submission packaging and live-processing expectations remain
+unconfirmed. No specific report filename/template is prescribed by the handout.
 
 ## Documentation
 
@@ -141,27 +150,31 @@ requirement or planned acceptance check is not evidence of implementation.
 Section 9 of the [register](docs/decisions-and-assumptions.md) consolidates
 remaining decisions: production access, teaching context/capacity, AI/data/budget
 boundaries, and eligible-peer/revision policy affect technical choices;
-numeric limits and other details can be refined during later design or trials.
+homework limits and quality targets remain open; video caps and participation defaults are already decided.
 The D-17 comments timing interpretation is resolved; it does not change attendance interpretations. The university-network study remains deferred and non-blocking.
 
-## Project Status
+## Current Implementation Status
 
-Unit A is implemented: sign-in/out, course-scoped permissions, course/meeting
-pages, lecturer meeting creation/editing, and isolated demo data. Unit B implements attendance, rotating QR windows, XLSX snapshots and connected private comments/history with lecturer polling. The poll lifecycle is implemented with labeled local demo drafts; local English generation is available for Lecturer-reviewed drafts. Video upload/extraction and local transcription are implemented; new uploads include local automatic summaries; homework AI remains unimplemented.
-See [architecture](docs/architecture.md) and [verification](docs/testing.md).
+The user has sent the lecturer three interpretation questions: rotating-QR
+attendance, online attendance list with XLSX snapshot, and speech-only video
+summary. All three await replies; implemented behavior is not lecturer acceptance.
+D-17 comments during/outside class is already resolved. See the
+[clarification register](docs/decisions-and-assumptions.md#lecturer-clarification-requests---sent-awaiting-reply).
 
-Local AI experiments produced measurable but mixed-quality results; Gemini
-was a partial connectivity experiment with no task-quality result. See
-[local AI feasibility](docs/local-ai-feasibility.md) and
-[Gemini feasibility](docs/gemini-free-feasibility.md). These are separate from
-website acceptance. No new AI experiment was run during Units A or B.
+The website implements Django/Templates authentication and course-membership roles,
+meeting management, attendance/QR/XLSX, connected comments during or outside class,
+and the complete poll lifecycle. Local Qwen3 8B generates **English** editable poll
+drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
+generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
+pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
+A failed summary retains an available saved transcript; legacy completed jobs are
+unchanged. Homework review/comparison remains **feasibility experiments only**, not
+a website feature. Functional operation does not establish reliable AI accuracy,
+phone usability, classroom capacity or a completed in-class demonstration.
 
-The foundation has automated server-side checks. The user reported successful
-manual browser checks for login, courses/roles, meeting creation, description
-persistence after refresh and absent student management buttons. These are
-separate from the server permission tests. Agent browser access was denied;
-viewport-specific visual and real-phone verification remain open.
-SQLite development success does not establish classroom load readiness.
+Detailed component/test evidence: [architecture](docs/architecture.md),
+[testing strategy](docs/testing.md#current-component-to-test-strategy),
+[tools report](docs/local-ai-feasibility.md#current-tools-and-evidence-index).
 
 ## Local Setup and Run
 
@@ -171,7 +184,7 @@ From a meeting choose **Video processing** as its Lecturer. Upload an MP4 of at
 most **4 minutes and 200 MB**; both limits and actual video/audio structure are
 checked by the server. After upload, keep using the site and return to the task
 to see persistent stage, separate queue/processing elapsed times and failure
-reasons. New successful tasks say **Transcription completed** and provide detected language and a private full-transcript link. Legacy extraction-only jobs retain **Audio extraction completed**. Word accuracy remains unverified against manual transcription; new uploads include local automatic summaries and no external-provider request occurs.
+reasons. New successful tasks say **Summary completed**, with detected language, an automatic summary and a private full-transcript link. If summary processing fails after transcription, the transcript remains accessible until expiry. Legacy extraction-only jobs retain **Audio extraction completed**. Word accuracy remains unverified against manual transcription; new uploads include local automatic summaries and no external-provider request occurs.
 
 Run the separate services from the project root in two PowerShell windows:
 
@@ -188,8 +201,8 @@ apply migrations before starting. For one task/pass, add `--once`.
 Only the uploader, while still a Lecturer in the course, can view each task.
 Private uploaded copies expire within 24 hours while maintenance is running;
 temporary audio is removed after processing. An offline computer cannot perform
-physical deletion; cleanup resumes on startup. Future text retention is at most
-7 days; no transcript/summary is stored now. Source files in Downloads are untouched.
+physical deletion; cleanup resumes on startup. Saved transcripts expire seven days after creation; summaries expire no later
+than their source transcript. Access is blocked at expiry and maintenance clears content. Source files in Downloads are untouched.
 
 Both existing clips meet the limits and passed actual extraction. Use
 SHORT-EXPLAIN.mp4 for a quick local browser check. See [video processing](docs/video-processing.md)
@@ -253,8 +266,7 @@ see their own stored history and lecturers see all meeting requests, with
 See [executed checks and limitations](docs/testing.md) and the
 [manual/private-LAN phone plan](docs/phone-testing.md). Phone access requires a
 separately authorized temporary LAN binding and exact allowed host; no network
-or firewall setting was changed during implementation. All website AI flows
-remain unimplemented.
+or firewall setting was changed during implementation. Local video AI and English poll generation are implemented; homework remains experimental.
 
 Run PowerShell from the repository root. A separate `.venv` is already prepared
 on the current workstation. On a fresh checkout, use an installed Python 3.12
@@ -325,4 +337,20 @@ D-41 makes the verified local large-v3-turbo checkpoint the default for new vide
 
 ## Local automatic video summaries — subsequent approved stage
 
-New MP4 uploads now use the existing local Qwen3 8B adapter after the full turbo transcript is saved. Output is an automatic paragraph plus 3–5 points in the detected recording language, owner-only with a transcript link and an error warning. Failed summaries retain the completed transcript. The same overall 600-second processing budget, course-membership/uploader authorization and at-most-seven-day text retention apply; summaries never outlive their source. Existing completed tasks remain unchanged. No external provider, model download or canned fallback is used. Current implementation, setup, measured checks and unresolved Hebrew grounding errors are in [local-summaries.md](docs/local-summaries.md). Earlier statements that website summarization was disabled describe the preceding transcription stage and are superseded by this section for new uploads.
+New MP4 uploads now use the existing local Qwen3 8B adapter after the full turbo transcript is saved. Output is an automatic paragraph plus 3–5 points in the detected recording language, owner-only with a transcript link and an error warning. Failed summaries retain the completed transcript. The same overall 600-second processing budget, course-membership/uploader authorization and at-most-seven-day text retention apply; summaries never outlive their source. Existing completed tasks remain unchanged. No external provider, model download or canned fallback is used. Current implementation, setup, measured checks and unresolved Hebrew grounding errors are in [local-summaries.md](docs/local-summaries.md). Historical extraction/transcription-only jobs retain their original outcomes; this pipeline applies to new uploads.
+
+## Interim Results and Final Conclusion Status
+
+The implemented website has server-side authorization/lifecycle checks and
+user-reported browser checks, recorded separately in [testing](docs/testing.md).
+SHORT completed the real video-to-summary route and the user opened its summary
+and transcript. STATIC transcription is understandable with remaining errors;
+its uploaded summary failed language validation while the transcript stayed
+available. English poll generation has narrow real-model evidence and requires
+Lecturer review; Hebrew automatic generation is unavailable. Homework probes
+missed real errors and invented gaps, so no homework website acceptance is claimed.
+Gemini produced no substantive task-quality result. See the [tools report](docs/local-ai-feasibility.md#current-tools-and-evidence-index).
+
+No in-class presentation, full phone acceptance, classroom load result or final
+assignment conclusion is recorded. This is an interim results account for To Do
+11, to be completed with observed demo results, limitations and remaining gaps.

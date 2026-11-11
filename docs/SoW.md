@@ -29,7 +29,7 @@ Detailed behavior and proposed acceptance checks belong in the
 | D-05 | Attendance uses student identification and a temporary QR displayed in class and rotated during the lecturer's open registration window; validate the code and meeting, record attendance and time, and prevent duplicates. Identity follows D-24; timings, transitions and additional-window registration follow D-27/D-28. |
 | D-06 | Lecturer receives an online attendance list and XLSX snapshot export, without synchronization of file edits back to the application. Lecturer interpretation of online/offline remains unverified. |
 | D-07 | University-network-origin checking is conditional on feasibility and a later decision; it is not an approved implementation requirement or a completed experiment. |
-| D-08 through D-11 | Approved polling design: lecturer-selected comprehension or opinion, real model generation from pasted text, four options, lecturer review/editing before publication only, final student responses, manual closure, role-specific results, and defined exclusions/error handling. D-31 resolves language and input length; real generation remains disabled/unverified under D-32. |
+| D-08 through D-11 | Approved polling design: lecturer-selected comprehension or opinion, real model generation from pasted text, four options, lecturer review/editing before publication only, final student responses, manual closure, role-specific results, and defined exclusions/error handling. D-31 resolves language and input length; D-32 is the historical disabled stage; D-44 implements local English generation, with Hebrew generation unavailable and semantic review still required. |
 | D-12 through D-16 | Target Hebrew and English video recordings, including Hebrew with English technical terms, through manual computer-file upload with initial MP4 support. Use audio extraction/transcription/model summarization, same-language output without translation, and an explicit unspoken-visual-content notice. Return a summary paragraph, 3-5 key points, and full-transcript viewing. Sustained language switching is outside the commitment. Set maximum duration/file size after time/cost measurements; demo duration is separate. Unit D implements validation/audio extraction; local transcription is implemented under Unit E; word accuracy and summary quality remain unverified. |
 | D-17 | Clarified by the user on 2026-11-11: online means during class; offline means outside class. Both use normal website submission to a meeting, including a past meeting. Creation, submission and storage remain distinct; no local persistence, send queue or disconnected synchronization is required. |
 | D-18/D-19 | Identified meeting comments/suggestions, storage/history, student-own and lecturer-meeting views, and live lecturer updates. No lecturer replies, threads, attachments, votes, or notifications. D-17 resolves during/outside-class use through the same connected workflow. |
@@ -39,7 +39,7 @@ The reviewed handout does not specify a programming language. No conflict with
 Python was found; this finding does not select a framework or AI service.
 D-23 through D-26 subsequently approve Django/Templates, initial SQLite,
 individual demo accounts, course-membership roles and lecturer meeting
-management. AI provider and production hosting remain open.
+management. Local turbo/Qwen adapters are selected for video and English polls; homework AI and production hosting remain open.
 
 ## 3. Planned Capability Coverage
 
@@ -79,13 +79,14 @@ For video summaries, manual computer-file upload with initial MP4 support, a
 summary paragraph with 3-5 key points, and full-transcript viewing are approved
 implementation targets (D-14). Planned verification includes Hebrew, English,
 and Hebrew speech with English technical terms (D-15). Sustained language
-switching is outside the current commitment; no language case has passed yet.
+switching is outside the current commitment. Actual Hebrew/English samples were
+processed, but word accuracy and broad summary quality remain unaccepted.
 Audio-only processing does not analyze unspoken slides, formulas, or board
 content; lecturer acceptance of this interpretation of the video requirement
 is not confirmed. A transcript supplied on its own does not demonstrate the
 approved extraction/transcription/summarization pipeline.
 
-D-34 now approves 4 minutes and 200 MB as initial system limits. Demo duration remains separate/undecided, not an unlimited-length claim. Unit D implements validation and real audio extraction; local transcription is implemented under Unit E, with word accuracy unverified; model summaries remain disabled. The earlier D-16 measurement-first policy informed these limits; see video-processing.md for current measurements and operational boundaries.
+D-34 now approves 4 minutes and 200 MB as initial system limits. Demo duration remains separate/undecided, not an unlimited-length claim. Unit D implements validation and real audio extraction; local transcription is implemented under Unit E, with word accuracy unverified; local Qwen3 summaries are implemented with known grounding/language failures. The earlier D-16 measurement-first policy informed these limits; see video-processing.md for current measurements and operational boundaries.
 
 University-network origin is only a conditional option (D-07, P-10, Q-10), not
 an additional attendance requirement. The proposed feasibility study in
@@ -176,8 +177,7 @@ than silently reducing the deliverables.
 Section 9 of the [register](decisions-and-assumptions.md) distinguishes decisions
 needed before fixing affected technical choices from details that can be
 refined later. Shared identity, teaching context/capacity, data/AI/budget
-boundaries, and peer-selection/revision policy affect architecture. D-17 resolves the comments timing interpretation without requiring disconnected functionality. Numeric video limits remain measurement-
-dependent, and the university-network study remains deferred.
+boundaries, and peer-selection/revision policy affect architecture. D-17 resolves the comments timing interpretation without requiring disconnected functionality. Initial video limits are fixed by D-34 at 4 minutes/200 MB; demo duration remains open, and the university-network study remains deferred.
 
 ## 8. Demo and Assignment Acceptance
 
@@ -195,33 +195,33 @@ Failures and partial processing must not be presented as successful outcomes.
 
 ## 9. Project Status
 
-Unit A is implemented: Django/Templates, login/logout, course-scoped roles,
-course/meeting views, lecturer meeting creation/editing and isolated demo data
-(D-23 through D-26). Its server checks are recorded in [testing](testing.md)
-and its component/class design in [architecture](architecture.md).
-Unit B implements attendance/XLSX and connected comments (D-27 through D-30). Unit C adds the poll lifecycle and labeled local demo drafts (D-31 through D-33); real AI generation remains disabled and unverified, and Unit D implements private upload/validation/audio extraction (D-34 through D-37); local transcription is implemented under Unit E; summaries and homework AI remain planned. Server verification is recorded in testing.md; actual browser/phone acceptance remains pending.
-The five-capability target is unchanged; D-17 now resolves the comments timing interpretation.
+The user has sent the lecturer three interpretation questions: rotating-QR
+attendance, online attendance list with XLSX snapshot, and speech-only video
+summary. All three await replies; implemented behavior is not lecturer acceptance.
+D-17 comments during/outside class is already resolved. See the
+[clarification register](decisions-and-assumptions.md#lecturer-clarification-requests---sent-awaiting-reply).
 
-Separate local AI experiments and a partial Gemini connectivity trial are
-recorded in the feasibility reports. They do not establish reliable AI quality
-or integrated website capability. No university-network trial occurred.
-Browser/phone visual checks and classroom load remain unverified. Further
-components, feature diagrams, testing, demo and conclusion remain deliverables.
+The website implements Django/Templates authentication and course-membership roles,
+meeting management, attendance/QR/XLSX, connected comments during or outside class,
+and the complete poll lifecycle. Local Qwen3 8B generates **English** editable poll
+drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
+generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
+pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
+A failed summary retains an available saved transcript; legacy completed jobs are
+unchanged. Homework review/comparison remains **feasibility experiments only**, not
+a website feature. Functional operation does not establish reliable AI accuracy,
+phone usability, classroom capacity or a completed in-class demonstration.
 
-## Unit E — Implemented Local Transcription
+The original Unit C disabled-provider and Unit D extraction-only milestones are
+historical, not current capability descriptions. D-34 fixes 240 seconds and
+200,000,000 bytes; D-38 through D-43 cover current video transcription/summary,
+privacy, deadline and retention. D-44 covers English poll generation. D-17 is
+resolved for comments only; attendance interpretations remain Q-01/Q-02.
 
-D-38 through D-40 extend normal new MP4 uploads with real local speech transcription before temporary-audio deletion. The single worker's original 600-second budget covers validation, extraction, model loading and transcription; queue wait remains separate. Stages show loading/transcribing/completed or the actual failed stage. Success exposes detected Hebrew/English and an owner-only full-transcript link. Summary is still disabled, so full AS-04/AC-04 acceptance is not claimed.
-
-The uploader must remain a Lecturer in the course. Access expires exactly seven days after transcript creation, including direct URLs; maintenance clears text and segments. Previously extracted jobs remain extraction-only. Current 240-second/200,000,000-byte input and 24-hour source retention limits remain unchanged. See [local-transcription.md](local-transcription.md).
-
-Acceptance evidence distinguishes functional transcription from word accuracy: actual new uploads of both supplied clips produced nonempty transcripts and owner HTTP 200 full-text pages. Automated tests cover unauthorized/demoted users, escaped mixed-language display markup, exact expiry, cleanup, failure, shared deadline and legacy compatibility. Manual-reference word/English-term accuracy and real-browser/phone layout remain unverified. No translation or summarization is performed.
-
-D-41 subsequently selects the tested local large-v3-turbo revision as the default for new uploads. Validate the checkpoint files before loading, record requested identity separately from actual-loaded repo/revision/configuration, and retain actual metadata even when inference subsequently fails. Unavailable/mismatched turbo fails explicitly without model substitution, downloads or an API fallback. Existing transcripts/model provenance are preserved. Full STATIC/SHORT experimental timing and the unresolved Hebrew wording/negation accuracy limitation are in local-transcription.md and the linked experiment reports; functional success is not an accuracy acceptance pass. Summarization remains separate and disabled.
-
-## Local automatic video summaries — subsequent approved stage
-
-New MP4 uploads now use the existing local Qwen3 8B adapter after the full turbo transcript is saved. Output is an automatic paragraph plus 3–5 points in the detected recording language, owner-only with a transcript link and an error warning. Failed summaries retain the completed transcript. The same overall 600-second processing budget, course-membership/uploader authorization and at-most-seven-day text retention apply; summaries never outlive their source. Existing completed tasks remain unchanged. No external provider, model download or canned fallback is used. Current implementation, setup, measured checks and unresolved Hebrew grounding errors are in [local-summaries.md](local-summaries.md). Earlier statements that website summarization was disabled describe the preceding transcription stage and are superseded by this section for new uploads.
-
-## Subsequent local English poll-draft integration — D-44
-
-The initial generation adapter now uses installed local Qwen3 8B for English only, through the existing provider contract and 6,000-character limit. It validates exact fields, question/four distinct options, English script and comprehension-only answer index/complete-sentence explanation before saving an editable unpublished draft. Opinion output has no answer/explanation metadata. Failure preserves the form/material without a saved placeholder or automatic retry; Lecturer publication remains separate after semantic review. Hebrew automatic generation is explicitly unavailable, while existing Hebrew editing/publication/voting remains supported. Earlier disabled-provider statements describe the initial lifecycle stage; full bilingual generation and classroom/quality acceptance are not claimed. Source/implementation, normal-route model measurements and the initially rejected factual opinion question are in [local-poll-generation.md](local-poll-generation.md). No video-engine or Gemini changes are part of this stage.
+Evidence and limitations: [tools report](local-ai-feasibility.md#current-tools-and-evidence-index),
+[current architecture](architecture.md), [class-aware strategy and results](testing.md#current-component-to-test-strategy).
+The full assignment still requires homework planning/integration if the unchanged
+five-capability target is retained, actual classroom/phone verification, an
+approximately ten-minute demonstration and a final results conclusion. No such
+class demonstration or final conclusion has been recorded. These are remaining
+deliverables, not permission to begin them.

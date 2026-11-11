@@ -1,381 +1,358 @@
-# Website Architecture — Units A, B, C, D and E
+# Website Architecture
 
-## Unit E local transcription
+## Current implemented boundary
 
-New uploads use the pinned local large-v3-turbo checkpoint (D-41) in the existing offline ASR environment in a supervised subprocess after decoding and before WAV deletion. The original 600-second deadline covers both. The database stores full text, timed segments, detected language and a seven-day expiry; no transcript appears in polling JSON. Owner/current-Lecturer authorization and expiry are enforced on the full-text route. Maintenance purges content; legacy extraction-only jobs are unchanged. See [local-transcription.md](local-transcription.md) for configuration, state, retention and measured evidence. Summary remains disabled.
+The website implements authentication/course roles, meetings, attendance/XLSX,
+connected comments during/outside class (resolved D-17), poll lifecycle with local
+English draft generation, and background MP4 extraction/transcription/summarization.
+Homework remains feasibility experiments only: no homework models, views or
+review service are implemented. See [requirements/use cases](SRS.md#5-main-use-cases),
+[tools and observed evidence](local-ai-feasibility.md#current-tools-and-evidence-index),
+and [component-to-test strategy](testing.md#current-component-to-test-strategy).
 
-## Unit D video infrastructure (initial extraction stage)
+The QR, online-list/XLSX snapshot and speech-only video-summary interpretations
+are implemented choices. The user reports sending all three clarification
+questions to the lecturer; acceptance is **pending a reply**, not confirmed.
+D-17 comments timing is resolved and is not part of that pending set.
 
-Detailed state/sequence, storage, limits and retention are in
-[video-processing.md](video-processing.md). VideoJob is the persistent aggregate:
-it references a meeting/uploader, original display name, actual byte count,
-state, timestamps/heartbeat, failure stage/code and media measurements. UUID
-paths use fixed filenames under private ignored storage, never the uploaded name.
+## Current components
 
-`video_uploads.py` bounds multipart bytes before disk; `video_forms.py` checks
-input shape/extension/size; `video_jobs.py` streams a private copy and manages
-authorization, recovery and retention; `video_views.py` exposes owner-only
-HTML/JSON. No decoding or AI wait occurs in the request. `video_worker.py` claims
-one queued job at a time under a coordinator OS lock and supervises the isolated
-`video_media.py` PyAV decoder. Parent/child deadlines and a parent-death watchdog
-bound processing. A decoder lock prevents overlapping orphan/new processing.
-The maintenance command runs independently of the worker and handles stale jobs,
-temporary audio and source expiry. Lock files contain no credentials.
+| Source component | Actual responsibility and boundary |
+|---|---|
+| `teachingtool/settings.py`, Django middleware/auth, `classroom/views.py` | Django 5.2.19 Templates/session/CSRF and meeting management; fresh course-membership authorization, SQLite development database. No public account/course administration. |
+| `models.py` | Course/Membership/Meeting, AttendanceWindow/AttendanceRecord/MeetingRequest, Poll/PollVote and VideoJob persistence/constraints. |
+| `attendance.py`, `participation_views.py`, `request_forms.py` | Rotating signed QR, POST registration/deduplication, XLSX snapshot, private comments/history and visible-page updates. |
+| `poll_views.py`, `poll_forms.py`, `poll_services.py` | Generation form, draft edit/version checks, publication, final vote, close and disclosure-safe payload. No inference inside a database write transaction. |
+| `poll_generation.py`, `local_poll_generator.py`, `poll_contract.py`, `local_poll_runner.py` | Replaceable PollGenerator contract, local Qwen3 8B English adapter, generated-output validation and isolated runtime. Fake providers are test-only; seed_demo_polls is a separate labeled local fixture command. |
+| `video_uploads.py`, `video_forms.py`, `video_views.py`, `video_jobs.py` | Bound uploaded bytes, private persistence, uploader/current-role access, state payloads, failure/recovery and retention. |
+| `video_worker.py`, `video_media.py`, `video_storage.py` | One persistent queue/worker; isolated CPU media validation and WAV extraction, locks, deadline/heartbeat and private file handling. |
+| `video_engines.py`, `local_transcriber.py`, `local_asr_runner.py`, `asr_checkpoint.py` | Transcriber contract/factory, pinned local large-v3-turbo, CUDA float16, offline checkpoint validation, supervised events and validated transcript results. |
+| `local_summarizer.py`, `local_summary_runner.py`, `summary_contract.py` | Summarizer implementation, pinned Qwen3 8B/structured paragraph plus 3-5 points, language/identity checks; no semantic-accuracy guarantee. |
+| `process_tree.py`, `process_lock.py` | Owned Windows process-tree lifetime and exclusive local compute access. Poll generation and video AI do not overlap on the shared compute lock. |
+| `transcript_display.py`, Templates, `static/js` | Word-preserving paragraphs/RTL-LTR isolation, escaped server-rendered results, visible-page polling and form interactions. |
 
-PyAV 16.0.0 is pinned from the previous tested media configuration. Decoding uses
-CPU and direct audio-plane bytes; no NumPy, ASR, LLM or FFmpeg CLI is needed.
-Explicit MP4 demuxing/file-only protocols and disabled external references avoid
-interpreting playlists or arbitrary remote media paths. Checking video frames is
-integrity validation, not visual-content analysis. JSON exposes only safe state
-and measurements, never private paths or raw decoder errors.
+`get_transcriber()`, `get_summarizer()` and `get_poll_generator()` return the local
+implementations. Disabled classes still exist in code but are not current factory
+results. No normal runtime fake provider, external inference or paid fallback is
+selected. Models/runtimes/private data remain outside Git.
 
-`video_engines.py` defines separate Transcriber/Summarizer contracts with disabled
-factories; the extraction worker never calls them. Fake execution fixtures in
-tests_support are only subprocess lifecycle tests and have no runtime switch.
-No actual AI or seven-day text-result cleanup is claimed: no text result exists
-yet. The approved future retention policy is recorded separately from the
-implemented 24-hour source/temporary-audio cleanup.
+## Class and interface diagrams
 
-## Unit C poll lifecycle
-
-Polls reuse the course-membership guard, CSRF middleware, responsive Templates
-and SQLite IMMEDIATE short transactions. No package or AI SDK was added.
-`poll_views.py` handles role-scoped HTML/JSON; `poll_forms.py` validates generation
-input, draft edits, optimistic versions and one selected option. `poll_services.py`
-owns transitions and the disclosure whitelist. No external call occurs in Unit C.
+These diagrams name real classes/interfaces and selected real operations. Boxes
+marked **module** describe function-based modules, not invented Python classes.
+Fields/operations are selected for responsibilities, not a complete ORM listing.
+The strategy table uses the same names and links to executable test methods.
 
 ```mermaid
 classDiagram
+    class User {
+        username
+        is_active
+    }
+    class Course {
+        code
+        title
+    }
+    class Membership {
+        role
+    }
+    class Meeting {
+        title
+        starts_at
+    }
+    class AttendanceWindow {
+        public_id
+        opened_at
+        closes_at
+        closed_at
+        additional
+    }
+    class AttendanceRecord {
+        registered_at
+        additional
+    }
+    class MeetingRequest {
+        kind
+        text
+        submission_id
+        created_at
+    }
     class Poll {
         kind
         language
-        material
         question
-        JSON options
+        options
         correct_index
         explanation
         status
-        origin
         version
-        created_at
-        published_at
-        closed_at
+        origin
     }
     class PollVote {
         option_index
         submitted_at
     }
-    Meeting "1" --> "0..*" Poll
-    Poll "1" --> "0..*" PollVote
-    User "1" --> "0..*" PollVote
-```
-
-The four options are stored as validated JSON, with one vote's index constrained
-to 0–3. The database restricts type/language/origin, answer metadata by poll type,
-and timestamp/status consistency. A conditional unique constraint permits only
-one Active poll per meeting; a unique poll/student constraint makes votes final.
-Opinion polls must have null correct_index and empty explanation. No grades,
-identity-bearing result list, reopen, delete or post-publication edit is exposed.
-
-Every write locks the meeting first and then the poll, under a short atomic
-transaction. Publication checks the draft version, full content and active-poll
-absence; editing increments the version, so a stale page cannot publish unseen
-edits. Voting checks fresh Student membership and Active status after the lock;
-closing acquires the same locks. Either a racing vote commits before close or
-is rejected after close. There is no provider wait inside these locks.
-
-```mermaid
-sequenceDiagram
-    participant L as Lecturer
-    participant D as Django
-    participant DB as SQLite
-    participant S as Student
-    L->>D: POST publish reviewed draft + version + CSRF
-    D->>DB: Lock meeting/poll; validate Draft and one Active; publish
-    S->>D: GET poll (no answer key or aggregates)
-    S->>D: POST one option + CSRF
-    D->>DB: Lock meeting/poll; check Active and unique vote; save
-    L->>D: GET live state while visible
-    D-->>L: Counts and percentages, no response identities
-    L->>D: POST manual close + CSRF
-    D->>DB: Lock same records; mark Closed
-    S->>D: Reload closed poll
-    D-->>S: Aggregates; comprehension-only answer and explanation
-```
-
-`public_payload` constructs an explicit whitelist. Students cannot access drafts;
-while Active they receive no counts, material, answer index, answer designation
-or explanation, including JSON/hidden HTML. Closed comprehension polls reveal
-the key/explanation; opinion polls never serialize these fields. Percentages use
-accepted votes rounded to two decimals, zero-safe, with no respondent identities.
-Lecturer read polling follows the Unit B visible-page 5-second pattern. A competing
-status change asks for reload instead of preserving misleading action controls.
-
-`poll_generation.py` defines the replaceable `PollGenerator` contract and the
-only normal factory result, `DisabledPollGenerator`. It raises unavailable,
-without HTTP, keys or a fabricated draft. Invalid eventual output is rejected
-before persistence and membership is rechecked after generation. Fake generators
-exist in automated tests only and cannot be selected through runtime settings.
-Real generation/provider choice, language quality and external data approval are
-unverified future work; no live AI request is permitted by this implementation.
-
-`seed_demo_polls` is a separate local fixture route, explicitly approved under
-D-33. It creates two Draft examples marked Demo data — not generated by AI,
-with he/en variants and stable demo keys. It preserves edited/published/closed
-examples on repeat runs; --new-set explicitly creates a new pair. No provider,
-publication or voting action occurs in the command.
-
-## Unit B participation design
-
-`participation_views.py` enforces course-scoped attendance and request access;
-`attendance.py` isolates signed QR rules and write transactions. Dependencies
-added in the website `.venv`: qrcode 8.2 (SVG, no Pillow), openpyxl 3.1.5,
-et_xmlfile 2.0.0 and colorama 0.4.6. The website imports no AI provider.
-
-```mermaid
-sequenceDiagram
-    participant L as Lecturer
-    participant S as Student browser
-    participant D as Django
-    participant DB as SQLite
-    L->>D: CSRF POST open window
-    D->>DB: Create window atomically
-    L->>D: GET state while visible
-    D-->>L: Signed rotating QR and roster
-    S->>D: GET scanned URL
-    D-->>S: Login if needed, preserving safe next URL
-    S->>D: Login and GET continuation
-    D-->>S: Revalidate membership/code; CSRF form
-    S->>D: POST form automatically, or manual fallback
-    D->>DB: Serialize; revalidate time/access; unique registration
-    D-->>S: Confirmed status or rescan error
-```
-
-AttendanceWindow stores a public UUID, meeting, opening/closing timestamps,
-explicit closure and additional-window flag. Only one unclosed window per
-meeting is allowed; opening after expiry closes that row before creating the
-next. AttendanceRecord stores student, meeting, original window/time and
-additional-window flag, unique per student/meeting. MeetingRequest stores
-student, meeting, type, text, timestamp and per-form UUID for duplicate-POST
-deduplication. Recorded history is protected from accidental FK deletion;
-there is no deletion UI or approved retention period.
-
-```mermaid
-classDiagram
-    class AttendanceWindow {
-        UUID public_id
-        datetime opened_at
-        datetime closes_at
-        datetime closed_at
-        bool additional
+    class VideoJob {
+        status
+        heartbeat_at
+        failed_stage
+        error_code
+        transcript
+        transcript_segments
+        detected_language
+        asr_metadata
+        transcript_expires_at
+        summary_paragraph
+        summary_points
+        summary_metadata
+        summary_expires_at
     }
-    class AttendanceRecord {
-        datetime registered_at
-        bool additional
-        registration_label
-    }
-    class MeetingRequest {
-        kind
-        text
-        datetime created_at
-        UUID submission_id
-    }
+    User "1" --> "0..*" Membership
+    Course "1" --> "0..*" Membership
+    Course "1" --> "0..*" Meeting
     Meeting "1" --> "0..*" AttendanceWindow
     Meeting "1" --> "0..*" AttendanceRecord
     AttendanceWindow "1" --> "0..*" AttendanceRecord
     User "1" --> "0..*" AttendanceRecord
     Meeting "1" --> "0..*" MeetingRequest
     User "1" --> "0..*" MeetingRequest
+    Meeting "1" --> "0..*" Poll
+    Poll "1" --> "0..*" PollVote
+    User "1" --> "0..*" PollVote
+    Meeting "1" --> "0..*" VideoJob
+    User "1" --> "0..*" VideoJob : uploader
 ```
 
-Signed QR payloads contain window UUID, meeting ID and a 30-second bucket,
-using a dedicated signing salt and the ignored local Django secret. No student
-identity is embedded. Codes stay stable within a bucket and expire at its
-start +45 seconds or window closure, whichever occurs first. Closed/replaced
-windows never become valid again. GET does not persist attendance or QR rows.
-After acquiring the write lock, validation uses current server time; client
-countdowns are informational. Valid signed links can still be forwarded.
-
-SQLite uses BEGIN IMMEDIATE with a 10-second busy timeout in short explicit
-atomic sections, not request-wide transactions. Writes serialize before reads,
-avoiding read-to-write upgrade races. Database uniqueness is the final duplicate
-safeguard. select_for_update expresses a possible future backend lock but is
-a no-op on SQLite. Export reads a consistent short snapshot, then builds XLSX
-outside the transaction; string cells prevent user-input formula execution.
-Database-busy errors return 503 without a save confirmation or automatic POST
-retry. Two concurrent requests are tested, not full classroom load.
-
-Every Unit B endpoint authenticates and freshly resolves course membership.
-Only lecturers access roster/state/export/window actions; scan/request writes
-require Student role. Parent mismatch/nonmembership gives generic 404; wrong
-role gives 403. Sensitive responses disable caching. Student history is filtered
-server-side and lecturer JSON feeds recheck roles. HTML is escaped; dynamic
-text uses textContent. No browser persistence or offline send queue exists.
-
-Lecturer requests poll every 5 seconds while visible; hidden pages cancel reads
-and resume on visibility. Attendance polls every 5 seconds or sooner at a QR
-boundary, with a local countdown. Read errors warn that prior data may be
-outdated. Composition, CSRF POST submission and confirmed database storage
-remain distinct, preserving the unresolved D-17 offline boundary.
-
-Official references consulted:
-[Django SQLite transactions](https://docs.djangoproject.com/en/5.2/ref/databases/#transactions-behavior),
-[Django atomic transactions](https://docs.djangoproject.com/en/5.2/topics/db/transactions/),
-[qrcode](https://pypi.org/project/qrcode/),
-[openpyxl](https://openpyxl.readthedocs.io/en/stable/).
-
-## Implemented boundary
-
-Unit A implements the shared website foundation under D-23 through D-26.
-Django 5.2.19 uses server-rendered Templates, CSS, sessions, forms, ORM and
-migrations. The development database is SQLite. Small Unit B scripts handle scan POST submission and visible-page polling. No AI SDK, provider key or AI experiment module
-is imported by the application. Attendance and connected comments are implemented under D-27 through D-30; the poll lifecycle is also implemented under Unit C; real poll generation and the video/homework website workflows remain unimplemented.
-
-```mermaid
-flowchart LR
-    Browser[Browser: HTML and responsive CSS] --> Middleware[Django session / authentication / CSRF middleware]
-    Middleware --> Auth[Django LoginView / POST LogoutView]
-    Middleware --> Views[classroom views]
-    Views --> Membership[Current membership lookup]
-    Views --> Forms[MeetingForm validation]
-    Membership --> ORM[Django ORM]
-    Forms --> ORM
-    ORM --> SQLite[(Development SQLite)]
-    Views --> Templates[Django Templates: escaped output]
-```
-
-## Data model
+Membership is unique per user/course, so roles can differ across courses. Attendance
+is unique per meeting/student; additional windows preserve first registration.
+Poll votes are unique per poll/student and a conditional database constraint allows
+only one Active poll per meeting. VideoJob stores actual model provenance separately
+from requested identity and preserves historical completed jobs.
 
 ```mermaid
 classDiagram
-    class User {
-        username
-        password_hash
-        is_active
+    class Transcriber {
+        <<interface>>
+        transcribe(audio_path, deadline, on_event, on_tick)
     }
-    class Course {
-        code
-        title
-        description
+    class LocalWhisperTranscriber {
+        transcribe(audio_path, deadline, on_event, on_tick)
     }
-    class Membership {
-        role: student or lecturer
+    class Summarizer {
+        <<interface>>
+        summarize(transcript, language, work_dir, deadline, on_event, on_tick)
     }
-    class Meeting {
-        title
-        starts_at: timezone aware
-        description
+    class LocalQwenSummarizer {
+        summarize(transcript, language, work_dir, deadline, on_event, on_tick)
     }
-    User "1" --> "0..*" Membership
-    Course "1" --> "0..*" Membership
-    Course "1" --> "0..*" Meeting
+    class PollGenerator {
+        <<interface>>
+        generate(material, kind, language)
+    }
+    class LocalPollGenerator {
+        generate(material, kind, language)
+    }
+    class ProcessTree {
+        attach(pid)
+        close()
+    }
+    class VideoUploadForm {
+        clean_video()
+    }
+    class BoundedUploadHandler {
+        receive_data_chunk(raw_data, start)
+        file_complete(file_size)
+    }
+    class video_worker {
+        <<module>>
+        run_worker()
+        claim_job()
+        process_job(job)
+    }
+    class video_jobs {
+        <<module>>
+        save_upload(meeting_id, user, upload)
+        owned_job(meeting_id, job_id, user)
+        fail_job(job_id, code, stage)
+        recover_jobs()
+        purge_expired_transcripts()
+        cleanup_video_files()
+    }
+    class poll_services {
+        <<module>>
+        create_generated_draft(meeting_id, user, kind, language, material)
+        edit_draft(meeting_id, poll_id, user, version, data)
+        publish(meeting_id, poll_id, user, version)
+        vote(meeting_id, poll_id, user, option_index)
+        close(meeting_id, poll_id, user)
+        public_payload(poll, membership, user)
+    }
+    Transcriber <|.. LocalWhisperTranscriber : structural protocol
+    Summarizer <|.. LocalQwenSummarizer : structural protocol
+    PollGenerator <|.. LocalPollGenerator : structural protocol
+    video_worker ..> Transcriber
+    video_worker ..> Summarizer
+    video_worker ..> video_jobs
+    video_jobs ..> VideoJob
+    poll_services ..> PollGenerator
+    poll_services ..> Poll
+    LocalQwenSummarizer ..> ProcessTree
+    LocalPollGenerator ..> ProcessTree
 ```
 
-User is Django's built-in user model. Membership has a database uniqueness
-constraint on user/course and a check constraint restricting role values.
-There is one role per user per course; a user can have different roles in
-different courses. Course count, meeting count and membership count are not
-capped by the demo fixtures. Meetings have no attendance-window, publication,
-AI-job or lifecycle state in Unit A. Past meetings can be viewed and edited by
-authorized lecturers; no future-only restriction is invented. Date/time
-input and display use Asia/Jerusalem; internal values are timezone-aware.
+Python Protocols use structural conformance; adapters do not inherit them explicitly.
+Function argument lists above omit optional/test-only parameters; the code is the
+source of exact signatures. ASR subprocess supervision is in LocalWhisperTranscriber;
+ProcessTree ownership is used for the Qwen subprocess/service descendants.
 
-## Authorization and writes
-
-All classroom routes require an authenticated active user. On each request,
-the server queries current membership, including writes from stale browser
-pages. No URL parameter, posted role, posted user or hidden button grants
-permission. Global staff/superuser flags do not bypass classroom membership.
-There is no admin site or public account/course/membership-management UI.
-
-| Operation | Student member | Lecturer member | Nonmember |
-|---|---|---|---|
-| List own courses | Own memberships | Own memberships | Empty list if no memberships |
-| Read course/meeting | Allowed | Allowed | Generic 404 |
-| Create/edit meeting | 403 | Allowed for that course | Generic 404 |
-
-Meeting lookup includes both its ID and authorized parent course. A meeting
-ID from another course cannot be substituted into an authorized course URL.
-The form only binds title, start time and description. The view assigns the
-course on the server, so posting a different course cannot move a meeting.
-Login uses Django's safe-next handling; logout requires POST and CSRF.
-Templates escape submitted text. These safeguards are verified separately in
-[testing.md](testing.md), rather than inferred from hidden UI controls.
+## Video sequence
 
 ```mermaid
 sequenceDiagram
-    actor Lecturer
-    participant View as meeting_form
-    participant DB as Membership / Meeting
-    participant Form as MeetingForm
-    Lecturer->>View: POST course / meeting URL + CSRF + fields
-    View->>DB: Current user membership for course
-    alt No membership
-        View-->>Lecturer: Generic 404
-    else Student membership
-        View-->>Lecturer: 403
-    else Lecturer membership
-        View->>DB: For edits, resolve meeting within course
-        View->>Form: Validate allowed fields
-        alt Invalid input
-            View-->>Lecturer: Form with errors, no save
-        else Valid input
-            View->>DB: Save with server-selected course
-            View-->>Lecturer: Redirect to meeting details
+    actor L as Lecturer
+    participant V as video_views
+    participant J as video_jobs
+    participant DB as VideoJob / SQLite
+    participant W as video_worker
+    participant M as video_media.media_child
+    participant T as LocalWhisperTranscriber
+    participant S as LocalQwenSummarizer
+    participant C as maintenance
+    L->>V: CSRF POST MP4 in meeting
+    V->>V: BoundedUploadHandler + VideoUploadForm
+    V->>J: save_upload(meeting_id, user, upload)
+    J->>DB: Authorize Lecturer, private file, queued job
+    V-->>L: Redirect, website remains usable
+    W->>J: recover_jobs / cleanup_video_files
+    W->>DB: claim_job(), recheck role, start 600s budget
+    W->>M: Validate MP4/audio/video, extract WAV
+    M-->>W: Measurements or actual failed stage/code
+    alt Media failure
+        W->>J: fail_job(), remove temporary files
+    else Media valid
+        W->>T: transcribe(audio_path, same deadline, events/ticks)
+        T-->>W: Verified identity/stages, text result or failure
+        alt Transcription failure
+            W->>J: fail_job(), remove WAV and pending files
+        else Valid transcript
+            W->>W: Remove WAV, require successful cleanup
+            W->>DB: Recheck role/state, persist transcript and 7-day expiry
+            W->>S: summarize(text, language, same deadline, events/ticks)
+            alt Summary valid and role still allowed
+                S-->>W: Validated paragraph, points, actual metadata
+                W->>DB: summarized, expiry no later than transcript
+            else Summary unavailable/invalid/timeout/interrupted
+                W->>J: fail_job() with stage/reason
+                Note over J,DB: Saved transcript remains, no false summary success
+            end
         end
+    end
+    L->>V: GET task / full transcript later
+    V->>J: owned_job(), current Lecturer + uploader, availability
+    V-->>L: Result or failure, transcript only while unexpired
+    C->>J: recover_jobs(), cleanup_video_files()
+    J->>DB: purge_expired_transcripts(), clear expired summary/text
+    Note over V,DB: Direct access blocked at expiry before physical cleanup
+```
+
+A WAV cleanup failure also routes to fail_job before saving a transcript or
+starting summary; the diagram abbreviates this guard. Actual states are queued,
+validating, extracting, loading_asr, transcribing, loading_sum, summarizing and
+terminal extracted/transcribed/summarized/failed (plus uploading during persistence).
+The persisted start governs a single 600-second processing deadline; queue wait
+is separate. Heartbeats/recovery and the worker lock prevent indefinitely active
+jobs or concurrent workers. Owner and fresh Lecturer role are checked on direct
+URLs and before saving outputs. WAV/IPC files are removed on normal/failure cleanup.
+
+Sources are private UUID paths, capped at 240 seconds/200,000,000 bytes, and expire
+within 24 hours while maintenance operates. Transcript access ends seven days after
+creation; summaries never outlive it. Maintenance clears content, not the job's
+history. Physical deletion cannot occur while the computer/maintenance is stopped.
+No public MEDIA_URL, original-file download or raw-audio endpoint exists.
+
+## Poll generation and publication sequence
+
+```mermaid
+sequenceDiagram
+    actor L as Lecturer
+    participant V as poll_views
+    participant P as poll_services
+    participant G as LocalPollGenerator
+    participant R as local_poll_runner / Qwen3 8B
+    participant DB as Poll / SQLite
+    actor S as Student
+    L->>V: CSRF POST English/type/material (1-6000 characters)
+    V->>P: create_generated_draft()
+    P->>P: validate_input(), authorize Lecturer
+    alt Invalid input or Hebrew generation
+        P-->>V: Reject before inference
+        V-->>L: Preserve material, explain English-only generation
+    else Valid English request
+    P->>G: generate(material, kind, language) outside DB transaction
+    G->>R: Private IPC, pinned local model, bounded shared compute
+    R-->>G: Structured result or explicit failure
+    alt Unavailable/busy/invalid/timeout
+        P-->>V: Explicit error, no Poll saved
+        V-->>L: Bound form retains material, no prepared fallback
+    else Valid English output
+        G-->>P: Validated draft content
+        P->>DB: Recheck membership under lock, create ai/Draft
+        V-->>L: Editable unpublished draft, review required
+        S->>V: GET unpublished draft
+        V-->>S: 404, omit from list
+        L->>V: POST edit/save draft + version + CSRF
+        V->>P: edit_draft(), validate_content(), increment version
+        L->>V: Separate POST Publish + version + CSRF
+        V->>P: publish()
+        P->>DB: Lock meeting/poll, require_draft, one Active, publish
+        S->>V: POST one final choice
+        V->>P: vote(), current Student role, Active, unique vote
+        L->>V: Read live counts, POST manual close
+        V->>P: close() under same locking order
+        S->>V: GET closed results
+        V-->>S: Aggregates, comprehension-only answer/explanation
+    end
     end
 ```
 
-## Runtime and sample data
+Validation occurs at adapter/service boundaries; a failed provider call does not
+continue through the success messages shown above. The runner's compute lock
+serializes against video AI; busy is an explicit error. Generation has a 120-second
+startup/generation limit and no automatic retry. Publication checks the current
+draft version; voting/closing serialize under short SQLite IMMEDIATE transactions.
+Active Student HTML/JSON contain no answer/explanation or aggregates. Opinion polls
+never have correctness fields. The review-required notice is Lecturer/Draft-only.
 
-`.venv` is separate from `.ai-lab/venv`; website dependencies include no AI
-libraries. `.local/` holds the development database, generated signing key,
-random demo credentials and local server logs. These are ignored by Git.
-Only password hashes go into the database. The credential file is local
-plaintext for demo convenience, not a production credential-management design.
+## Shared participation and authorization
 
-`seed_demo` creates six accounts, two courses, seven memberships and four
-initial meetings. It retains existing passwords and refuses to take over
-matching unrelated usernames. The README describes each account's access.
-Courses/memberships are sample data; only meetings have a management UI.
+All feature routes require current course membership, not just hidden controls.
+Cross-course or mismatched parent IDs yield generic 404; wrong-role access gives
+403. Student histories filter by owner; Lecturer feeds/exports recheck role. Staff
+flags do not bypass course membership. Login preserves a safe next URL, logout
+requires CSRF POST, and templates escape text. MeetingForm binds allowed fields
+and the server assigns the course. Past meetings remain usable.
 
-Current UI copy is English as a reversible implementation choice. Responsive
-CSS uses a single-column mobile layout, viewport metadata, wrapping content,
-labels, focus styles and minimum main button sizes. Basic functional browser
-checks were subsequently reported by the user (see testing.md). Viewport-specific
-rendering and actual-phone usability remain unverified; the agent's browser
-check was blocked by the origin approval gate.
+Attendance opens a five-minute initial window, rotates signed QR every 30 seconds
+and accepts a code for 45 seconds bounded by closure. Later windows last two
+minutes. GET/login continuation revalidates; only CSRF POST registers, preserving
+one meeting/student record. A valid code can be forwarded: physical presence is
+not proven. XLSX is a snapshot, without back-sync or manual corrections.
 
-## Broader AI boundary — planned; disabled poll contract implemented
+Comments accept 1-1000 trimmed characters and retain private history; a visible
+Lecturer page polls every five seconds. D-17 is resolved as during/outside class,
+including past meetings and later Lecturer login, using the same connected path.
+No disconnected queue/local persistence/synchronization is required.
 
-Future feature services should call a provider-independent text-generation
-interface and a separate transcription interface. Inputs should carry source
-text/audio references, task/language and required output structure. Results
-should carry output, completion/error status, actual backend/model, usage and
-latency metadata. An adapter may implement local inference or an approved
-external provider without changing course permissions or feature views.
+## Historical milestones and remaining boundaries
 
-Configuration will select an adapter; persistence should not depend on a
-provider's response format. Provider errors, quota exhaustion and partial
-outputs must remain explicit. Test doubles must be labeled and must not be
-presented as functioning AI. No adapter, fake AI feature, provider selection,
-background worker or new AI trial is included in Unit A.
+Unit A was foundation-only; Unit B added participation; initial Unit C used a
+disabled generator and local demo drafts; Unit D initially stopped at extraction;
+Unit E added ASR. D-41/D-42/D-43/D-44 supersede those old disabled boundaries for
+new uploads/English drafts. Historical records remain in testing and experiment
+reports and must not be read as current factories or full acceptance.
 
-## Deployment limits
-
-Loopback-only Django development server, DEBUG enabled, and development
-SQLite are not production deployment. HTTPS, rate limiting, real identity,
-data lifecycle and classroom write concurrency remain later work. No campus
-IP gate, offline queue or synchronization mechanism is implemented.
-
-## Checkpoint provenance and no-fallback contract
-
-asr_checkpoint.py is stdlib-only and pins the tested turbo repo/revision plus SHA-256 of model/config/tokenizer files. The isolated runner verifies these before CUDA loading; a missing/mismatched checkpoint produces a typed teacher-facing failure. It cannot substitute medium or download a model. New jobs record requested identity in asr_metadata; actual-loaded identity/library versions/configuration replace this on the verified model-loaded event and remain if later inference fails. validate_result rejects another revision. Existing completed jobs are not migrated/retranscribed; their persisted metadata remains authoritative.
-
-## Local automatic video summaries — subsequent approved stage
-
-New MP4 uploads now use the existing local Qwen3 8B adapter after the full turbo transcript is saved. Output is an automatic paragraph plus 3–5 points in the detected recording language, owner-only with a transcript link and an error warning. Failed summaries retain the completed transcript. The same overall 600-second processing budget, course-membership/uploader authorization and at-most-seven-day text retention apply; summaries never outlive their source. Existing completed tasks remain unchanged. No external provider, model download or canned fallback is used. Current implementation, setup, measured checks and unresolved Hebrew grounding errors are in [local-summaries.md](local-summaries.md). Earlier statements that website summarization was disabled describe the preceding transcription stage and are superseded by this section for new uploads.
-
-## Subsequent local English poll-draft integration — D-44
-
-The initial generation adapter now uses installed local Qwen3 8B for English only, through the existing provider contract and 6,000-character limit. It validates exact fields, question/four distinct options, English script and comprehension-only answer index/complete-sentence explanation before saving an editable unpublished draft. Opinion output has no answer/explanation metadata. Failure preserves the form/material without a saved placeholder or automatic retry; Lecturer publication remains separate after semantic review. Hebrew automatic generation is explicitly unavailable, while existing Hebrew editing/publication/voting remains supported. Earlier disabled-provider statements describe the initial lifecycle stage; full bilingual generation and classroom/quality acceptance are not claimed. Source/implementation, normal-route model measurements and the initially rejected factual opinion question are in [local-poll-generation.md](local-poll-generation.md). No video-engine or Gemini changes are part of this stage.
+The website is loopback development with DEBUG/SQLite, not a production/classroom
+deployment. Phone access, classroom load, HTTPS/hardening and the ten-minute demo
+remain unverified. Homework comparison/review has failed quality expectations in
+local feasibility work; no corresponding website classes or sequence are invented
+here. Optional campus-network checks remain deferred and nonblocking.

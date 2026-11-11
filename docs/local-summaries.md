@@ -2,7 +2,7 @@
 
 ## Current implementation (2026-11-08)
 
-New normal meeting MP4 uploads now continue from real turbo transcription into Qwen3 8B summarization. Existing extraction/transcription-only tasks keep their original results and do not acquire summaries automatically. The worker first commits the transcript, language, provenance and seven-day expiry, deletes WAV, then invokes the replaceable summary adapter. No fake/canned summary is selectable in runtime; tests alone inject fixtures.
+New normal meeting MP4 uploads now continue from real turbo transcription into Qwen3 8B summarization. Existing extraction/transcription-only tasks keep their original results and do not acquire summaries automatically. After transcription returns, the worker removes WAV, then commits the transcript, language, provenance and seven-day expiry before invoking the replaceable summary adapter. A WAV cleanup failure fails the job instead of proceeding. No fake/canned summary is selectable in runtime; tests alone inject fixtures.
 
 Success renders **Automatic summary**, one short paragraph and 3–5 key points in the recording language, with a full-transcript link and **This summary is based on an automatic transcript and may contain errors.** Summary text is escaped in server-rendered HTML, not inserted as HTML by JavaScript. Owner-only status JSON carries availability flags rather than generated text; one guarded reload renders a newly ready summary. Other site pages remain usable.
 

@@ -1,5 +1,83 @@
 # Verification Record — Units A, B, C, D and E
 
+## Current component-to-test strategy
+
+This section addresses To Do 8 and the real names in the
+[class/interface diagrams](architecture.md#class-and-interface-diagrams).
+It is a current strategy/index over existing tests, not a new execution record.
+Dated results below retain provenance. **No software tests or AI trials were run
+in this documentation round.** The last full website closure recorded 136 server
+and 12 JavaScript tests passing; the later personal-review helper records two
+standalone audit tests, outside that website count.
+
+Use software tests for deterministic contracts, state/permission/retention and
+process-control assertions; use bounded real-model samples for inference wiring
+and content review; require separately reported browser/phone/classroom evidence
+for those environments. A fake engine may verify failure handling or disclosure,
+never speech/feedback/summary correctness. Exact-source quote checking does not
+prove that the quote supports the assessment.
+
+| Diagram component / responsibility | Risk or invariant | Existing software evidence (named tests) | Real-model / open boundary |
+|---|---|---|---|
+| User, Course, Membership, Meeting, MeetingForm | Cross-course access, forged role/parent and invalid writes | [Foundation suite](../classroom/tests.py); [class-aware assertions](#class-aware-coverage) | User browser checks are separate; production identities/phone/load open. |
+| AttendanceWindow, AttendanceRecord and attendance module | QR expiry/login continuation/duplicate registration; one record per student/meeting | [Participation suite](../classroom/test_participation.py): test_close_invalidates_every_code_even_after_reopen, test_window_closed_after_get_rejects_post_and_next_scan_requires_new_code; concurrent registration cases in same suite | User QR report is not a phone/classroom acceptance or physical-presence proof. Lecturer interpretation pending. |
+| MeetingRequest and request form/views | Outside-class persistence and Student-own/Lecturer visibility | [Participation suite](../classroom/test_participation.py): test_outside_class_requests_for_past_meeting_persist_for_later_lecturer | User reported live appearance of a comment; D-17 resolved. Broader load/retention open. |
+| Poll/PollVote, poll_services.edit_draft/publish/vote/close | Stale edits; second Active poll; concurrent duplicate vote; vote/close ordering | [Poll suite](../classroom/test_polls.py): test_draft_edit_all_content_and_optimistic_version, test_same_student_parallel_votes_are_final_and_unique, test_parallel_publications_only_one_active_poll, test_vote_racing_close_has_one_consistent_order | Real local generated drafts exercised lifecycle; not classroom load. |
+| poll_services.public_payload and Poll views | Draft/answer privacy; review notice only Lecturer/Draft | [Poll suite](../classroom/test_polls.py): test_student_cannot_see_drafts_in_list_detail_or_state, test_ai_review_notice_is_lecturer_draft_only_in_list_detail_and_state | User opinion-results checks reported separately; browser/phone matrix incomplete. |
+| PollGenerator / LocalPollGenerator / poll_contract | Invalid or unavailable engine must save no draft and retain material; Hebrew lifecycle unaffected | [Generation tests](../classroom/test_poll_generation.py): test_valid_comprehension_and_opinion_are_not_rewritten, test_bad_fields_script_duplicates_answer_and_incomplete_explanation_rejected, test_adapter_protocol_is_local_only_and_removes_private_material, test_unavailable_real_adapter_preserves_form_without_creating_poll, test_invalid_output_preserves_material_and_does_not_save, test_generated_poll_is_draft_hidden_from_student_before_separate_publish, test_hebrew_existing_draft_edit_publish_and_vote_remain_supported | Actual English stacks/queues route in local-poll-generation.md; factual opinion defect caught in review. Hebrew generation unavailable; max-input semantic/latency quality unproven. |
+| BoundedUploadHandler / VideoUploadForm / video_jobs.save_upload | Oversized/corrupt/no-audio input and unauthorized upload | [Video tests](../classroom/test_videos.py): test_size_handler_boundary_and_real_http_abort, test_duration_limit_is_server_enforced_with_real_media, test_corrupt_no_audio_and_audio_only_are_failed_by_worker, test_authorization_owner_lecturer_and_parent_scoping | Both supplied clips extracted; input-limit checks do not prove ASR accuracy. |
+| VideoJob / video_worker.claim_job/process_job / media_child | One worker; queue wait separate; timeout/stop/stale recovery; remove temporary audio | [Video tests](../classroom/test_videos.py): test_single_worker_lock_and_fifo, test_queue_wait_does_not_consume_processing_budget, test_timeout_terminates_actual_subprocess_and_removes_audio, test_hard_stopped_worker_is_recovered_and_decoder_does_not_orphan | Real uploads/workers exercised; full GPU hard-crash testing not claimed. |
+| Transcriber / LocalWhisperTranscriber / checkpoint helper | No fallback/download; valid metadata/text; one deadline; failure cleanup | [Transcription tests](../classroom/test_transcription.py): test_unavailable_turbo_fails_clearly_without_fallback, test_loaded_model_identity_is_retained_if_inference_fails, test_total_deadline_is_not_reset_at_transcription_start, test_adapter_protocol_keeps_text_off_stdout_and_forces_offline_environment, test_checkpoint_verification_rejects_missing_or_changed_files | Real medium/turbo on full SHORT/STATIC and new turbo uploads. No human-reference word accuracy; Hebrew code terms/negation remain uncertain. |
+| Summarizer / LocalQwenSummarizer / summary contract | Save transcript first; invalid language/model/format; failed summary preserves transcript | [Summary tests](../classroom/test_summaries.py): test_full_lifecycle_stores_transcript_first_then_summary_with_shared_expiry, test_summary_failure_keeps_saved_transcript_accessible, test_hebrew_summary_accepts_english_code_terms_without_rewriting, test_format_language_and_wrong_model_are_rejected | SHORT real upload success; STATIC saved-input success but uploaded summary_language failure. Structural tests cannot certify source grounding. |
+| video_jobs.owned_job/transcript_available/summary_available/purge_expired_transcripts | Owner/current role on direct URL; exact expiry; summary never outlives transcript | [Transcription tests](../classroom/test_transcription.py): test_demotion_revocation_and_mismatched_parent_block_saved_link, test_expiry_blocks_at_exact_deadline_even_before_cleanup; [summary tests](../classroom/test_summaries.py): test_expiry_hides_summary_on_direct_job_url_and_cleanup_clears_both | Actual owner pages opened; seven-day passage is tested with controlled time, not a seven-day live wait. Physical cleanup requires running maintenance. |
+| ProcessTree / exclusive_lock | Orphan compute and competing video/poll AI | [Summary tests](../classroom/test_summaries.py): test_windows_process_tree_close_terminates_owned_descendant; [video tests](../classroom/test_videos.py): test_single_worker_lock_and_fifo; generation adapter protocol test above | Owned-descendant test uses ordinary Python, not a real GPU hard-crash. Real sample services exited; classroom contention unmeasured. |
+| transcript_display.reading_paragraphs / Templates / browser scripts | Reordering/rewriting, RTL-LTR, escaping, hidden-page polling and double reload | [Display tests](../classroom/test_transcription.py): test_pause_boundaries_preserve_words_and_isolate_new_car, test_unmatched_legacy_segments_do_not_replace_text; [JS video tests](../tests_js/videos.test.cjs), [poll tests](../tests_js/polls.test.cjs), [participation tests](../tests_js/participation.test.cjs) | User opened STATIC transcript and SHORT summary/link. Actual-phone layout and full keyboard/browser matrix remain open. |
+| Personal-review audit helper (experiment only, not website class) | Fabricated quote versus unsupported conclusion | **Local only / unpublished:** experiments/local_ai/test_personal_review_probe.py (two reported audit tests); excluded from this documentation commit | **Local only / unpublished:** docs/homework-personal-review-feasibility.md reports 15/15 exact quotes, but technical false positives/negatives persist. No homework acceptance. |
+
+### Evidence boundaries and outstanding acceptance
+
+- **Software:** request/database/rendering/contracts and bounded process tests
+  above; test doubles and controlled clocks are disclosed in dated records.
+- **Real model:** measured local ASR, summary, English poll and synthetic homework
+  trials are indexed by the [tools report](local-ai-feasibility.md#current-tools-and-evidence-index).
+  The independent homework coverage map was not supplied to the model. Gemini
+  has no substantive task-quality result; user-reported direct HTTP 503 is a failure.
+- **Manual interface:** user reports are labeled as such below. They do not
+  establish unreported phone, audio-reference accuracy or classroom-load tests.
+- **Open:** lecturer acceptance of QR/list-XLSX/speech-only interpretations (the
+  user has sent the questions; replies pending), phone/network/load conditions,
+  broad AI quality and the actual ten-minute class demo/final conclusion.
+  D-17 comments timing is resolved; no disconnected queue is required.
+- **Reproducibility:** repository links above point to tracked files included in a clean clone.
+  New homework probes/reports/audit tests and later Gemini updates remain
+  unpublished local files, as labeled. Models, supplied media/raw transcripts
+  and independent experiment maps also remain local-only.
+
+### Documentation publication verification - 2026-11-11
+
+The documentation review checks the prospective staged tree rather than mere
+working-directory existence: repository links must resolve to tracked files and
+headings after commit; excluded homework/Gemini artifacts are explicitly labeled
+local-only/unpublished without repository links. README maps the eleven populated
+To Do items in page-2 order. The two previous homework experiment execution records
+remain unstaged; their outcomes are summarized in the tools index without
+publishing those experiments.
+
+All four current architecture Mermaid blocks and the historical video-processing
+sequence were parsed and rendered with
+Mermaid 11.12.0 in headless Chrome and their PNGs visually inspected. Rendering
+exposed sequence-message semicolons interpreted as statement separators; those
+labels were corrected to commas. No application behavior changed. The render
+helper/library/SVG/PNG outputs are local-only under ignored .local/doc-review,
+not submission dependencies or committed artifacts. This is documentation QA,
+not a new model, website, phone or classroom test.
+
+## Historical execution records
+
+Entries below are dated stage evidence. Statements that an engine was disabled
+or a workflow unimplemented describe that historical stage, not today's runtime.
+Use the current architecture and strategy above for the implemented boundary.
+
 ## Unit E — Local Transcription — 2026-11-08
 
 - **106 website tests passed**, file-backed SQLite, 48.750 s, no skips; 32 focused video/transcription checks passed in 15.381 s. Tests inject ASR fixtures only; actual GPU evidence is separate below.
