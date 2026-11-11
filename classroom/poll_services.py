@@ -6,6 +6,7 @@ from django.utils import timezone
 from .attendance import authorize, lock_and_authorize, CourseAccessError
 from .models import Membership, Poll, PollVote
 from .poll_generation import get_poll_generator, GenerationUnavailable
+from .poll_contract import validate_generated
 
 
 class PollError(Exception):
@@ -49,13 +50,17 @@ def content_of(poll):
 def create_generated_draft(meeting_id, user, kind, language, material):
     authorize(meeting_id, user, Membership.Role.LECTURER)
     validate_input(kind, language, material)
-    # External work, if eventually integrated, must stay outside DB transactions.
+    if language!='en':
+        raise GenerationUnavailable('Automatic draft generation is currently available in English only. Hebrew polls can still be edited, published and answered.')
+    # Model generation must stay outside database transactions.
     try:
         data = get_poll_generator().generate(material, kind, language)
     except GenerationUnavailable:
         raise
     except Exception:
         raise GenerationUnavailable('Generation failed. No draft was saved. You may retry explicitly.') from None
+    try:validate_generated(kind,data)
+    except (TypeError,ValueError):raise ValidationError('The generated draft failed content checks.') from None
     validate_content(kind, data)
     with transaction.atomic():
         lock_and_authorize(meeting_id, user, Membership.Role.LECTURER)
@@ -145,12 +150,21 @@ def vote(meeting_id, poll_id, user, option_index):
     return PollVote.objects.create(poll=poll, student=user, option_index=option_index, submitted_at=timezone.now())
 
 
+def origin_label_for(poll, membership):
+    """Draft review guidance is actionable only for a Lecturer reviewing a draft."""
+    if poll.origin == 'demo':
+        return poll.origin_label
+    if membership.role == Membership.Role.LECTURER and poll.status == Poll.Status.DRAFT:
+        return poll.origin_label
+    return 'Model-generated poll'
+
+
 def public_payload(poll, membership, user):
     """Whitelist disclosure fields: never serialize a model instance to students."""
     lecturer = membership.role == Membership.Role.LECTURER
     data = {'id': poll.pk, 'kind': poll.kind, 'kind_label': poll.get_kind_display(),
         'language': poll.language, 'language_label': poll.get_language_display(), 'status': poll.status,
-        'origin_label': poll.origin_label, 'question': poll.question,
+        'origin_label': origin_label_for(poll,membership), 'question': poll.question,
         'options': [{'index': i, 'text': text} for i, text in enumerate(poll.options)]}
     own = poll.votes.filter(student=user).first() if not lecturer else None
     data['has_voted'] = own is not None

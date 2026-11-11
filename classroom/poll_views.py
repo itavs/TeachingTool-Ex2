@@ -20,7 +20,7 @@ def poll_list(request, meeting, membership):
         polls = polls.exclude(status=Poll.Status.DRAFT)
     # List context contains no material, answer, explanation or vote identities.
     items = [{'id':p.pk, 'question':p.question, 'kind_label':p.get_kind_display(),
-        'status':p.get_status_display(), 'origin_label':p.origin_label} for p in polls]
+        'status':p.get_status_display(), 'origin_label':rules.origin_label_for(p,membership)} for p in polls]
     return render(request,'classroom/poll_list.html',{**context(meeting,membership),'polls':items})
 
 

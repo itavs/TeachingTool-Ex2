@@ -14,7 +14,8 @@ from django.urls import reverse
 from django.utils import timezone
 from .models import Poll, PollVote, Membership
 from . import poll_services as rules
-from .poll_generation import DisabledPollGenerator, GenerationUnavailable, get_poll_generator
+from .poll_generation import GenerationUnavailable, get_poll_generator
+from .local_poll_generator import LocalPollGenerator
 from .test_participation import ParticipationFixture
 
 
@@ -23,7 +24,7 @@ class FakeGenerator:
     def generate(self, material, kind, language):
         result = {'question':'שאלת דוגמה' if language == 'he' else 'Example question', 'options':['A','B','C','D']}
         if kind == 'comprehension':
-            result.update(correct_index=1, explanation='PRIVATE_EXPLANATION')
+            result.update(correct_index=1, explanation='PRIVATE_EXPLANATION is supported by the supplied source text.')
         return result
 
 
@@ -99,15 +100,36 @@ class PollTests(PollFixture,TestCase):
     def setUp(self):
         self.prepare_polls()
 
-    def test_generation_disabled_without_saving_draft_or_using_fake(self):
-        self.assertIsInstance(get_poll_generator(),DisabledPollGenerator)
+    def test_hebrew_generation_is_blocked_without_calling_provider(self):
+        self.assertIsInstance(get_poll_generator(),LocalPollGenerator)
         self.client.force_login(self.teacher)
-        for kind in ['comprehension','opinion']:
-            response = self.client.post(self.purl('poll-create'),{'kind':kind,'language':'he','material':'Test material'})
-            self.assertContains(response,'No draft was generated',status_code=503)
+        with patch('classroom.poll_services.get_poll_generator') as provider:
+            for kind in ['comprehension','opinion']:
+                response=self.client.post(self.purl('poll-create'),{'kind':kind,'language':'he','material':'Test material'})
+                self.assertContains(response,'English only',status_code=400)
+                self.assertContains(response,'Test material',status_code=400)
+            provider.assert_not_called()
         self.assertEqual(Poll.objects.count(),2)
-        with self.assertRaises(GenerationUnavailable):
-            get_poll_generator().generate('Example','opinion','en')
+
+    def test_ai_review_notice_is_lecturer_draft_only_in_list_detail_and_state(self):
+        notice='Model-generated draft — lecturer review required'
+        self.comp.origin='ai';self.comp.save(update_fields=['origin'])
+        self.client.force_login(self.teacher)
+        for name in ['poll-list','poll-detail','poll-edit']:
+            with self.subTest(role='lecturer',state='draft',view=name):
+                self.assertContains(self.client.get(self.purl(name)),notice)
+        self.assertEqual(self.client.get(self.purl('poll-state')).json()['origin_label'],notice)
+        self.publish()
+        for state in ['active','closed']:
+            if state=='closed':rules.close(self.meeting.pk,self.comp.pk,self.teacher)
+            for user in [self.teacher,self.student]:
+                self.client.force_login(user)
+                for name in ['poll-list','poll-detail']:
+                    with self.subTest(role=user.username,state=state,view=name):
+                        response=self.client.get(self.purl(name))
+                        self.assertNotContains(response,notice)
+                        self.assertContains(response,'Model-generated poll')
+                self.assertEqual(self.client.get(self.purl('poll-state')).json()['origin_label'],'Model-generated poll')
 
     def test_student_radio_labels_group_and_explicit_submission(self):
         self.publish();self.client.force_login(self.student)
@@ -142,9 +164,11 @@ class PollTests(PollFixture,TestCase):
 
     def test_generation_input_boundaries_and_languages_checked_before_provider(self):
         self.client.force_login(self.teacher)
-        for material,status in [('x',503),('א'*6000,503),('🙂'*6000,503),('x'*6001,400),(' '*10,400),('x'*6000+' ',400)]:
-            with self.subTest(length=len(material)):
-                self.assertEqual(self.client.post(self.purl('poll-create'),{'kind':'opinion','language':'en','material':material}).status_code,status)
+        with patch('classroom.poll_services.get_poll_generator') as unavailable:
+            unavailable.return_value.generate.side_effect=GenerationUnavailable('Local model unavailable')
+            for material,status in [('x',503),('א'*6000,503),('🙂'*6000,503),('x'*6001,400),(' '*10,400),('x'*6000+' ',400)]:
+                with self.subTest(length=len(material)):
+                    self.assertEqual(self.client.post(self.purl('poll-create'),{'kind':'opinion','language':'en','material':material}).status_code,status)
         for kind,language in [('bad','he'),('opinion','fr')]:
             self.assertEqual(self.client.post(self.purl('poll-create'),{'kind':kind,'language':language,'material':'text'}).status_code,400)
         with patch('classroom.poll_services.get_poll_generator') as provider:
@@ -153,17 +177,17 @@ class PollTests(PollFixture,TestCase):
                     rules.create_generated_draft(self.meeting.pk,self.teacher,'opinion','he',material)
             provider.assert_not_called()
 
-    def test_fake_provider_supports_both_types_languages_only_when_injected_in_test(self):
+    def test_fake_provider_supports_both_types_only_when_injected_in_test(self):
         self.client.force_login(self.teacher)
         with patch('classroom.poll_services.get_poll_generator',return_value=FakeGenerator()):
             for kind in ['comprehension','opinion']:
-                for language in ['he','en']:
+                for language in ['en']:
                     response=self.client.post(self.purl('poll-create'),{'kind':kind,'language':language,'material':'Test data'})
                     self.assertEqual(response.status_code,302)
                     poll=Poll.objects.latest('pk')
                     self.assertEqual((poll.kind,poll.language,poll.status),(kind,language,'draft'))
                     self.assertEqual(poll.correct_index,1 if kind=='comprehension' else None)
-        self.assertIsInstance(get_poll_generator(),DisabledPollGenerator)
+        self.assertIsInstance(get_poll_generator(),LocalPollGenerator)
 
     def test_provider_failure_and_invalid_output_never_save_placeholder(self):
         self.client.force_login(self.teacher)
@@ -171,9 +195,9 @@ class PollTests(PollFixture,TestCase):
         with patch('classroom.poll_services.get_poll_generator',return_value=provider):
             for payload in [{'question':'Bad','options':['A']}, {'question':'Bad','options':['A','B','C','D'],'correct_index':0}]:
                 provider.generate.return_value=payload
-                self.assertEqual(self.client.post(self.purl('poll-create'),{'kind':'opinion','language':'he','material':'source'}).status_code,400)
+                self.assertEqual(self.client.post(self.purl('poll-create'),{'kind':'opinion','language':'en','material':'source'}).status_code,400)
             provider.generate.side_effect=TimeoutError('PRIVATE_PROVIDER_ERROR')
-            response=self.client.post(self.purl('poll-create'),{'kind':'opinion','language':'he','material':'source'})
+            response=self.client.post(self.purl('poll-create'),{'kind':'opinion','language':'en','material':'source'})
             self.assertContains(response,'Generation failed',status_code=503)
             self.assertNotContains(response,'PRIVATE_PROVIDER_ERROR',status_code=503)
         self.assertEqual(Poll.objects.count(),2)
@@ -185,7 +209,7 @@ class PollTests(PollFixture,TestCase):
         provider=Mock();provider.generate.side_effect=revoke
         self.client.force_login(self.teacher)
         with patch('classroom.poll_services.get_poll_generator',return_value=provider):
-            self.assertEqual(self.client.post(self.purl('poll-create'),{'kind':'opinion','language':'he','material':'source'}).status_code,404)
+            self.assertEqual(self.client.post(self.purl('poll-create'),{'kind':'opinion','language':'en','material':'source'}).status_code,404)
         self.assertEqual(Poll.objects.count(),2)
 
     def test_draft_edit_all_content_and_optimistic_version(self):

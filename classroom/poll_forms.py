@@ -5,7 +5,7 @@ from .poll_services import validate_content
 
 class GenerationForm(forms.Form):
     kind = forms.ChoiceField(choices=Poll.Kind.choices, label='Poll type')
-    language = forms.ChoiceField(choices=Poll.Language.choices, label='Output language')
+    language = forms.ChoiceField(choices=Poll.Language.choices, label='Output language',initial='en')
     material = forms.CharField(max_length=6000, strip=False, widget=forms.Textarea(attrs={'rows':7, 'dir':'auto'}),
         label='Learning material', help_text='1–6000 Unicode characters, including whitespace. No files.')
 
@@ -18,6 +18,12 @@ class GenerationForm(forms.Form):
         if not text.strip():
             raise forms.ValidationError('Enter learning material, not whitespace only.')
         return text
+
+    def clean_language(self):
+        language=self.cleaned_data['language']
+        if language=='he':
+            raise forms.ValidationError('Automatic draft generation is currently available in English only. Hebrew polls can still be edited, published and answered.')
+        return language
 
 
 class DraftForm(forms.Form):

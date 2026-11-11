@@ -1,4 +1,4 @@
-"""Replaceable generation contract. Normal application has no working AI provider."""
+"""Replaceable poll generation contract; local English-only runtime provider."""
 from typing import Protocol
 
 
@@ -18,5 +18,5 @@ class DisabledPollGenerator:
 
 
 def get_poll_generator() -> PollGenerator:
-    # No environment switch, credentials, HTTP, SDK or fake-provider fallback.
-    return DisabledPollGenerator()
+    from .local_poll_generator import LocalPollGenerator
+    return LocalPollGenerator()

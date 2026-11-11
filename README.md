@@ -24,7 +24,7 @@ polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
 D-22. AI workflows remain design targets; attendance and connected comments now have a Unit B implementation and server checks;
 remaining operational parameters and open interpretations are explicit.
 The shared website foundation is now implemented under D-23 through D-26;
-Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Real AI generation is disabled and unverified; Unit D implements private MP4 validation/audio extraction; Unit E now transcribes new video uploads locally and exposes private full transcripts; new uploads now include local Qwen3 automatic summaries; homework website AI remains unimplemented.
+Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Local English poll-draft generation is now available under D-44; Unit D implements private MP4 validation/audio extraction; Unit E now transcribes new video uploads locally and exposes private full transcripts; new uploads now include local Qwen3 automatic summaries; homework website AI remains unimplemented.
 
 | Capability | Assignment behavior | Design direction and open proposals |
 |------------|---------------------|----------------------------------|
@@ -147,7 +147,7 @@ The D-17 comments timing interpretation is resolved; it does not change attendan
 ## Project Status
 
 Unit A is implemented: sign-in/out, course-scoped permissions, course/meeting
-pages, lecturer meeting creation/editing, and isolated demo data. Unit B implements attendance, rotating QR windows, XLSX snapshots and connected private comments/history with lecturer polling. The poll lifecycle is implemented with labeled local demo drafts; real AI generation remains disabled and unverified. Video upload/extraction and local transcription are implemented; new uploads include local automatic summaries; homework AI remains unimplemented.
+pages, lecturer meeting creation/editing, and isolated demo data. Unit B implements attendance, rotating QR windows, XLSX snapshots and connected private comments/history with lecturer polling. The poll lifecycle is implemented with labeled local demo drafts; local English generation is available for Lecturer-reviewed drafts. Video upload/extraction and local transcription are implemented; new uploads include local automatic summaries; homework AI remains unimplemented.
 See [architecture](docs/architecture.md) and [verification](docs/testing.md).
 
 Local AI experiments produced measurable but mixed-quality results; Gemini
@@ -206,10 +206,9 @@ have no correct answer or correctness evaluation. Poll material accepts at most
 6,000 Unicode characters on the server; output-language choices are Hebrew and
 English. This does not establish genuine AI language/generation quality.
 
-Real generation is **disabled and unverified**. The generation form makes no
-provider request and reports unavailable, without saving canned content. Fake
-providers exist only in automated tests. For manual lifecycle checks, use the
-separate local command after migrations:
+English draft generation now uses installed local Qwen3 8B through the provider interface. Choose English/type and paste up to 6,000 characters; a valid result opens an unpublished editable draft. Publication is a separate Lecturer action. Automatic checks do not establish meaning/correctness. Hebrew generation is currently unavailable, while editing/publishing/voting in existing Hebrew polls remains supported. On failure the material remains in the form, with no saved placeholder. See [local-poll-generation.md](docs/local-poll-generation.md).
+
+The separate local command below remains available for clearly labeled manual lifecycle fixtures after migrations:
 
 ```powershell
 .\.venv\Scripts\python.exe manage.py seed_demo_polls --language he
@@ -232,7 +231,7 @@ in the ignored local demo credential file. No signup or network setup changed.
 See [poll design and manual checks](docs/poll-implementation-plan.md),
 [architecture](docs/architecture.md), and [executed evidence](docs/testing.md).
 Real browser/phone acceptance and classroom capacity are separate from server
-and JavaScript logic tests; real AI generation is not a completed capability.
+and JavaScript logic tests. Local English generation has narrow real-model evidence; broader language/meaning quality remains unverified.
 
 ### Unit B quick check
 
