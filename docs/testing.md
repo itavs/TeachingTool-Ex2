@@ -6,7 +6,7 @@ This section addresses To Do 8 and the real names in the
 [class/interface diagrams](architecture.md#class-and-interface-diagrams).
 It is a current strategy/index over existing tests, not a new execution record.
 Dated results below retain provenance. **No software tests or AI trials were run
-in this documentation round.** The last full website closure recorded 136 server
+in this documentation round.** The previous poll-stage closure recorded 136 server
 and 12 JavaScript tests passing; the later personal-review helper records two
 standalone audit tests, outside that website count.
 
@@ -72,12 +72,70 @@ helper/library/SVG/PNG outputs are local-only under ignored .local/doc-review,
 not submission dependencies or committed artifacts. This is documentation QA,
 not a new model, website, phone or classroom test.
 
+## UC-05 submission foundation
+
+Implemented under D-53; this section supersedes the planned status only for
+assignment creation, submitted versions and authorized reading. Review jobs,
+AI, comparison and feedback publication remain unimplemented and untested.
+The two previous uncommitted model experiment records below are unchanged.
+
+**Executed:** the full website suite passed **151 tests in 55.674 seconds**, using
+a separate file-backed SQLite test database, no skips. This includes **15 new
+homework tests** in [test_homework.py](../classroom/test_homework.py). An earlier
+focused run of the first 14 tests passed before the additional Lecturer-access
+case was added; the complete run includes that case. **12 JavaScript tests passed**.
+System check, migration-drift check and dependency check passed. Migration
+0007_homework_submissions was applied to the ignored local development database.
+No model inference or external-provider request occurred.
+
+| Actual component | Executed assertions |
+|---|---|
+| AssignmentForm / homework_services.create_assignment / HomeworkAssignment | Lecturer normal-form creation; server-selected meeting/creator despite forged fields; required title/instructions/ordered criteria; Student can read instructions. Student/foreign-course creation denied. |
+| SubmissionForm / homework_services.submit_version / SubmissionVersion | Normal POST save confirmation and Submitted/version display; second submission preserves both exact sources including whitespace/line breaks and Hebrew/English terms. Posted owner/assignment/version/status ignored. Concurrent real-connection submissions receive numbers 1/2 and retain both texts. |
+| assignment_for / submission_for / scoped guard | Owner sees both version URLs/history; current course Lecturer and a second Lecturer in that course can read; another Student cannot discover/open versions; a foreign Lecturer/nonmember and global staff flags do not bypass scope. Wrong course/meeting/assignment substitutions fail. Fresh membership removal/demotion applies to direct reads and stale-form writes. |
+| CSRF, read-only endpoints and source integrity | CSRF rejection and successful token-bearing creation/submission; anonymous login redirects; POST to read-only version/list routes rejected; model save rejects editing saved versions; DB rejects duplicate/zero numbering. Blank work is not saved and failed-save HTTP 503 cannot display success. |
+| Templates / source display | Escaped source HTML, dir=auto and pre-wrap reading style; explicit Student/version/time/Submitted fields. No review-request action is offered. These are server markup assertions, not phone/browser visual acceptance. |
+
+These checks establish website control flow and source persistence, **not feedback
+quality**. Application save paths are append-only; no database trigger blocks
+privileged bulk/SQL administration. SQLite two-request success is not classroom
+capacity acceptance. No numeric homework-content/workload limit is established;
+existing Django request-memory limits still apply. Criteria are stored as ordered
+text, one line per criterion; feedback-language/rubric-version configuration is
+not part of this slice. Assignment editing/deletion and intentional demo cleanup
+remain deferred.
+
+Manual browser steps for lecturer_alpha/student_alex are in the
+[README](../README.md#uc-05-submission-foundation---local-browser-check).
+### User-reported Lecturer version check - 2026-11-11
+
+The user reported opening both **Version 1** and **Version 2**, submitted by
+**student_alex**, in the browser as a Lecturer after resubmission. Each version
+showed its corresponding text. This is a user-reported manual Lecturer reading
+and version-preservation check, not agent-operated browser evidence. It does not
+establish Student submission UI, phone layout, other users' access restrictions
+or model quality; server authorization/source checks above are separate evidence.
+
+The agent separately verified the active loopback server's authenticated HTTP
+navigation from DEMO-CS101 / Test Meeting through Assignments and submissions to
+New assignment (all HTTP 200). The old --noreload process initially served the
+previous template; restarting that development server exposed the existing new
+link without a template correction. This was HTTP/form inspection, not browser
+visual acceptance or a newly created assignment. No phone/network binding changed.
+
+Before the submission-stage commit, all 15 focused homework tests passed again
+in 0.465 seconds on a separate file-backed SQLite test database, with no skips.
+System and migration-drift checks passed. This documentation-only manual-report
+addition did not change application code or require a new AI trial.
+Gemini/homework experiment changes remain separate from this submission stage.
+
 ## Planned UC-05 acceptance strategy
 
-**Not executed.** D-46 through D-52 approve a planning baseline, not implementation
-or a pass. This section does not modify the historical homework experiment records
-below. All additions in the [planned diagrams](architecture.md#planned-uc-05-components)
-remain absent from the website. Separate deterministic website acceptance from
+**Full review acceptance is not executed.** D-46 through D-52 define the review
+planning baseline; D-53 foundation checks are executed separately above. This section does not modify the historical homework experiment records
+below. The assignment/submission subset is now implemented under D-53 (see the
+[executed foundation checks](#uc-05-submission-foundation)). All feedback/review/
+comparison/publication additions in the diagrams remain planned. Separate deterministic website acceptance from
 actual-model conclusion quality. Test fixtures can validate control flow, not
 claim real feedback generation or an accepted language.
 
@@ -86,7 +144,7 @@ claim real feedback generation or an accepted language.
 | Planned responsibility | Risk / acceptance check | Evidence status |
 |---|---|---|
 | HomeworkReviewService + existing Membership | Student requests only own work, course Lecturer may request a course submission. Reject forged owner/course/version, direct cross-user/cross-course HTML/JSON and revoked membership at request/save/publication/read. | Planned tests, no implementation. |
-| SubmissionVersion | Resubmission preserves exact earlier text and version; old published feedback stays associated with that version. Concurrent submissions cannot overwrite a version. | Planned tests. |
+| SubmissionVersion | Resubmission preserves exact earlier text and version; old published feedback stays associated with that version. Concurrent submissions cannot overwrite a version. | Source/version/concurrency checks implemented under D-53 in test_homework.py; feedback association remains planned. |
 | ReviewJob source selection | Save latest version per other owner in the same assignment at request creation; exclude all target-owner versions, not merely requester versions. **Lecturer initiates review of A, where A has multiple versions: none of A's versions may appear as a peer.** Include latest B/C only, exclude foreign assignments, and preserve the chosen snapshots after later resubmission. | Planned transactional/source-selection tests. |
 | ReviewJob provenance | Save actual target/peer IDs, instructions, criteria, assignment revision/language, actual model identity and failure stage. Editing source/rubric/language does not rewrite prior request inputs. | Planned persistence tests. |
 | FeedbackDraft + review service | Student cannot discover draft text/evidence via list/detail/JSON. Lecturer can review/edit; only separate CSRF Publish exposes version-bound public content. Original generated text is distinguishable from edits. Stale or concurrent edit/publication and changed-source-as-current attempts are rejected or explicitly flagged, never silently relabeled. | Planned disclosure/concurrency tests. |

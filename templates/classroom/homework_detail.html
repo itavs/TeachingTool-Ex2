@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}{{ assignment.title }} · Homework{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'homework-list' course.pk meeting.pk %}">← Homework · {{ meeting.title }}</a><h1 dir="auto">{{ assignment.title }}</h1>
+<section class="panel"><h2>Instructions</h2><div class="submission-text" dir="auto">{{ assignment.instructions }}</div><h2>Review criteria</h2><ol>{% for criterion in assignment.criteria %}<li dir="auto">{{ criterion }}</li>{% endfor %}</ol></section>
+{% if form %}<section class="panel form-panel"><h2>Submit your work</h2><form method="post">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}<p class="muted">{{ field.help_text }}</p>{{ field.errors }}</div>{% endfor %}<button class="button" type="submit">Submit new version</button></form></section>{% endif %}
+<section class="panel"><h2>{% if membership.role == 'lecturer' %}Submitted versions{% else %}Your submitted versions{% endif %}</h2><ul>{% for version in versions %}<li>{% if membership.role == 'lecturer' %}{{ version.student.username }} · {% endif %}<a href="{% url 'homework-submission' course.pk meeting.pk assignment.pk version.pk %}">Version {{ version.version_number }}</a> · Submitted · {{ version.submitted_at|date:'j F Y H:i:s' }} (Asia/Jerusalem)</li>{% empty %}<li>No work has been submitted{% if membership.role == 'student' %} by you{% endif %}.</li>{% endfor %}</ul></section>
+{% endblock %}

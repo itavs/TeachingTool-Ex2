@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Homework · {{ meeting.title }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'meeting-detail' course.pk meeting.pk %}">← {{ meeting.title }}</a>
+<div class="page-heading"><h1>Homework</h1>{% if membership.role == 'lecturer' %}<a class="button" href="{% url 'homework-create' course.pk meeting.pk %}">New assignment</a>{% endif %}</div>
+{% for assignment in assignments %}<section class="panel"><h2><a href="{% url 'homework-detail' course.pk meeting.pk assignment.pk %}" dir="auto">{{ assignment.title }}</a></h2><p>View instructions, criteria and submitted versions.</p></section>{% empty %}<section class="panel"><p>No assignments have been created for this meeting.</p></section>{% endfor %}
+{% endblock %}

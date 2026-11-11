@@ -3,6 +3,7 @@ from . import views
 from . import participation_views as participation
 from . import poll_views as polls
 from . import video_views as videos
+from . import homework_views as homework
 
 urlpatterns = [
     path("", views.course_list, name="course-list"),
@@ -14,6 +15,10 @@ urlpatterns = [
 
 meeting_prefix = "courses/<int:course_id>/meetings/<int:meeting_id>/"
 urlpatterns += [
+    path(meeting_prefix + 'homework/', homework.assignment_list, name='homework-list'),
+    path(meeting_prefix + 'homework/new/', homework.assignment_create, name='homework-create'),
+    path(meeting_prefix + 'homework/<int:assignment_id>/', homework.assignment_detail, name='homework-detail'),
+    path(meeting_prefix + 'homework/<int:assignment_id>/versions/<int:submission_id>/', homework.submission_detail, name='homework-submission'),
     path(meeting_prefix + "attendance/", participation.attendance_dashboard, name="attendance"),
     path(meeting_prefix + "attendance/state/", participation.attendance_state, name="attendance-state"),
     path(meeting_prefix + "attendance/open/", participation.attendance_open, name="attendance-open"),

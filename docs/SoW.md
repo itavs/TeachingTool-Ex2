@@ -56,7 +56,7 @@ a capability requires a user decision.
 | Comments and suggestions (AS-02) | Student comments and suggestions in real time / offline. | D-17 clarifies online as during class and offline as outside class, both through normal connected website submission to an associated meeting, including a past meeting. D-18/D-19 retain identified comment/suggestion requests, stored history, student-own visibility, lecturer access and live lecturer updates. | No local persistence, send queue or disconnected synchronization is required. Lecturer replies, threads, attachments, votes and notifications remain excluded. Identity follows D-24; retention and classroom capacity remain open. |
 | Automatic polls (AS-03) | Lecturers can create simple polls automatically about current learning material. | Approved D-08 through D-11: lecturer selects comprehension or opinion before real model generation from pasted text. Both types have one question and four single-choice options; comprehension adds one correct answer and short explanation, while opinion has no correct answer or correctness evaluation. All generated content can be reviewed/edited before publication only. Each identified student submits one final response; one active poll per meeting, with further creation after manual closure. Lecturer sees live counts/percentages; students see aggregates without identities only after closure, plus comprehension answer/explanation then. | D-31 fixes lecturer-selected Hebrew/English output and 6,000 material characters; shared identity/capacity/AI constraints remain Q-06/Q-07. These detailed rules are project choices, not explicit handout requirements. No grades, file uploads, open-ended questions, or automatic scheduling. Generation failure provides an error and retry without prepared-content substitution. |
 | Class-video summary (AS-04) | The lecturer receives an ML-generated summary derived from a class video. | Approved D-12 through D-16: manually upload an MP4 from the computer; extract audio, transcribe speech, and summarize through a model in the recording's spoken language without translation. Target Hebrew, English, and Hebrew with English technical terms. Display a summary paragraph, 3-5 key points, an option to view the full transcript, and a notice that unspoken visual information is excluded. | Targets are unverified. Sustained language switching is outside the commitment. D-34 fixes initial system limits at 4 minutes/200 MB. Separate demo duration, model quality and lecturer interpretation remain open (P-06/Q-04). Unit D validates/extracts audio; Unit E adds full-transcript viewing, with word accuracy unverified and summaries disabled. |
-| Homework review and comparison (AS-05) | Students and teachers receive deep LLM reviews, including comparison with other students' work. | D-20 through D-22 approve theoretical Hebrew/English pasted submissions, lecturer instructions/criteria, strengths/gaps/actionable recommendations, and actual same-assignment peer comparison of topic coverage and solution approaches. Student requests/views own feedback/comparison without peer identities/full works; lecturer may review any submission and sees all submissions/feedback. No-peer feedback explicitly says no comparison occurred. | No grades, plagiarism determinations, or code execution. Demo uses sample works only; sample count is not a system cap. D-46 through D-51 resolve planned publication, peer/version snapshots, assignment language and synthetic-demo retention. Measured limits and per-language quality remain Q-05; D-52 resolves individual-only publication after comparison failure; real-data/resource boundaries remain Q-07. No homework website capability is implemented or accepted. |
+| Homework review and comparison (AS-05) | Students and teachers receive deep LLM reviews, including comparison with other students' work. | D-20 through D-22 approve theoretical Hebrew/English pasted submissions, lecturer instructions/criteria, strengths/gaps/actionable recommendations, and actual same-assignment peer comparison of topic coverage and solution approaches. Student requests/views own feedback/comparison without peer identities/full works; lecturer may review any submission and sees all submissions/feedback. No-peer feedback explicitly says no comparison occurred. | No grades, plagiarism determinations, or code execution. Demo uses sample works only; sample count is not a system cap. D-46 through D-51 resolve planned publication, peer/version snapshots, assignment language and synthetic-demo retention. Measured limits and per-language quality remain Q-05; D-52 resolves individual-only publication after comparison failure; real-data/resource boundaries remain Q-07. Assignment/submission creation and authorized reading are implemented under D-53; AI review/comparison acceptance remains outstanding. |
 
 The proposed administrative boundary is one course, one lecturer, and one active
 meeting (P-01). Neither the actual class size nor a concurrency limit has been
@@ -211,7 +211,7 @@ generation is unavailable. New MP4 jobs validate/extract audio, transcribe with 
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
 unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
-D-51) and feasibility evidence only; it is not a website feature. Functional operation does not establish reliable AI accuracy,
+D-51) with an implemented assignment/submission foundation; AI feedback/comparison is not a website feature. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 The original Unit C disabled-provider and Unit D extraction-only milestones are
@@ -222,7 +222,7 @@ resolved for comments only; attendance interpretations remain Q-01/Q-02.
 
 Evidence and limitations: [tools report](local-ai-feasibility.md#current-tools-and-evidence-index),
 [current architecture](architecture.md), [class-aware strategy and results](testing.md#current-component-to-test-strategy).
-The full assignment still requires homework implementation/integration if the unchanged
+The full assignment still requires homework feedback/comparison implementation/integration if the unchanged
 five-capability target is retained, actual classroom/phone verification, an
 approximately ten-minute demonstration and a final results conclusion. No such
 class demonstration or final conclusion has been recorded. These are remaining
@@ -252,8 +252,22 @@ for this workflow yet, and length/workload/runtime bounds await measurement.
 
 Retain only synthetic demo versions/feedback through the demo and submission
 checking, then provide intentional cleanup. Real student-work policy is separate;
-video retention does not apply. This is planning, not implementation or new trial
-results. Responsibilities/diagrams and planned software versus model-quality
+video retention does not apply. The feedback/comparison portion is planning, not implemented AI or new trial
+results; D-53 implements assignment/submission and authorized reading only. Responsibilities/diagrams and planned software versus model-quality
 acceptance are in [architecture](architecture.md#planned-uc-05-components),
 [UC-05](SRS.md#uc-05---submit-homework-review-a-draft-and-publish-feedback) and
 [testing strategy](testing.md#planned-uc-05-acceptance-strategy).
+
+## UC-05 first implementation slice
+
+The UC-05 submission foundation is implemented: Lecturers create meeting-linked
+assignments with instructions and one criterion per line; enrolled Students submit
+text as append-only numbered versions. Owners see their history; current course
+Lecturers can read all submitted versions. The status is **Submitted**, not reviewed
+or published. AI review requests, comparison, feedback drafts/publication, feedback
+language configuration and cleanup remain planned. No model is called by this stage.
+
+This slice does not implement assignment editing/deletion, language selection,
+review jobs, AI, comparisons, publication or cleanup. It preserves all later
+approved UC-05 behavior as planned work. See [manual check](../README.md#uc-05-submission-foundation---local-browser-check)
+and [executed software evidence](testing.md#uc-05-submission-foundation).

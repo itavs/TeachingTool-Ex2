@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}Version {{ submission.version_number }} · {{ assignment.title }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'homework-detail' course.pk meeting.pk assignment.pk %}">← {{ assignment.title }}</a>
+<h1>Submitted work · Version {{ submission.version_number }}</h1>
+<section class="panel"><p><strong>Status: {{ submission.status_label }}</strong></p><p>Student: {{ submission.student.username }} · {{ submission.submitted_at|date:'j F Y H:i:s' }} (Asia/Jerusalem)</p><div class="submission-text" dir="auto">{{ submission.text }}</div></section>
+{% endblock %}

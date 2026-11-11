@@ -45,7 +45,7 @@ remain open. Website identity/access follows D-24; production readiness remains 
 
 For comments, D-17 was clarified by the user on 2026-11-11: online means during class and offline means outside class. In both cases, identified students submit normally through the website to an associated meeting, including one that has already taken place. Creating content, submitting it and confirming storage remain separate responsibilities. Local persistence, a send queue and disconnected synchronization are not required. D-18/D-19 retain stored history, student-own visibility, lecturer access to meeting requests and live updates. Lecturer replies, discussion threads, attachments, votes and notifications remain excluded.
 
-Homework review remains **planned / feasibility only**, under D-20 through D-22
+Homework feedback/comparison remains **planned / feasibility only**, under D-20 through D-22
 and the approved UC-05 baseline D-46 through D-51. A Student may request feedback
 on their version; a course Lecturer may request a submission review. AI prepares
 a private Lecturer draft, which the Lecturer edits/reviews and publishes separately
@@ -134,9 +134,9 @@ linked sections; detailed historical evidence is separate from current status.
 | 4 | SRS document | [Functional requirements](docs/SRS.md#4-functional-requirements) | FR/NFR and acceptance targets defined; full acceptance not claimed. |
 | 5 | Main use cases / client stories | [UC-01 through UC-05](docs/SRS.md#5-main-use-cases) | Five main flows documented; UC-05 planning baseline approved, quality/limits still open. |
 | 6 | Main software components | [Current components](docs/architecture.md#current-components) | Implemented responsibilities mapped; planned UC-05 additions are separate from existing code. |
-| 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence), [planned homework](docs/architecture.md#planned-uc-05-components) | Current video/poll paths covered; homework classes/sequence are explicitly planned, not implemented. |
+| 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence), [planned homework](docs/architecture.md#planned-uc-05-components) | Current video/poll paths covered; homework assignment/version classes are implemented; review/comparison remains planned. |
 | 8 | Testing strategy addressing the classes in item 7 | [Component-to-test strategy](docs/testing.md#current-component-to-test-strategy) | Software checks mapped separately from real-model evidence and open acceptance. |
-| 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Foundation/participation/polls/video implemented; homework website capability missing. |
+| 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Foundation/participation/polls/video implemented; homework submissions implemented; AI feedback/comparison missing. |
 | 10 | Perform a demo in class | [Classroom/demo acceptance](docs/SRS.md#7-future-acceptance-checks-and-traceability) | Not recorded as performed; phone, network, load and ten-minute rehearsal outstanding. |
 | 11 | Conclude; write a short account of results | [Interim results](#interim-results-and-final-conclusion-status) | Interim findings available; final conclusion awaits remaining work and actual class demo. |
 
@@ -179,7 +179,7 @@ generation is unavailable. New MP4 jobs validate/extract audio, transcribe with 
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
 unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
-D-51) and feasibility evidence only; it is not a website feature. Functional operation does not establish reliable AI accuracy,
+D-51) with an implemented assignment/submission foundation; AI feedback/comparison is not a website feature. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 Detailed component/test evidence: [architecture](docs/architecture.md),
@@ -276,7 +276,7 @@ see their own stored history and lecturers see all meeting requests, with
 See [executed checks and limitations](docs/testing.md) and the
 [manual/private-LAN phone plan](docs/phone-testing.md). Phone access requires a
 separately authorized temporary LAN binding and exact allowed host; no network
-or firewall setting was changed during implementation. Local video AI and English poll generation are implemented; homework remains experimental.
+or firewall setting was changed during implementation. Local video AI and English poll generation are implemented; homework submission is available, while feedback remains experimental.
 
 Run PowerShell from the repository root. A separate `.venv` is already prepared
 on the current workstation. On a fresh checkout, use an installed Python 3.12
@@ -364,3 +364,34 @@ Gemini produced no substantive task-quality result. See the [tools report](docs/
 No in-class presentation, full phone acceptance, classroom load result or final
 assignment conclusion is recorded. This is an interim results account for To Do
 11, to be completed with observed demo results, limitations and remaining gaps.
+
+## UC-05 submission foundation - local browser check
+
+The UC-05 submission foundation is implemented: Lecturers create meeting-linked
+assignments with instructions and one criterion per line; enrolled Students submit
+text as append-only numbered versions. Owners see their history; current course
+Lecturers can read all submitted versions. The status is **Submitted**, not reviewed
+or published. AI review requests, comparison, feedback drafts/publication, feedback
+language configuration and cleanup remain planned. No model is called by this stage.
+
+The local database migration `0007_homework_submissions` has been applied. On a
+fresh checkout run `python manage.py migrate` in the website environment. Restart
+an existing development server if it runs without autoreload; no AI worker is
+needed for homework submission.
+
+1. Sign in as **lecturer_alpha**, open **DEMO-CS101**, choose a meeting, then
+   **Assignments and submissions -> New assignment**. Enter a title, instructions
+   and one criterion per line, and create the assignment.
+2. In a separate browser/private session, sign in as **student_alex**, open the
+   same meeting/assignment, paste synthetic text and **Submit new version**.
+   Check the save confirmation and **Version 1 / Submitted** reading page.
+3. Return to the assignment and submit changed text. Check **Version 2** and open
+   both saved links to confirm the original text is unchanged.
+4. As lecturer_alpha, open the same assignment and either version. The page shows
+   student, version number, submission time and exact escaped text.
+5. Optional privacy check: as **student_casey** (another CS101 member), the other
+   Student's links are absent; directly opening Alex's version URL returns 404.
+
+No feedback-generation, comparison or publication controls are exposed. Assignment
+editing/deletion is not included in this slice. Automated evidence and remaining
+browser/phone limits are in [testing](docs/testing.md#uc-05-submission-foundation).

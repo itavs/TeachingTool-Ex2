@@ -5,9 +5,9 @@
 The website implements authentication/course roles, meetings, attendance/XLSX,
 connected comments during/outside class (resolved D-17), poll lifecycle with local
 English draft generation, and background MP4 extraction/transcription/summarization.
-Homework has an approved planning baseline and feasibility evidence only: no
-homework models, views or review service are implemented. Planned additions are
-explicitly separated below from current components. See [requirements/use cases](SRS.md#5-main-use-cases),
+Homework assignment/submission and private version reading are implemented under
+D-53; AI review/comparison remains planned. Current foundation and later planned
+review components are separated below. See [requirements/use cases](SRS.md#5-main-use-cases),
 [tools and observed evidence](local-ai-feasibility.md#current-tools-and-evidence-index),
 and [component-to-test strategy](testing.md#current-component-to-test-strategy).
 
@@ -346,18 +346,19 @@ No disconnected queue/local persistence/synchronization is required.
 
 ## Planned UC-05 components
 
-**Planning only - D-46 through D-52.** Every Homework/Review/Feedback class and
-operation below is proposed for addition; none exists in the website. Existing
+**Mixed status - D-46 through D-53.** HomeworkAssignment and SubmissionVersion
+are now implemented. ReviewJob, FeedbackDraft, HomeworkReviewService, reviewer/
+validator and background review worker remain planned additions. Existing
 Meeting/User/Membership, Django session/CSRF/Templates, short SQLite transactions
 and the local compute lock are integration points. Do not extend VideoJob or
 silently route homework through the video worker. A separate review worker is
 planned; timeout, workload and queue controls need measured bounds. Existing Qwen3
 is a candidate adapter, not an accepted homework engine in either language.
 
-| Planned addition | Responsibility / integration |
+| Component / status | Responsibility / integration |
 |---|---|
-| HomeworkAssignment | Meeting association, instructions, criterion identifiers, assignment revision and chosen feedback language. |
-| SubmissionVersion | Immutable submitted text, assignment/owner/version and timestamp; a resubmission never overwrites a source. |
+| HomeworkAssignment - implemented foundation | Meeting/creator, title, instructions, ordered criterion text and creation timestamp. Stable criterion IDs, rubric revision and feedback-language configuration are later review-stage extensions. |
+| SubmissionVersion - implemented | Exact submitted text, assignment/Student/version and timestamp; next number serialized under a short transaction, unique per owner/assignment/version. Submitted status is a display property. No update/delete route. |
 | ReviewJob | Requester separately from target owner, target/peer version IDs, copied instructions/criteria/language, processing/comparison states, actual engine metadata and errors. Freeze the latest version per other owner at request creation, even for Lecturer requests. |
 | FeedbackDraft | Original model findings separately from Lecturer edits, target and private comparison evidence, draft edit version, comparison outcome, published content and timestamp. Published content is immutable and version-bound. |
 | HomeworkReviewService | Current membership/ownership, submission/version creation, atomic source selection, request, optimistic draft editing, separate publication and safe Student projection. |
@@ -374,8 +375,9 @@ and never presents historical feedback as a review of new text.
 
 ### Planned homework class diagram
 
-All classes marked planned are additions, not executable interfaces. Existing
-infrastructure is marked existing. Method names here are design proposals; unlike
+Classes marked planned remain additions, not executable interfaces. The two
+submission foundation models are marked implemented; other existing infrastructure
+is marked existing. Method names here are design proposals; unlike
 the implemented diagrams above, they do not assert that Python methods exist.
 
 ```mermaid
@@ -390,14 +392,14 @@ classDiagram
         <<existing>>
     }
     class HomeworkAssignment {
-        <<planned>>
+        <<implemented foundation>>
+        title
         instructions
         criteria
-        feedback_language
-        revision
+        created_at
     }
     class SubmissionVersion {
-        <<planned>>
+        <<implemented>>
         version_number
         text
         submitted_at
@@ -465,7 +467,8 @@ classDiagram
 
 ### Planned homework submission to publication sequence
 
-This is a proposed future path, not execution evidence. The English/Hebrew
+The submission/create/read subset is implemented under D-53; all review/request/
+comparison/publication arrows below remain a proposed future path, not execution evidence. The English/Hebrew
 language gate is closed until real-output review accepts that language for this
 workflow. The diagram assumes that gate has passed; earlier failed probes do not
 open it. Failures cannot become public feedback by following the success branch.
@@ -564,5 +567,26 @@ reports and must not be read as current factories or full acceptance.
 The website is loopback development with DEBUG/SQLite, not a production/classroom
 deployment. Phone access, classroom load, HTTPS/hardening and the ten-minute demo
 remain unverified. Homework comparison/review has failed quality expectations in
-local feasibility work; no corresponding website classes are implemented. The explicitly planned UC-05
-diagrams above do not change that status. Optional campus-network checks remain deferred and nonblocking.
+local feasibility work; only the assignment/submission foundation is implemented. The review/comparison
+classes and arrows above remain planned, with model quality unaccepted. Optional campus-network checks remain deferred and nonblocking.
+
+## Implemented UC-05 submission foundation
+
+`homework_forms.py` validates nonblank input and an ordered line-per-criterion
+list; submission text uses strip=False. `homework_views.py` reuses the existing
+scoped/context guard. `homework_services.py` provides actual create_assignment,
+submit_version, assignment_for and submission_for functions; it is not the
+planned HomeworkReviewService class. Writes recheck role under transaction and
+assign meeting/owner server-side. SQLite IMMEDIATE plus the unique version
+constraint serializes concurrent submissions. SubmissionVersion.save rejects
+existing-row edits; direct ORM bulk/SQL administration is outside that application
+guard. Neither form nor service invokes a model.
+
+New URL names: homework-list, homework-create, homework-detail and
+homework-submission. The meeting page links to them. Current-role/parent checks
+cover course, meeting and assignment; the version queryset filters Student owners.
+Private pages use the shared never-cache guard. Templates escape text, preserve
+line breaks and use dir=auto. Four new Templates and a small CSS rule reuse the
+existing layout; actual-phone rendering remains unverified. Database migration
+0007_homework_submissions adds only the two foundation models. No feedback model,
+review request action, worker task, language setting or publication route exists.

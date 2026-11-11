@@ -22,7 +22,8 @@ generation is unavailable. New MP4 jobs validate/extract audio, transcribe with 
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
 unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
-D-51) and feasibility evidence only; it is not a website feature. Functional operation does not establish reliable AI accuracy,
+D-52). The assignment/submission foundation is implemented under D-53;
+AI feedback/comparison remains feasibility/planning only, not a website feature. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 The five-capability target is user-approved, not lecturer-confirmed. Full AC-01
@@ -259,7 +260,9 @@ original version. Snapshot instructions, criteria, requested language and source
 versions at request creation. Never silently treat old feedback as feedback for
 new text. Source/rubric changes and stale edits must be detected before publication.
 
-This is **planned**, not a website feature. Hebrew and English remain quality-test
+The **assignment/submission foundation is implemented** (D-53): meeting-linked
+assignment creation, instructions/criteria, exact-text versions and authorized
+reading. Review/comparison/publication below remain **planned**, not website features. Hebrew and English remain quality-test
 targets: a language becomes available only after actual output for this workflow
 has been reviewed successfully. Existing failed trials do not enable either.
 Length/workload and processing bounds require measurement, not a cap inferred
@@ -415,15 +418,17 @@ direction from implementation or completed checks.
 
 ### UC-05 - Submit Homework, Review a Draft, and Publish Feedback
 
-**Status:** user-approved planning baseline D-46 through D-52; all added website
-components are planned and model conclusion quality remains open.
+**Status:** user-approved planning baseline D-46 through D-52; assignment/submission components are implemented under D-53, while all review/
+comparison/publication components are planned and model conclusion quality remains open.
 
 1. A course Lecturer defines an assignment under a meeting, with instructions,
    criteria and requested Hebrew/English feedback language. Generation is enabled
    only for a language with recorded successful real-output review; neither is
-   currently accepted for this planned workflow.
+   currently accepted for this planned workflow. Current creation implements
+   title/instructions/criteria only; feedback-language configuration is deferred.
 2. A Student pastes a synthetic work and submits it as a new immutable version.
-   Show their version/history and review state, not a fabricated result.
+   This is implemented: show save confirmation, numbered history and Submitted
+   status, not a pending/generated review claim. Steps 3-8 remain planned.
 3. The owner requests review, or the course Lecturer requests review for that
    version. Check current membership/role and target ownership. Atomically save
    target/version, instructions/criteria/language and latest-other-owner peer
@@ -523,7 +528,7 @@ parameters are explicit. AC-02 includes outside-class connected submission under
 | AC-02 | AS-02, D-01, D-17 through D-19 | FR-03; UC-02 | Submit identified comment and suggestion samples through normal website POST during and outside class, including a meeting dated in the past. Verify the selected meeting and submitting student are persisted, personal history survives a fresh login, and a lecturer signing in later sees the stored requests in that meeting. Another student must not see them through the meeting page or access the lecturer feed. Retain checks for failed-save reporting, boundaries, duplicate submission, escaping and live lecturer updates. No local persistence, queues or disconnected synchronization is required. | D-17 resolves timing. D-30 fixes request length and visible-page refresh. Executed server evidence is in testing.md; browser/phone/classroom capacity and retention remain separate questions under Q-06/Q-07. |
 | AC-03 | AS-03, D-01, D-08 through D-11 | FR-04; UC-03 | Exercise both lecturer-selected types using real generation from known pasted material. Inspect relevance, four options, and, for comprehension, one correct option plus a short explanation. Edit all applicable draft fields and verify publication uses the approved version; reject later content edits. Cast known votes from two identified students and verify live lecturer counts/percentages, one final response each, no vote changes, and no second active poll in that meeting. Before closure, verify student-facing content exposes neither aggregates nor the comprehension answer/explanation. Close manually; reject later votes and show student aggregates without identities, plus the correct answer/explanation only for comprehension. Confirm opinion polls never designate or evaluate correctness and neither type assigns grades. Create a further poll after closure. Exercise generation failure and retry without a prepared-content substitution. Verify the basic flow has no file upload, open-ended response, or automatic scheduling. | D-31 resolves poll language/input length. Lifecycle evidence uses test fixtures and explicitly labeled demo data under D-32/D-33, not real generation. Q-06/Q-07 retain capacity and integrated-AI/data questions. Approved workflow is not conditional on P-05 approval. |
 | AC-04 | AS-04, D-01, D-12 through D-16 | FR-05; UC-04 | Manually upload permitted MP4 files for three planned cases: Hebrew speech, English speech, and a Hebrew lecture with English technical terms. Using agreed quality criteria, verify genuine audio extraction/transcription/model summarization, inspect known spoken facts and the intended meaning of technical terms, and confirm output is in the spoken language without translation (Hebrew for the terminology case). Verify a summary paragraph, 3-5 key points, and an option that exposes the full transcript rather than a partial excerpt. Compare the transcript and summary with the actual speech. Check each result clearly states that unspoken visual content is excluded. Check the candidate failed/unsupported-input path without false success after its details are agreed. Measure time and cost for samples of different durations/file sizes before proposing maximum duration and file size; choose demo duration separately. After numeric limits are agreed and implemented, add boundary checks at and above each limit without inventing thresholds now. | D-34 through D-37 cover initial limits and extraction infrastructure; Q-04 retains demo duration, real-model quality and lecturer interpretation; Q-07/Q-09 for resources and demo expectations. All three language cases are planned, not passed; sustained language switching is outside the commitment. Extraction-only measurements/limits are recorded separately; no end-to-end AI quality pass is assumed. |
-| AC-05 | AS-05, D-01, D-20 through D-22, D-46 through D-52 | FR-06, FR-07; UC-05 | Planned software and actual-model quality checks are separated in the UC-05 strategy. Verify owner/Lecturer requests, private drafts and separate publication; latest-other-owner snapshots including Lecturer initiation; immutable revisions; no-peers versus comparison failure versus no supported difference; system-controlled no-peer notice. For successful personal feedback plus failed comparison, assert private draft before explicit Lecturer individual-only publication and own published feedback plus the exact failed-comparison notice afterward. Personal failure yields no publishable draft. A later comparison stays hidden until separately reviewed/published. Assess real conclusions against source/criteria, A capacity coverage, B rollback and cache-only controlled correction, C actual gaps, and a grounded coverage/approach difference. | All homework implementation/acceptance is pending. Q-05 retains quality/language readiness, measured limits; D-52 resolves failure-publication; Q-07 real-data policy; Q-09 live demo. No existing trial constitutes a pass. |
+| AC-05 | AS-05, D-01, D-20 through D-22, D-46 through D-52 | FR-06, FR-07; UC-05 | Planned software and actual-model quality checks are separated in the UC-05 strategy. Verify owner/Lecturer requests, private drafts and separate publication; latest-other-owner snapshots including Lecturer initiation; immutable revisions; no-peers versus comparison failure versus no supported difference; system-controlled no-peer notice. For successful personal feedback plus failed comparison, assert private draft before explicit Lecturer individual-only publication and own published feedback plus the exact failed-comparison notice afterward. Personal failure yields no publishable draft. A later comparison stays hidden until separately reviewed/published. Assess real conclusions against source/criteria, A capacity coverage, B rollback and cache-only controlled correction, C actual gaps, and a grounded coverage/approach difference. | D-53 assignment/submission/read checks have software evidence in testing.md; AI review/comparison/publication and full AC-05 remain pending. Q-05 retains quality/language readiness, measured limits; D-52 resolves failure-publication; Q-07 real-data policy; Q-09 live demo. No existing trial constitutes a pass. |
 | AC-06 | AS-06, AS-07 | NFR-01, NFR-02; UC-01 through UC-05 | Exercise the relevant student flows on the agreed smartphone/browser set and all flows in the intended classroom environment at the agreed load; record devices, network conditions, observed durations, and failures. | Q-06; P-01. |
 | AC-07 | AS-09, D-01 | NFR-06; UC-01 through UC-05 | Rehearse the approximately ten-minute presentation and record what ran live, actual processing times, any earlier outputs, and any failures. Confirm all five capabilities have genuine execution evidence; label sample data and any separately approved presentation shortcuts. | Q-09; P-09. |
 
@@ -621,7 +626,8 @@ generation is unavailable. New MP4 jobs validate/extract audio, transcribe with 
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
 unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
-D-51) and feasibility evidence only; it is not a website feature. Functional operation does not establish reliable AI accuracy,
+D-52). The assignment/submission foundation is implemented under D-53;
+AI feedback/comparison remains feasibility/planning only, not a website feature. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 Unit A supplied the shared foundation; Unit B added attendance/comments; the
@@ -639,3 +645,28 @@ samples, user-reported interface checks and open phone/classroom/quality gaps
 are separated in the [testing strategy](testing.md#current-component-to-test-strategy).
 See [current components and diagrams](architecture.md) and the
 [tools report](local-ai-feasibility.md#current-tools-and-evidence-index).
+
+## UC-05 implemented submission slice
+
+The UC-05 submission foundation is implemented: Lecturers create meeting-linked
+assignments with instructions and one criterion per line; enrolled Students submit
+text as append-only numbered versions. Owners see their history; current course
+Lecturers can read all submitted versions. The status is **Submitted**, not reviewed
+or published. AI review requests, comparison, feedback drafts/publication, feedback
+language configuration and cleanup remain planned. No model is called by this stage.
+
+Normal CSRF-protected form POSTs create assignments and submitted versions. Fresh
+course membership and server-selected assignment/owner prevent posted IDs/roles
+from changing scope. Direct URLs resolve course -> meeting -> assignment ->
+version; Students are filtered to their own versions and Lecturers require current
+course membership. Read-only version URLs reject POST. Invalid or failed saves
+never confirm success. Blank work/instructions/criteria are rejected; no numeric
+homework text/workload limit is introduced here beyond existing HTTP transport
+limits. Title metadata uses the existing site's 160-character convention.
+
+Resubmission computes the next owner/assignment version under a short SQLite
+IMMEDIATE transaction; uniqueness prevents duplicate numbering. Submitted text
+is kept exactly, including leading/trailing whitespace and line breaks. The model
+save path rejects editing an existing version; no edit/delete endpoint exists.
+This is application immutability, not a claim that privileged direct SQL cannot
+alter data. Demo data remains synthetic; no automatic cleanup is implemented.

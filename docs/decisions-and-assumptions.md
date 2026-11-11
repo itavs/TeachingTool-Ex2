@@ -13,8 +13,8 @@ drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
 generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
-unchanged. Homework review/comparison remains **feasibility experiments only**, not
-a website feature. Functional operation does not establish reliable AI accuracy,
+unchanged. Homework assignment/submission and authorized reading are implemented under D-53;
+AI review/comparison remains feasibility/planning only, not a website feature. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 Current evidence: [tools](local-ai-feasibility.md#current-tools-and-evidence-index),
@@ -152,9 +152,11 @@ three weeks, as provided by the user; the exact deadline is not confirmed.
 
 These decisions extend D-20 through D-22; they are user-approved design choices,
 not additional lecturer requirements or evidence of implemented homework support.
-The proposed classes/worker and all homework acceptance checks remain planned.
+The review/comparison classes/worker remain planned. D-53 implements the first
+assignment/submission slice, with its own software checks; model quality remains open.
 The earlier Qwen trials do not establish either language as available for this
-new feedback workflow. No implementation or new model trial is authorized here.
+new feedback workflow. That historical planning checkpoint included no implementation
+or new model trial; D-53 subsequently authorizes the submission foundation only.
 
 | ID | User-approved decision | Planning / evidence boundary |
 |---|---|---|
@@ -177,6 +179,12 @@ comparison: **"Your lecturer published your individual feedback. The comparison 
 The no-other-submissions notice and completed-no-supported-difference result
 remain distinct. D-52 resolves the former open publication policy in Q-05; all
 source/version/privacy rules in D-46 through D-51 remain in force.
+
+### Approved UC-05 submission implementation slice
+
+| ID | User-approved stage | Actual boundary |
+|---|---|---|
+| D-53 | Implement meeting assignment creation with instructions/criteria, enrolled-Student text submission, immutable resubmission versions, and current-course Lecturer/owner reading. Show save confirmation, version number and Submitted status. | HomeworkAssignment and SubmissionVersion, forms, short transactional writes and scoped HTML routes are implemented. Feedback requests/generation, comparison, publication, assignment language configuration and cleanup remain deferred. No AI calls, new model downloads or paid service. Assignment edit/delete is not exposed. Tests distinguish source preservation/server privacy from later model quality. |
 
 ## 4. Proposal Register
 

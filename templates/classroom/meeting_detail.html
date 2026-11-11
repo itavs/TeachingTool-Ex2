@@ -7,4 +7,5 @@
 <section class="panel"><h2>Participation</h2>{% if attendance_record %}<p>Your attendance: {{ attendance_record.registration_label }} · {{ attendance_record.registered_at|date:'j F Y H:i:s' }} (Asia/Jerusalem)</p>{% endif %}<div class="actions">
 {% if membership.role == 'lecturer' %}<a class="button" href="{% url 'attendance' course.pk meeting.pk %}">Attendance and QR</a>{% else %}<p>Scan the current classroom QR to register attendance. If asked to sign in, return to the scan afterwards.</p>{% endif %}
 <a class="button secondary" href="{% url 'meeting-requests' course.pk meeting.pk %}">Comments and suggestions</a><a class="button secondary" href="{% url 'poll-list' course.pk meeting.pk %}">Polls</a>{% if membership.role == 'lecturer' %}<a class="button secondary" href="{% url 'video-list' course.pk meeting.pk %}">Video processing</a>{% endif %}</div></section>
+<section class="panel"><h2>Homework</h2><a class="button secondary" href="{% url 'homework-list' course.pk meeting.pk %}">Assignments and submissions</a></section>
 {% endblock %}

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.core.validators import MaxLengthValidator, MinLengthValidator
+from django.core.exceptions import ValidationError
 import uuid
 
 
@@ -43,6 +44,42 @@ class Meeting(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class HomeworkAssignment(models.Model):
+    meeting = models.ForeignKey(Meeting, on_delete=models.PROTECT, related_name="homework_assignments")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    title = models.CharField(max_length=160)
+    instructions = models.TextField()
+    criteria = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+
+
+class SubmissionVersion(models.Model):
+    assignment = models.ForeignKey(HomeworkAssignment, on_delete=models.PROTECT, related_name="submissions")
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="homework_versions")
+    version_number = models.PositiveIntegerField()
+    text = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["student__username", "-version_number"]
+        constraints = [
+            models.UniqueConstraint(fields=["assignment", "student", "version_number"], name="unique_homework_owner_version"),
+            models.CheckConstraint(condition=models.Q(version_number__gte=1), name="positive_homework_version"),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise ValidationError("Submitted versions cannot be edited. Submit a new version instead.")
+        return super().save(*args, **kwargs)
+
+    @property
+    def status_label(self):
+        return "Submitted"
 
 
 class AttendanceWindow(models.Model):

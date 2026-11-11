@@ -19,3 +19,5 @@ input.poll-choice-input{appearance:auto;-webkit-appearance:radio;display:inline-
 .panel input[type=text]{max-width:100%;padding:.55rem;border:1px solid #aebfb7;border-radius:8px}#main h1,#main h2{overflow-wrap:anywhere}
 
 .transcript-panel{max-width:58rem;margin-inline:auto}.transcript-body{max-width:68ch;margin-inline:auto;line-height:1.9;text-align:start;overflow-wrap:anywhere;font-size:1.075rem}.transcript-body p{white-space:pre-wrap;margin-block:0 1.25em}.transcript-body bdi{unicode-bidi:isolate}@media(max-width:600px){.transcript-panel{padding:1rem}.transcript-body{font-size:1rem;line-height:1.85}}.button[hidden]{display:none}
+
+.submission-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;text-align:start}
