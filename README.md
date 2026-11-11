@@ -25,7 +25,7 @@ work** (D-01). This is our working target; the lecturer has not confirmed that
 all five must be implemented for the demo. User-approved directions now cover
 attendance D-05/D-06, comments D-18/D-19 with the D-17 during/outside-class clarification,
 polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
-D-22. AI workflows remain design targets; attendance and connected comments now have a Unit B implementation and server checks;
+D-22. Homework remains a planning/quality target; implemented video/English-poll AI and participation evidence are described below;
 remaining operational parameters and open interpretations are explicit.
 The shared website foundation is now implemented under D-23 through D-26;
 Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Local English poll-draft generation is now available under D-44; Unit D implements private MP4 validation/audio extraction; Unit E now transcribes new video uploads locally and exposes private full transcripts; new uploads now include local Qwen3 automatic summaries; homework website AI remains unimplemented.
@@ -39,23 +39,33 @@ Unit B implements attendance/XLSX and connected comments under D-27 through D-30
 | Homework review | Students and teachers obtain deep LLM reviews including comparison with other students' work. | Approved D-20 through D-22: theoretical Hebrew/English pasted-text assignments, lecturer instructions/criteria, actual LLM feedback and processing of same-assignment peer submissions, student-own review/comparison without peer identities/full works, and lecturer access to all submissions/feedback. No-peer feedback explicitly states that no comparison occurred. |
 
 One course, one lecturer, and one active meeting are proposed simplifications
-(P-01), not approved limits. Separate video demo duration and quality criteria, homework numeric limits, review output
-language/peer-selection/revision rules, production access/security parameters,
-retention/deletion details and classroom capacity
+(P-01), not approved limits. Separate video demo duration and quality criteria, homework measured limits/quality,
+production access/security parameters, real-work retention and classroom capacity
 remain open. Website identity/access follows D-24; production readiness remains unverified.
 
 For comments, D-17 was clarified by the user on 2026-11-11: online means during class and offline means outside class. In both cases, identified students submit normally through the website to an associated meeting, including one that has already taken place. Creating content, submitting it and confirming storage remain separate responsibilities. Local persistence, a send queue and disconnected synchronization are not required. D-18/D-19 retain stored history, student-own visibility, lecturer access to meeting requests and live updates. Lecturer replies, discussion threads, attachments, votes and notifications remain excluded.
 
-Homework review uses pasted theoretical work in Hebrew and English against
-lecturer-provided instructions/criteria, returning strengths, gaps, and
-actionable recommendations (D-20). Comparison actually processes other works
-for the same assignment and addresses topic coverage and solution approaches
-(D-21). A student can request their own review; the lecturer can request any
-submission and see all submissions/feedback for the assignment. The student
-view excludes peer identities and full peer works. Without peers, personal
-feedback is allowed with an explicit no-comparison notice. Grades, plagiarism
-determinations, and submitted-code execution are excluded. The demo uses
-sample works only; their count is not a system limit (D-22).
+Homework review remains **planned / feasibility only**, under D-20 through D-22
+and the approved UC-05 baseline D-46 through D-51. A Student may request feedback
+on their version; a course Lecturer may request a submission review. AI prepares
+a private Lecturer draft, which the Lecturer edits/reviews and publishes separately
+before the Student sees it. The same assignment's latest version per other owner
+is frozen at request time, excluding all target-owner versions even for Lecturer
+requests. Instructions/criteria/source versions are recorded. Resubmission creates
+a new immutable version and never reassigns old feedback to new text.
+
+No peers permits personal publication with a system-controlled notice. D-52 also
+permits explicitly reviewed/published personal feedback after comparison failure,
+with the fixed failure notice in UC-05; personal generation failure has no draft.
+Any later comparison requires separate Lecturer review and explicit publication. Eligible
+peers with failed comparison and completed comparison with no supported difference
+are distinct states. Feedback language is chosen per assignment; Hebrew/English
+are test targets, neither yet accepted for this planned workflow. Keep synthetic
+demo versions/feedback through the demo and submission checking, then support
+intentional cleanup; real-student-work policy is separate. No grades, plagiarism
+determinations or code execution. See [UC-05](docs/SRS.md#uc-05---submit-homework-review-a-draft-and-publish-feedback),
+[planned design](docs/architecture.md#planned-uc-05-components) and
+[planned acceptance](docs/testing.md#planned-uc-05-acceptance-strategy).
 
 Approved polling scope includes one active poll per meeting, with another
 created after the previous poll closes. The lecturer closes polls manually
@@ -122,9 +132,9 @@ linked sections; detailed historical evidence is separate from current status.
 | 2 | Technical tools report, with actual trials of suggested tools | [Tools and evidence index](docs/local-ai-feasibility.md#current-tools-and-evidence-index) | Trials and failures documented; homework quality insufficient, Gemini partial; some evidence local-only/uncommitted. |
 | 3 | SoW document | [Scope and deliverables](docs/SoW.md#3-planned-capability-coverage) | Draft maintained against implemented boundaries and open interpretations. |
 | 4 | SRS document | [Functional requirements](docs/SRS.md#4-functional-requirements) | FR/NFR and acceptance targets defined; full acceptance not claimed. |
-| 5 | Main use cases / client stories | [UC-01 through UC-05](docs/SRS.md#5-main-use-cases) | Five main flows documented; homework details remain open. |
-| 6 | Main software components | [Current components](docs/architecture.md#current-components) | Implemented responsibilities/interfaces mapped; homework remains outside website. |
-| 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence) | Current video/poll paths and shared domain covered; homework design deferred. |
+| 5 | Main use cases / client stories | [UC-01 through UC-05](docs/SRS.md#5-main-use-cases) | Five main flows documented; UC-05 planning baseline approved, quality/limits still open. |
+| 6 | Main software components | [Current components](docs/architecture.md#current-components) | Implemented responsibilities mapped; planned UC-05 additions are separate from existing code. |
+| 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence), [planned homework](docs/architecture.md#planned-uc-05-components) | Current video/poll paths covered; homework classes/sequence are explicitly planned, not implemented. |
 | 8 | Testing strategy addressing the classes in item 7 | [Component-to-test strategy](docs/testing.md#current-component-to-test-strategy) | Software checks mapped separately from real-model evidence and open acceptance. |
 | 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Foundation/participation/polls/video implemented; homework website capability missing. |
 | 10 | Perform a demo in class | [Classroom/demo acceptance](docs/SRS.md#7-future-acceptance-checks-and-traceability) | Not recorded as performed; phone, network, load and ten-minute rehearsal outstanding. |
@@ -149,8 +159,8 @@ requirement or planned acceptance check is not evidence of implementation.
 
 Section 9 of the [register](docs/decisions-and-assumptions.md) consolidates
 remaining decisions: production access, teaching context/capacity, AI/data/budget
-boundaries, and eligible-peer/revision policy affect technical choices;
-homework limits and quality targets remain open; video caps and participation defaults are already decided.
+boundaries and homework quality/limits remain open; D-47/D-48 resolve planned
+peer/version selection, and D-50/D-51 resolve assignment language/demo retention; video caps and participation defaults are already decided.
 The D-17 comments timing interpretation is resolved; it does not change attendance interpretations. The university-network study remains deferred and non-blocking.
 
 ## Current Implementation Status
@@ -168,8 +178,8 @@ drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
 generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
-unchanged. Homework review/comparison remains **feasibility experiments only**, not
-a website feature. Functional operation does not establish reliable AI accuracy,
+unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
+D-51) and feasibility evidence only; it is not a website feature. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 Detailed component/test evidence: [architecture](docs/architecture.md),

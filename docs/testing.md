@@ -72,6 +72,77 @@ helper/library/SVG/PNG outputs are local-only under ignored .local/doc-review,
 not submission dependencies or committed artifacts. This is documentation QA,
 not a new model, website, phone or classroom test.
 
+## Planned UC-05 acceptance strategy
+
+**Not executed.** D-46 through D-52 approve a planning baseline, not implementation
+or a pass. This section does not modify the historical homework experiment records
+below. All additions in the [planned diagrams](architecture.md#planned-uc-05-components)
+remain absent from the website. Separate deterministic website acceptance from
+actual-model conclusion quality. Test fixtures can validate control flow, not
+claim real feedback generation or an accepted language.
+
+### Planned website correctness checks
+
+| Planned responsibility | Risk / acceptance check | Evidence status |
+|---|---|---|
+| HomeworkReviewService + existing Membership | Student requests only own work, course Lecturer may request a course submission. Reject forged owner/course/version, direct cross-user/cross-course HTML/JSON and revoked membership at request/save/publication/read. | Planned tests, no implementation. |
+| SubmissionVersion | Resubmission preserves exact earlier text and version; old published feedback stays associated with that version. Concurrent submissions cannot overwrite a version. | Planned tests. |
+| ReviewJob source selection | Save latest version per other owner in the same assignment at request creation; exclude all target-owner versions, not merely requester versions. **Lecturer initiates review of A, where A has multiple versions: none of A's versions may appear as a peer.** Include latest B/C only, exclude foreign assignments, and preserve the chosen snapshots after later resubmission. | Planned transactional/source-selection tests. |
+| ReviewJob provenance | Save actual target/peer IDs, instructions, criteria, assignment revision/language, actual model identity and failure stage. Editing source/rubric/language does not rewrite prior request inputs. | Planned persistence tests. |
+| FeedbackDraft + review service | Student cannot discover draft text/evidence via list/detail/JSON. Lecturer can review/edit; only separate CSRF Publish exposes version-bound public content. Original generated text is distinguishable from edits. Stale or concurrent edit/publication and changed-source-as-current attempts are rejected or explicitly flagged, never silently relabeled. | Planned disclosure/concurrency tests. |
+| Student output projection | Only own published feedback; no peer identities, IDs, stable labels, full works or private comparison quotes/evidence. Lecturer can inspect permitted sources. Test accidental provider identity fields and escaping. | Planned privacy/rendering tests. |
+| Comparison state | Empty eligible set produces system-controlled no-other-submissions notice and permits personal publication. Nonempty set plus failure retains personal draft with a separate comparison-failed state, never no peers or no difference. Completed no-supported-difference is distinct from completed differences. D-52 permits personal-only publication only after successful personal generation, Lecturer review and explicit selection; keep comparison failed. Personal generation failure has no draft/publication. | Planned state/publication tests, policy resolved by D-52. |
+| Language gate | Assignment stores selected language; unsupported/unaccepted language fails before inference. A generation language can be enabled only with recorded reviewed real output for this workflow. Existing failed Hebrew/English probes do not enable either language. | Planned gate tests plus separate real-output evidence below. |
+| Worker / HomeworkReviewer / validator | Unavailable/invalid/timeout/interrupt/busy reports a real failure without prepared fallback or automatic publication. Verify shared-compute integration without changing video processing. Numeric control bounds/retries require a later measured decision. | Planned injected-provider/process tests, not real model quality. |
+| Explicit synthetic-data cleanup | Keep versions/feedback through demo and submission checking. Then an intentional authorized cleanup removes linked demo content consistently without deleting unrelated course data. No inherited seven-day expiry or automatic deletion; real-work policy remains separate. | Planned lifecycle tests, no cleanup executed. |
+
+### Planned partial-publication regression (D-52)
+
+**Not executed.** Arrange eligible peers, successful personal feedback and failed
+comparison. Assert that the Student cannot read the private draft through list,
+detail or JSON. The Lecturer sees the successful personal draft and separate
+comparison failure, reviews/edits and explicitly chooses individual-only
+publication. After publication the owner sees the published personal content and
+comparison status failed, with this exact system-controlled notice:
+
+> Your lecturer published your individual feedback. The comparison with other submissions could not be completed.
+
+Assert that no-peer and completed-no-supported-difference messages are absent,
+no peer identities/private evidence are exposed, and another Student cannot read
+that feedback. Revoked/wrong-role users cannot publish. A personal-generation
+failure creates no publishable draft and exposes no publication action.
+
+Then produce a fixture for a later successful comparison: keep the previous
+publication and failure notice unchanged while the new feedback revision is
+private. Only a second explicit Lecturer review/publication exposes the new
+comparison and updates the visible comparison state. Retain source snapshots and
+publication history. An injected provider proves these state/privacy controls,
+not the quality of a real comparison; model quality is evaluated separately below.
+
+### Planned model quality checks
+
+Use only synthetic work and an independent criterion/coverage map prepared before
+generation and kept outside the prompt. Retain exact inputs, original outputs,
+model/configuration and timings locally. A reviewer checks each claim against its
+referenced source and criterion, not merely fluent wording or valid JSON.
+
+| Quality target | Required source-based evaluation |
+|---|---|
+| Quote presence versus entailment | Mechanically verify each quote against the correct frozen target/peer version. Separately check relevance, surrounding context and whether the conclusion follows; an exact quote cannot certify technical correctness or absence of a topic. |
+| Missing / partial / incorrect | Missing means relevant explanation is absent, partial means meaningful correct coverage is incomplete, incorrect means an explicit wrong explanation. Correctly credit explicit coverage rather than demand unapproved SQL/code detail. |
+| Original A/B/C | A must receive credit for the conditional seat update. B must receive credit for explicit rollback while its wrong UNIQUE/last-seat and cache-only approval claims are identified. C must receive credit for locking/recheck while its actual failure/rollback and duplicate-protection gaps are recognized. |
+| Controlled B cache correction | Change only the cache-authorization sentence. The cache criticism must disappear or become an appropriate acknowledgment; the unchanged UNIQUE/last-seat error must still be identified, and unchanged rollback/atomicity coverage must not improve or worsen without source justification. Check actual findings, not identical wording or score strings. |
+| Real comparison | Actually process saved other-owner submissions and identify a concrete supported coverage/approach difference, such as A's conditional update versus C's locking/recheck. Check the private evidence against each source; no invented omissions, majority-as-correctness or cross-assignment comparisons. |
+| Similar works | Use deliberately similar synthetic works. A completed comparison may correctly state no supported difference; verify actual processing and review the basis. This must not substitute for empty peers or failed inference. |
+| Hebrew / English readiness | Test real complete feedback and comparison output in each assignment-selected language. Assess readable language, technical claims and privacy as well as structure. Record each language separately; no accepted generation language is claimed now. Numerical acceptance thresholds/repeatability and measured input/workload limits remain open. |
+
+Prior homework trials are **failed quality evidence**, not a pass for this design.
+The latest personal probe matched 15/15 supplied quotes but missed genuine errors
+and invented gaps. Lecturer review is a safety/control step, not proof that the
+engine meets quality targets. No new model run, website test or acceptance result
+was produced while adding this strategy. See [tools summary](local-ai-feasibility.md#current-tools-and-evidence-index)
+for repository versus local-only evidence availability.
+
 ## Historical execution records
 
 Entries below are dated stage evidence. Statements that an engine was disabled

@@ -33,7 +33,7 @@ Detailed behavior and proposed acceptance checks belong in the
 | D-12 through D-16 | Target Hebrew and English video recordings, including Hebrew with English technical terms, through manual computer-file upload with initial MP4 support. Use audio extraction/transcription/model summarization, same-language output without translation, and an explicit unspoken-visual-content notice. Return a summary paragraph, 3-5 key points, and full-transcript viewing. Sustained language switching is outside the commitment. Set maximum duration/file size after time/cost measurements; demo duration is separate. Unit D implements validation/audio extraction; local transcription is implemented under Unit E; word accuracy and summary quality remain unverified. |
 | D-17 | Clarified by the user on 2026-11-11: online means during class; offline means outside class. Both use normal website submission to a meeting, including a past meeting. Creation, submission and storage remain distinct; no local persistence, send queue or disconnected synchronization is required. |
 | D-18/D-19 | Identified meeting comments/suggestions, storage/history, student-own and lecturer-meeting views, and live lecturer updates. No lecturer replies, threads, attachments, votes, or notifications. D-17 resolves during/outside-class use through the same connected workflow. |
-| D-20 through D-22 | Theoretical Hebrew/English pasted homework, lecturer criteria, real LLM review and same-assignment comparison, student-own feedback without peer identities/full works, lecturer access to all assignment submissions/feedback, and explicit no-peer comparison notice. No grades, plagiarism determinations, or code execution. Demo uses sample works only; sample count is not a system limit. |
+| D-20 through D-22 | Theoretical Hebrew/English pasted homework, lecturer criteria, real LLM review and same-assignment comparison, student-own feedback without peer identities/full works, lecturer access to all assignment submissions/feedback, and explicit no-peer comparison notice. No grades, plagiarism determinations, or code execution. D-46 through D-51 add private Lecturer drafts/separate publication, immutable source/peer snapshots, assignment language and synthetic-demo retention/explicit cleanup. These additions remain planned; sample count is not a system limit. |
 
 The reviewed handout does not specify a programming language. No conflict with
 Python was found; this finding does not select a framework or AI service.
@@ -56,7 +56,7 @@ a capability requires a user decision.
 | Comments and suggestions (AS-02) | Student comments and suggestions in real time / offline. | D-17 clarifies online as during class and offline as outside class, both through normal connected website submission to an associated meeting, including a past meeting. D-18/D-19 retain identified comment/suggestion requests, stored history, student-own visibility, lecturer access and live lecturer updates. | No local persistence, send queue or disconnected synchronization is required. Lecturer replies, threads, attachments, votes and notifications remain excluded. Identity follows D-24; retention and classroom capacity remain open. |
 | Automatic polls (AS-03) | Lecturers can create simple polls automatically about current learning material. | Approved D-08 through D-11: lecturer selects comprehension or opinion before real model generation from pasted text. Both types have one question and four single-choice options; comprehension adds one correct answer and short explanation, while opinion has no correct answer or correctness evaluation. All generated content can be reviewed/edited before publication only. Each identified student submits one final response; one active poll per meeting, with further creation after manual closure. Lecturer sees live counts/percentages; students see aggregates without identities only after closure, plus comprehension answer/explanation then. | D-31 fixes lecturer-selected Hebrew/English output and 6,000 material characters; shared identity/capacity/AI constraints remain Q-06/Q-07. These detailed rules are project choices, not explicit handout requirements. No grades, file uploads, open-ended questions, or automatic scheduling. Generation failure provides an error and retry without prepared-content substitution. |
 | Class-video summary (AS-04) | The lecturer receives an ML-generated summary derived from a class video. | Approved D-12 through D-16: manually upload an MP4 from the computer; extract audio, transcribe speech, and summarize through a model in the recording's spoken language without translation. Target Hebrew, English, and Hebrew with English technical terms. Display a summary paragraph, 3-5 key points, an option to view the full transcript, and a notice that unspoken visual information is excluded. | Targets are unverified. Sustained language switching is outside the commitment. D-34 fixes initial system limits at 4 minutes/200 MB. Separate demo duration, model quality and lecturer interpretation remain open (P-06/Q-04). Unit D validates/extracts audio; Unit E adds full-transcript viewing, with word accuracy unverified and summaries disabled. |
-| Homework review and comparison (AS-05) | Students and teachers receive deep LLM reviews, including comparison with other students' work. | D-20 through D-22 approve theoretical Hebrew/English pasted submissions, lecturer instructions/criteria, strengths/gaps/actionable recommendations, and actual same-assignment peer comparison of topic coverage and solution approaches. Student requests/views own feedback/comparison without peer identities/full works; lecturer may review any submission and sees all submissions/feedback. No-peer feedback explicitly says no comparison occurred. | No grades, plagiarism determinations, or code execution. Demo uses sample works only; sample count is not a system cap. Peer selection/revisions, output language, numeric workload/input limits, quality, and data/resource details remain Q-05/Q-07. No capability has been verified. |
+| Homework review and comparison (AS-05) | Students and teachers receive deep LLM reviews, including comparison with other students' work. | D-20 through D-22 approve theoretical Hebrew/English pasted submissions, lecturer instructions/criteria, strengths/gaps/actionable recommendations, and actual same-assignment peer comparison of topic coverage and solution approaches. Student requests/views own feedback/comparison without peer identities/full works; lecturer may review any submission and sees all submissions/feedback. No-peer feedback explicitly says no comparison occurred. | No grades, plagiarism determinations, or code execution. Demo uses sample works only; sample count is not a system cap. D-46 through D-51 resolve planned publication, peer/version snapshots, assignment language and synthetic-demo retention. Measured limits and per-language quality remain Q-05; D-52 resolves individual-only publication after comparison failure; real-data/resource boundaries remain Q-07. No homework website capability is implemented or accepted. |
 
 The proposed administrative boundary is one course, one lecturer, and one active
 meeting (P-01). Neither the actual class size nor a concurrency limit has been
@@ -176,8 +176,10 @@ than silently reducing the deliverables.
 
 Section 9 of the [register](decisions-and-assumptions.md) distinguishes decisions
 needed before fixing affected technical choices from details that can be
-refined later. Shared identity, teaching context/capacity, data/AI/budget
-boundaries, and peer-selection/revision policy affect architecture. D-17 resolves the comments timing interpretation without requiring disconnected functionality. Initial video limits are fixed by D-34 at 4 minutes/200 MB; demo duration remains open, and the university-network study remains deferred.
+refined later. Shared identity is implemented; teaching context/capacity and
+remaining data/AI/budget boundaries still matter. D-47/D-48 define planned peer
+and version snapshots; measured limits and quality remain open. D-52 resolves
+individual-only publication after comparison failure. D-17 resolves the comments timing interpretation without requiring disconnected functionality. Initial video limits are fixed by D-34 at 4 minutes/200 MB; demo duration remains open, and the university-network study remains deferred.
 
 ## 8. Demo and Assignment Acceptance
 
@@ -208,8 +210,8 @@ drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
 generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
-unchanged. Homework review/comparison remains **feasibility experiments only**, not
-a website feature. Functional operation does not establish reliable AI accuracy,
+unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
+D-51) and feasibility evidence only; it is not a website feature. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 The original Unit C disabled-provider and Unit D extraction-only milestones are
@@ -220,8 +222,38 @@ resolved for comments only; attendance interpretations remain Q-01/Q-02.
 
 Evidence and limitations: [tools report](local-ai-feasibility.md#current-tools-and-evidence-index),
 [current architecture](architecture.md), [class-aware strategy and results](testing.md#current-component-to-test-strategy).
-The full assignment still requires homework planning/integration if the unchanged
+The full assignment still requires homework implementation/integration if the unchanged
 five-capability target is retained, actual classroom/phone verification, an
 approximately ten-minute demonstration and a final results conclusion. No such
 class demonstration or final conclusion has been recorded. These are remaining
 deliverables, not permission to begin them.
+
+## Approved UC-05 planning baseline
+
+D-46 through D-51 extend the first-version homework scope. A Student requests
+review of their own version, or a current Lecturer requests a course submission
+review. The model produces a private editable Lecturer draft, and a separate
+Lecturer publication action exposes version-bound feedback only to its owner.
+Select the latest submitted version per other owner in the same assignment at
+request time and exclude all target-owner versions regardless of requester.
+Persist actual source IDs plus instructions/criteria/language snapshots. A new
+submission is immutable history, not a rewrite of prior work or feedback.
+
+Comparison has distinct no-peers, failed-with-peers and completed-no-supported-
+difference outcomes, plus completed grounded differences. The no-peer notice is
+system controlled and permits personal-only publication. D-52 also permits
+publication of successful personal feedback after comparison failure, following
+Lecturer review and an explicit individual-only publication choice, with the
+required failure notice. Failed personal generation has no publishable draft. A
+later comparison stays private until separately reviewed and published.
+Assignment-level Hebrew/English selection is approved, but each language needs
+real-output quality review before it becomes available. No language is accepted
+for this workflow yet, and length/workload/runtime bounds await measurement.
+
+Retain only synthetic demo versions/feedback through the demo and submission
+checking, then provide intentional cleanup. Real student-work policy is separate;
+video retention does not apply. This is planning, not implementation or new trial
+results. Responsibilities/diagrams and planned software versus model-quality
+acceptance are in [architecture](architecture.md#planned-uc-05-components),
+[UC-05](SRS.md#uc-05---submit-homework-review-a-draft-and-publish-feedback) and
+[testing strategy](testing.md#planned-uc-05-acceptance-strategy).

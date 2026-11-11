@@ -5,8 +5,9 @@
 The website implements authentication/course roles, meetings, attendance/XLSX,
 connected comments during/outside class (resolved D-17), poll lifecycle with local
 English draft generation, and background MP4 extraction/transcription/summarization.
-Homework remains feasibility experiments only: no homework models, views or
-review service are implemented. See [requirements/use cases](SRS.md#5-main-use-cases),
+Homework has an approved planning baseline and feasibility evidence only: no
+homework models, views or review service are implemented. Planned additions are
+explicitly separated below from current components. See [requirements/use cases](SRS.md#5-main-use-cases),
 [tools and observed evidence](local-ai-feasibility.md#current-tools-and-evidence-index),
 and [component-to-test strategy](testing.md#current-component-to-test-strategy).
 
@@ -343,6 +344,215 @@ Lecturer page polls every five seconds. D-17 is resolved as during/outside class
 including past meetings and later Lecturer login, using the same connected path.
 No disconnected queue/local persistence/synchronization is required.
 
+## Planned UC-05 components
+
+**Planning only - D-46 through D-52.** Every Homework/Review/Feedback class and
+operation below is proposed for addition; none exists in the website. Existing
+Meeting/User/Membership, Django session/CSRF/Templates, short SQLite transactions
+and the local compute lock are integration points. Do not extend VideoJob or
+silently route homework through the video worker. A separate review worker is
+planned; timeout, workload and queue controls need measured bounds. Existing Qwen3
+is a candidate adapter, not an accepted homework engine in either language.
+
+| Planned addition | Responsibility / integration |
+|---|---|
+| HomeworkAssignment | Meeting association, instructions, criterion identifiers, assignment revision and chosen feedback language. |
+| SubmissionVersion | Immutable submitted text, assignment/owner/version and timestamp; a resubmission never overwrites a source. |
+| ReviewJob | Requester separately from target owner, target/peer version IDs, copied instructions/criteria/language, processing/comparison states, actual engine metadata and errors. Freeze the latest version per other owner at request creation, even for Lecturer requests. |
+| FeedbackDraft | Original model findings separately from Lecturer edits, target and private comparison evidence, draft edit version, comparison outcome, published content and timestamp. Published content is immutable and version-bound. |
+| HomeworkReviewService | Current membership/ownership, submission/version creation, atomic source selection, request, optimistic draft editing, separate publication and safe Student projection. |
+| HomeworkReviewer protocol / LocalQwenHomeworkReviewer | Separate target assessment and actual-source comparison. Local Qwen implementation remains conditional on language/quality acceptance; no runtime fake or canned fallback. |
+| ReviewEvidenceValidator | Shape/criterion/source references and exact quote presence against the referenced version; never certify entailment or technical correctness from a substring match. |
+| Dedicated review worker | Claim queued requests, enforce planned control bounds and shared compute lock, evaluate target first and peers second, save explicit partial/failure states without publishing. |
+
+Choose sources by **target owner**, not actor: exclude every version of that owner,
+then latest submitted version per other owner in the same assignment at the saved
+request instant. Persist IDs and content/provenance needed to reproduce the exact
+inputs. Later submissions, changed criteria or output-language changes do not
+silently mutate an existing request. Publication checks the draft/source revision
+and never presents historical feedback as a review of new text.
+
+### Planned homework class diagram
+
+All classes marked planned are additions, not executable interfaces. Existing
+infrastructure is marked existing. Method names here are design proposals; unlike
+the implemented diagrams above, they do not assert that Python methods exist.
+
+```mermaid
+classDiagram
+    class Meeting {
+        <<existing>>
+    }
+    class User {
+        <<existing>>
+    }
+    class Membership {
+        <<existing>>
+    }
+    class HomeworkAssignment {
+        <<planned>>
+        instructions
+        criteria
+        feedback_language
+        revision
+    }
+    class SubmissionVersion {
+        <<planned>>
+        version_number
+        text
+        submitted_at
+    }
+    class ReviewJob {
+        <<planned>>
+        requester_id
+        target_owner_id
+        peer_version_ids
+        instructions_snapshot
+        criteria_snapshot
+        language_snapshot
+        status
+        comparison_status
+        model_metadata
+        error_code
+    }
+    class FeedbackDraft {
+        <<planned>>
+        generated_findings
+        edited_findings
+        private_comparison_evidence
+        comparison_outcome
+        version
+        published_content
+        published_at
+    }
+    class HomeworkReviewService {
+        <<planned>>
+        submit()
+        request_review()
+        edit_draft()
+        publish()
+        published_feedback()
+        cleanup_demo_data()
+    }
+    class HomeworkReviewer {
+        <<planned interface>>
+        assess_submission()
+        compare_submissions()
+    }
+    class LocalQwenHomeworkReviewer {
+        <<planned candidate>>
+        assess_submission()
+        compare_submissions()
+    }
+    class ReviewEvidenceValidator {
+        <<planned>>
+        validate_structure()
+        verify_quotes()
+    }
+    Meeting "1" --> "0..*" HomeworkAssignment
+    HomeworkAssignment "1" --> "0..*" SubmissionVersion
+    User "1" --> "0..*" SubmissionVersion : owner
+    SubmissionVersion "1" --> "0..*" ReviewJob : target
+    ReviewJob ..> SubmissionVersion : frozen peer IDs
+    ReviewJob "1" --> "0..1" FeedbackDraft
+    HomeworkReviewService ..> Membership : fresh access checks
+    HomeworkReviewService ..> SubmissionVersion
+    HomeworkReviewService ..> ReviewJob
+    HomeworkReviewService ..> FeedbackDraft
+    HomeworkReviewer <|.. LocalQwenHomeworkReviewer
+    LocalQwenHomeworkReviewer ..> ReviewEvidenceValidator
+```
+
+### Planned homework submission to publication sequence
+
+This is a proposed future path, not execution evidence. The English/Hebrew
+language gate is closed until real-output review accepts that language for this
+workflow. The diagram assumes that gate has passed; earlier failed probes do not
+open it. Failures cannot become public feedback by following the success branch.
+
+```mermaid
+sequenceDiagram
+    actor S as Student
+    actor L as Lecturer
+    participant V as Planned HomeworkReviewService
+    participant DB as Existing database with planned models
+    participant W as Planned review worker
+    participant AI as Planned HomeworkReviewer
+    S->>V: CSRF POST synthetic text
+    V->>DB: Current membership, immutable SubmissionVersion
+    alt Student initiates
+        S->>V: Request own version feedback
+    else Lecturer initiates
+        L->>V: Request course submission feedback
+    end
+    V->>DB: Authorize actor and identify target owner
+    V->>DB: Freeze latest other-owner versions, instructions, criteria, language
+    Note over V,DB: Exclude all target-owner versions even if requester is Lecturer
+    V-->>S: Own version and request state only, no draft
+    W->>DB: Claim job, revalidate access and language readiness
+    W->>AI: assess_submission(target snapshot, criteria)
+    AI-->>W: Personal findings with evidence or explicit failure
+    W->>W: Validate structure and exact source quotes
+    alt Personal generation or evidence validation fails
+        W->>DB: Failure state, preserve submission, no publication
+    else Personal draft available
+        alt No eligible peer snapshots
+            W->>DB: Save personal draft, comparison not performed
+            Note over W,DB: System-controlled no-other-submissions notice
+        else Eligible peers exist
+            W->>AI: compare_submissions(actual frozen texts)
+            AI-->>W: Grounded differences, no supported difference, or failure
+            W->>DB: Save distinct comparison outcome and private evidence
+        end
+        L->>V: Read target, private draft and comparison state
+        L->>V: CSRF edit findings and anonymous comparison
+        V->>DB: Recheck Lecturer role and draft version, retain original output
+        alt Comparison failed with eligible peers
+            V-->>L: Separate comparison failure, personal draft retained
+            L->>V: Explicit Publish individual feedback only after review
+            V->>DB: Recheck role and versions, publish personal content with comparison failed
+            S->>V: GET own published individual feedback
+            V-->>S: Published personal feedback and system-controlled comparison-failed notice
+        else No peers or completed comparison
+            L->>V: Separate CSRF Publish action
+            V->>DB: Recheck role, draft/source revisions and public privacy
+            V->>DB: Publish immutable version-bound feedback
+            S->>V: GET own published feedback
+            V-->>S: Edited personal feedback and anonymous result or no-peer notice
+        end
+    end
+    opt Later comparison succeeds after personal feedback was published
+        W->>DB: New private feedback revision with recorded comparison sources
+        Note over S,DB: Previous published content remains unchanged
+        L->>V: Review and explicitly publish new comparison revision
+        V->>DB: Recheck role and versions, publish new immutable revision
+        S->>V: GET own latest published feedback
+        V-->>S: Reviewed personal feedback and newly published comparison outcome
+    end
+```
+
+Do not collapse the comparison outcomes: empty peer set means not performed;
+nonempty set plus generation/validation failure means failed; a completed comparison
+may contain grounded differences or a grounded no-supported-difference result.
+D-52 permits individual-only publication of a successful personal draft after
+comparison failure, but only after explicit Lecturer review/choice. If personal
+generation fails, no draft exists for publication. The failed-comparison notice
+is fixed by [UC-05](SRS.md#uc-05---submit-homework-review-a-draft-and-publish-feedback).
+A later comparison remains private until separate Lecturer review/publication;
+it is a new feedback revision, not a silent mutation of published content.
+Student-facing output never includes internal peer IDs, stable identifying labels,
+full peer works or private evidence. No grades, ranking, plagiarism judgment or
+code execution. Similarity is not a finding of copying.
+
+Retain synthetic versions/feedback until the demo and submission checking finish,
+then provide an explicit authorized cleanup operation. Scope, confirmation and
+referential cleanup must be designed/tested before execution; no timed video
+retention policy is inherited and no real student-data policy is approved.
+
+Planned responsibilities and risks map to the
+[UC-05 acceptance strategy](testing.md#planned-uc-05-acceptance-strategy).
+The source workflow is [UC-05](SRS.md#uc-05---submit-homework-review-a-draft-and-publish-feedback).
+
 ## Historical milestones and remaining boundaries
 
 Unit A was foundation-only; Unit B added participation; initial Unit C used a
@@ -354,5 +564,5 @@ reports and must not be read as current factories or full acceptance.
 The website is loopback development with DEBUG/SQLite, not a production/classroom
 deployment. Phone access, classroom load, HTTPS/hardening and the ten-minute demo
 remain unverified. Homework comparison/review has failed quality expectations in
-local feasibility work; no corresponding website classes or sequence are invented
-here. Optional campus-network checks remain deferred and nonblocking.
+local feasibility work; no corresponding website classes are implemented. The explicitly planned UC-05
+diagrams above do not change that status. Optional campus-network checks remain deferred and nonblocking.
