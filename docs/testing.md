@@ -5,10 +5,10 @@
 This section addresses To Do 8 and the real names in the
 [class/interface diagrams](architecture.md#class-and-interface-diagrams).
 It is a current strategy/index over existing tests, not a new execution record.
-Dated results below retain provenance. **No software tests or AI trials were run
-in this documentation round.** The previous poll-stage closure recorded 136 server
-and 12 JavaScript tests passing; the later personal-review helper records two
-standalone audit tests, outside that website count.
+Dated results below retain provenance. The original documentation-only round
+ran no software tests or AI; subsequent runtime verification is recorded below.
+Latest workflow verification is 167 server and 12 JavaScript tests, separate from
+the two standalone experiment quote-audit tests. No new AI inference occurred.
 
 Use software tests for deterministic contracts, state/permission/retention and
 process-control assertions; use bounded real-model samples for inference wiring
@@ -20,7 +20,7 @@ prove that the quote supports the assessment.
 | Diagram component / responsibility | Risk or invariant | Existing software evidence (named tests) | Real-model / open boundary |
 |---|---|---|---|
 | User, Course, Membership, Meeting, MeetingForm | Cross-course access, forged role/parent and invalid writes | [Foundation suite](../classroom/tests.py); [class-aware assertions](#class-aware-coverage) | User browser checks are separate; production identities/phone/load open. |
-| AttendanceWindow, AttendanceRecord and attendance module | QR expiry/login continuation/duplicate registration; one record per student/meeting | [Participation suite](../classroom/test_participation.py): test_close_invalidates_every_code_even_after_reopen, test_window_closed_after_get_rejects_post_and_next_scan_requires_new_code; concurrent registration cases in same suite | User QR report is not a phone/classroom acceptance or physical-presence proof. Lecturer interpretation pending. |
+| AttendanceWindow, AttendanceRecord and attendance module | QR expiry/login continuation/duplicate registration; one record per student/meeting | [Participation suite](../classroom/test_participation.py): test_close_invalidates_every_code_even_after_reopen, test_window_closed_after_get_rejects_post_and_next_scan_requires_new_code; concurrent registration cases in same suite | User QR report is not a phone/classroom acceptance or physical-presence proof. Email wait closed by D-54; implementation/classroom verification remains separate. |
 | MeetingRequest and request form/views | Outside-class persistence and Student-own/Lecturer visibility | [Participation suite](../classroom/test_participation.py): test_outside_class_requests_for_past_meeting_persist_for_later_lecturer | User reported live appearance of a comment; D-17 resolved. Broader load/retention open. |
 | Poll/PollVote, poll_services.edit_draft/publish/vote/close | Stale edits; second Active poll; concurrent duplicate vote; vote/close ordering | [Poll suite](../classroom/test_polls.py): test_draft_edit_all_content_and_optimistic_version, test_same_student_parallel_votes_are_final_and_unique, test_parallel_publications_only_one_active_poll, test_vote_racing_close_has_one_consistent_order | Real local generated drafts exercised lifecycle; not classroom load. |
 | poll_services.public_payload and Poll views | Draft/answer privacy; review notice only Lecturer/Draft | [Poll suite](../classroom/test_polls.py): test_student_cannot_see_drafts_in_list_detail_or_state, test_ai_review_notice_is_lecturer_draft_only_in_list_detail_and_state | User opinion-results checks reported separately; browser/phone matrix incomplete. |
@@ -44,8 +44,7 @@ prove that the quote supports the assessment.
   has no substantive task-quality result; user-reported direct HTTP 503 is a failure.
 - **Manual interface:** user reports are labeled as such below. They do not
   establish unreported phone, audio-reference accuracy or classroom-load tests.
-- **Open:** lecturer acceptance of QR/list-XLSX/speech-only interpretations (the
-  user has sent the questions; replies pending), phone/network/load conditions,
+- **Open:** review the relevant lecture section under D-54, phone/network/load conditions,
   broad AI quality and the actual ten-minute class demo/final conclusion.
   D-17 comments timing is resolved; no disconnected queue is required.
 - **Reproducibility:** repository links above point to tracked files included in a clean clone.
@@ -129,13 +128,79 @@ System and migration-drift checks passed. This documentation-only manual-report
 addition did not change application code or require a new AI trial.
 Gemini/homework experiment changes remain separate from this submission stage.
 
+## UC-05 feedback workflow controls
+
+**Executed 2026-11-12:** all **167 server tests passed in 54.969 seconds**, no skips,
+using a separate file-backed SQLite test database. This includes **16 new workflow
+tests** in [test_homework_review.py](../classroom/test_homework_review.py), plus the
+15 submission-foundation tests. **12 JavaScript tests passed**. System/schema-
+drift checks passed and migration 0008_homework_review_workflow was applied to
+the ignored local development database. There was no real-model generation.
+
+The central CSRF-enforced authenticated form route used test actors student_alex
+and lecturer_alpha. Alex requests feedback on v1 with a fake provider available
+only through test injection, submits v2 before processing, then the processor
+receives the exact v1 source. The Lecturer page identifies Version 1, warns that
+a newer version exists, and shows only the frozen v1 source. The Lecturer edits
+and separately publishes it; Alex sees published feedback only on v1, not v2.
+Before publication the draft is absent from Student HTML and the Lecturer route
+returns 403 to the Student. This is in-process HTTP/database/rendering evidence,
+not browser interaction or a real model-quality result.
+
+| Actual component | Executed control assertions |
+|---|---|
+| AssignmentForm / DisabledHomeworkReviewer / request_review | English/Hebrew assignment language stored; unsupported choice rejected. Normal factory refuses both languages, including a fictitious settings flag; preflight explains unavailability and forged POST creates no ReviewJob. |
+| ReviewJob snapshot selection | Lecturer-triggered request excludes every target-owner version, includes only latest other-owner versions for the same assignment, and freezes sources/criteria against later submissions or rubric changes. Repeated active requests reuse the original job. |
+| homework_worker / validation | Correct source/criterion shape and exact quote validation; invalid individual output creates no draft. Invalid comparison evidence/failure retains successful personal draft with comparison failed. A real factory processing a queued fixture fails unavailable without fake fallback. Worker restart marks interrupted work failed, not indefinitely ready/successful. |
+| Draft edit / publish / public projection | Separate publication, stale edit/version rejection and immutable published snapshots; other Student/nonmember/wrong-course/direct parent routes denied; role revocation before processing/publication blocked. HTML escaped and private peer snapshots/model metadata absent from Student output. Login, POST-only and CSRF checks included. |
+| D-52 partial success and later comparison | Private draft before publication. Explicit individual_only action publishes personal content with the exact comparison-failed notice; complete publication in that state is rejected. No peers, failed comparison and completed no_difference remain distinct. Later comparison stays hidden until another explicit publication, preserving prior publication history. |
+
+**Live normal-site HTTP check (no fake):** Lecturer assignment creation form exposes
+the target-language selector with its limitation. Student Alex's existing v1 page
+at /courses/1/meetings/5/homework/1/versions/1/ shows English generation unavailable
+and no request button. An authenticated CSRF POST to the request route returns the
+same reason and leaves the development ReviewJob count exactly zero. No test
+feedback or prepared draft was seeded into the live database. This is direct
+HTTP/form inspection, not agent browser/phone visual acceptance.
+
+Pre-commit verification after the user display report: **31 focused homework
+submission/workflow tests passed in 0.787 seconds**, with a separate file-backed
+SQLite database, no skips. System and migration-drift checks passed. Application
+code was unchanged since the full 167-test run above; this rerun verifies the stage
+before publication without another real model call.
+
+### User-reported Version 1 display check - 2026-11-12
+
+The user reported opening student_alex's Version 1 page in the browser. It showed
+Submitted status, the original submitted text, a clear notice that English
+feedback generation is unavailable and no request would be created, and a notice
+that no feedback had yet been published for that version. This is a manual
+**display** check reported by the user; the account/role was not specified in this
+report. It does not claim that the user submitted a feedback request or exercised
+draft editing/publication. The draft-edit/publication lifecycle, including v1
+request followed by v2 resubmission, is verified by automated injected-provider
+tests only. No real-model feedback/comparison or phone test is established.
+
+**Not established:** actual personal-feedback/comparison quality, accepted real
+providers for either language, semantic anonymity/technical correctness, real
+inference deadline/cancellation/hard-crash behavior, measured workload/input caps,
+classroom load or intentional demo-data cleanup. Fixtures test the lifecycle,
+never fulfill the real-model requirement. Lecturer semantic/privacy review remains
+necessary even when field/quote checks pass. No application commit/push is made
+by this verification record; the separate experiment commit is bb9cc58.
+
+The lecturer clarification update is documentation-only: the user reports design
+freedom and a reference to requirements 1-5 in the lecture. The QR/list-XLSX/speech-
+summary choices are project-owned; email waiting is closed, and lecture-section
+review is still an action. No independent lecture review is claimed.
+
 ## Planned UC-05 acceptance strategy
 
 **Full review acceptance is not executed.** D-46 through D-52 define the review
 planning baseline; D-53 foundation checks are executed separately above. This section does not modify the historical homework experiment records
 below. The assignment/submission subset is now implemented under D-53 (see the
-[executed foundation checks](#uc-05-submission-foundation)). All feedback/review/
-comparison/publication additions in the diagrams remain planned. Separate deterministic website acceptance from
+[executed foundation checks](#uc-05-submission-foundation)). Feedback request/draft/publication controls are now implemented under D-55 with
+test-only provider evidence; real-model generation/comparison quality remains open. Separate deterministic website acceptance from
 actual-model conclusion quality. Test fixtures can validate control flow, not
 claim real feedback generation or an accepted language.
 
@@ -143,20 +208,20 @@ claim real feedback generation or an accepted language.
 
 | Planned responsibility | Risk / acceptance check | Evidence status |
 |---|---|---|
-| HomeworkReviewService + existing Membership | Student requests only own work, course Lecturer may request a course submission. Reject forged owner/course/version, direct cross-user/cross-course HTML/JSON and revoked membership at request/save/publication/read. | Planned tests, no implementation. |
+| HomeworkReviewService + existing Membership | Student requests only own work, course Lecturer may request a course submission. Reject forged owner/course/version, direct cross-user/cross-course HTML/JSON and revoked membership at request/save/publication/read. | Workflow controls tested under D-55 with test-only provider; no real-model acceptance. |
 | SubmissionVersion | Resubmission preserves exact earlier text and version; old published feedback stays associated with that version. Concurrent submissions cannot overwrite a version. | Source/version/concurrency checks implemented under D-53 in test_homework.py; feedback association remains planned. |
-| ReviewJob source selection | Save latest version per other owner in the same assignment at request creation; exclude all target-owner versions, not merely requester versions. **Lecturer initiates review of A, where A has multiple versions: none of A's versions may appear as a peer.** Include latest B/C only, exclude foreign assignments, and preserve the chosen snapshots after later resubmission. | Planned transactional/source-selection tests. |
-| ReviewJob provenance | Save actual target/peer IDs, instructions, criteria, assignment revision/language, actual model identity and failure stage. Editing source/rubric/language does not rewrite prior request inputs. | Planned persistence tests. |
-| FeedbackDraft + review service | Student cannot discover draft text/evidence via list/detail/JSON. Lecturer can review/edit; only separate CSRF Publish exposes version-bound public content. Original generated text is distinguishable from edits. Stale or concurrent edit/publication and changed-source-as-current attempts are rejected or explicitly flagged, never silently relabeled. | Planned disclosure/concurrency tests. |
-| Student output projection | Only own published feedback; no peer identities, IDs, stable labels, full works or private comparison quotes/evidence. Lecturer can inspect permitted sources. Test accidental provider identity fields and escaping. | Planned privacy/rendering tests. |
-| Comparison state | Empty eligible set produces system-controlled no-other-submissions notice and permits personal publication. Nonempty set plus failure retains personal draft with a separate comparison-failed state, never no peers or no difference. Completed no-supported-difference is distinct from completed differences. D-52 permits personal-only publication only after successful personal generation, Lecturer review and explicit selection; keep comparison failed. Personal generation failure has no draft/publication. | Planned state/publication tests, policy resolved by D-52. |
-| Language gate | Assignment stores selected language; unsupported/unaccepted language fails before inference. A generation language can be enabled only with recorded reviewed real output for this workflow. Existing failed Hebrew/English probes do not enable either language. | Planned gate tests plus separate real-output evidence below. |
-| Worker / HomeworkReviewer / validator | Unavailable/invalid/timeout/interrupt/busy reports a real failure without prepared fallback or automatic publication. Verify shared-compute integration without changing video processing. Numeric control bounds/retries require a later measured decision. | Planned injected-provider/process tests, not real model quality. |
+| ReviewJob source selection | Save latest version per other owner in the same assignment at request creation; exclude all target-owner versions, not merely requester versions. **Lecturer initiates review of A, where A has multiple versions: none of A's versions may appear as a peer.** Include latest B/C only, exclude foreign assignments, and preserve the chosen snapshots after later resubmission. | D-55 snapshot and Lecturer-request tests passed. |
+| ReviewJob provenance | Save actual target/peer IDs, instructions, criteria, assignment revision/language, actual model identity and failure stage. Editing source/rubric/language does not rewrite prior request inputs. | D-55 frozen-source tests passed. |
+| FeedbackDraft + review service | Student cannot discover draft text/evidence via list/detail/JSON. Lecturer can review/edit; only separate CSRF Publish exposes version-bound public content. Original generated text is distinguishable from edits. Stale or concurrent edit/publication and changed-source-as-current attempts are rejected or explicitly flagged, never silently relabeled. | D-55 draft privacy/stale version/publication tests passed; classroom concurrency remains unmeasured. |
+| Student output projection | Only own published feedback; no peer identities, IDs, stable labels, full works or private comparison quotes/evidence. Lecturer can inspect permitted sources. Test accidental provider identity fields and escaping. | D-55 direct-access/rendering tests passed; semantic text privacy still needs Lecturer review. |
+| Comparison state | Empty eligible set produces system-controlled no-other-submissions notice and permits personal publication. Nonempty set plus failure retains personal draft with a separate comparison-failed state, never no peers or no difference. Completed no-supported-difference is distinct from completed differences. D-52 permits personal-only publication only after successful personal generation, Lecturer review and explicit selection; keep comparison failed. Personal generation failure has no draft/publication. | D-55 test-only partial/no-peer/no-difference/publication cases passed; policy resolved by D-52. |
+| Language gate | Assignment stores selected language; unsupported/unaccepted language fails before inference. A generation language can be enabled only with recorded reviewed real output for this workflow. Existing failed Hebrew/English probes do not enable either language. | D-55 language/preflight gate tests passed; no real language is accepted. |
+| Worker / HomeworkReviewer / validator | Unavailable/invalid/timeout/interrupt/busy reports a real failure without prepared fallback or automatic publication. Verify shared-compute integration without changing video processing. Numeric control bounds/retries require a later measured decision. | D-55 injected-provider/disabled-factory/restart tests passed, not real model quality. |
 | Explicit synthetic-data cleanup | Keep versions/feedback through demo and submission checking. Then an intentional authorized cleanup removes linked demo content consistently without deleting unrelated course data. No inherited seven-day expiry or automatic deletion; real-work policy remains separate. | Planned lifecycle tests, no cleanup executed. |
 
 ### Planned partial-publication regression (D-52)
 
-**Not executed.** Arrange eligible peers, successful personal feedback and failed
+**Executed with injected fixtures under D-55, not a real model.** Arrange eligible peers, successful personal feedback and failed
 comparison. Assert that the Student cannot read the private draft through list,
 detail or JSON. The Lecturer sees the successful personal draft and separate
 comparison failure, reviews/edits and explicitly chooses individual-only

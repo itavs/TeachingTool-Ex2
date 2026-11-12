@@ -52,6 +52,7 @@ class HomeworkAssignment(models.Model):
     title = models.CharField(max_length=160)
     instructions = models.TextField()
     criteria = models.JSONField(default=list)
+    feedback_language = models.CharField(max_length=2, choices=[('en', 'English'), ('he', 'Hebrew')], default='en')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -80,6 +81,47 @@ class SubmissionVersion(models.Model):
     @property
     def status_label(self):
         return "Submitted"
+
+
+class ReviewJob(models.Model):
+    submission = models.ForeignKey(SubmissionVersion, on_delete=models.PROTECT, related_name='review_jobs')
+    requester = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    instructions_snapshot = models.TextField()
+    criteria_snapshot = models.JSONField()
+    target_text = models.TextField()
+    peer_snapshots = models.JSONField(default=list)
+    language = models.CharField(max_length=2)
+    status = models.CharField(max_length=12, default='queued', choices=[('queued','Queued'), ('running','Processing'), ('ready','Lecturer review'), ('failed','Failed')])
+    comparison_status = models.CharField(max_length=16, default='pending', choices=[('pending','Pending'), ('no_peers','No other submissions'), ('failed','Comparison failed'), ('compared','Comparison completed'), ('no_difference','No supported difference')])
+    generated_individual = models.JSONField(default=dict)
+    generated_comparison = models.JSONField(default=dict)
+    model_metadata = models.JSONField(default=dict)
+    error_code = models.CharField(max_length=40, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['submission'], condition=models.Q(status__in=['queued','running']), name='one_active_review_per_version')]
+        ordering = ['-created_at', '-pk']
+
+    @property
+    def display_status(self):
+        draft = getattr(self, 'draft', None) if self.status == 'ready' else None
+        if draft and draft.published_at:
+            return 'Published'
+        return self.get_status_display()
+
+
+class FeedbackDraft(models.Model):
+    job = models.OneToOneField(ReviewJob, on_delete=models.PROTECT, related_name='draft')
+    individual_text = models.TextField()
+    comparison_text = models.TextField(blank=True)
+    version = models.PositiveIntegerField(default=1)
+    published_individual = models.TextField(blank=True)
+    published_comparison = models.TextField(blank=True)
+    published_comparison_status = models.CharField(max_length=16, blank=True)
+    published_at = models.DateTimeField(null=True)
+    published_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
 
 
 class AttendanceWindow(models.Model):

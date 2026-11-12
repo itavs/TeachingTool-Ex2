@@ -4,11 +4,14 @@
 
 ## 1. Purpose and Status
 
-The user has sent the lecturer three interpretation questions: rotating-QR
-attendance, online attendance list with XLSX snapshot, and speech-only video
-summary. All three await replies; implemented behavior is not lecturer acceptance.
+The user reports the lecturer replied: requirements 1-5 are detailed in the
+lecture, and implementation/design details are ours to decide. Email waiting is
+closed. Rotating QR, online attendance plus offline-readable XLSX snapshot, and
+speech-only video summaries are **project choices**, not technical prescriptions
+attributed to the lecturer. Review the relevant lecture section; it has not been
+independently reviewed in this update.
 D-17 comments during/outside class is already resolved. See the
-[clarification register](decisions-and-assumptions.md#lecturer-clarification-requests---sent-awaiting-reply).
+[clarification register](decisions-and-assumptions.md#lecturer-clarification-response-and-project-choices).
 
 This document defines the intended behavior of a web-based classroom teaching
 tool for Exercise 2. It supports scope decisions, later design, implementation,
@@ -23,7 +26,8 @@ pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
 unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
 D-52). The assignment/submission foundation is implemented under D-53;
-AI feedback/comparison remains feasibility/planning only, not a website feature. Functional operation does not establish reliable AI accuracy,
+real AI feedback/comparison remains unavailable; deterministic request/draft/publication
+mechanics are implemented with test-only provider evidence. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 The five-capability target is user-approved, not lecturer-confirmed. Full AC-01
@@ -47,7 +51,7 @@ goals. Detailed candidate behavior marked **Open proposal** is conditional:
 it does not become approved merely because it appears beside a requirement.
 The same distinction applies to use cases and future acceptance criteria.
 Attendance direction D-05 and D-06 is user-approved; its remaining details
-follow D-24/D-27 through D-29; lecturer interpretation remains pending. Approval is not evidence of
+follow D-24/D-27 through D-29; D-54 closes the email wait; lecture-section review remains an action. Approval is not evidence of
 implementation. The university-network option in D-07 remains conditional.
 Polling decisions D-08 through D-11 are also user-approved project choices,
 not additional requirements stated by the lecturer. D-31 resolves Q-03: Hebrew/English with lecturer-selected output language and a 6,000-character material ceiling.
@@ -107,8 +111,7 @@ student and meeting. Meeting entry alone is not the selected trigger.
 Identity follows D-24. D-27 fixes the initial window at 5 minutes, rotation at 30 seconds and validity at 45 seconds (15 seconds overlap, bounded by closure). Later windows last 2 minutes; closing invalidates all their codes. D-28 requires login continuation with fresh validation, and registration by CSRF-protected POST only. Preserve the first registration without duplicates; label a first registration in a later window Registered in an additional window, never Late.
 
 The mechanism does not conclusively prove physical presence and does not
-prevent real-time sharing of a still-valid code. Lecturer acceptance of this
-interpretation of automatically remains unverified. A university-network check
+prevent real-time sharing of a still-valid code. D-54 records this as our choice under the lecturer's design freedom; the email wait is closed. A university-network check
 is not required by this direction; see D-07 and Section 6.1.
 
 ### FR-02 - Attendance Spreadsheet
@@ -116,7 +119,8 @@ is not required by this direction; see D-07 and Section 6.1.
 **Assignment requirement:** AS-01.
 
 The lecturer shall receive an online/offline spreadsheet containing attendance
-details. Lecturer interpretation of online/offline remains unverified (Q-02).
+details. D-54 closes the email wait: the project chooses an online list and an
+offline-readable XLSX snapshot, without back-sync.
 
 **User-approved design direction:** D-06 resolves the output direction in
 P-03: the lecturer views an online attendance list and can export it to XLSX.
@@ -224,8 +228,7 @@ and model-based summarization of that transcript. Analysis is audio-only.
 The result must clearly explain that visual information not spoken in the
 recording is not included in the analysis. Silent slides, formulas, diagrams,
 and board content are therefore not analyzed; speech-recognition errors can
-affect the summary. Lecturer acceptance of this interpretation remains
-unconfirmed; the handout does not explicitly prescribe an audio-only approach.
+affect the summary. This is our implementation choice under D-54, not a lecturer-prescribed technique; the handout does not explicitly prescribe an audio-only approach.
 
 **User-approved input/output (D-14):** the lecturer manually uploads a video
 file from the computer. MP4 is the initial supported format. The result
@@ -262,7 +265,8 @@ new text. Source/rubric changes and stale edits must be detected before publicat
 
 The **assignment/submission foundation is implemented** (D-53): meeting-linked
 assignment creation, instructions/criteria, exact-text versions and authorized
-reading. Review/comparison/publication below remain **planned**, not website features. Hebrew and English remain quality-test
+reading. Request/draft/publication control flow below is now implemented under D-55 with
+test-only provider evidence. Real AI production and quality remain unavailable. Hebrew and English remain quality-test
 targets: a language becomes available only after actual output for this workflow
 has been reviewed successfully. Existing failed trials do not enable either.
 Length/workload and processing bounds require measurement, not a cap inferred
@@ -413,22 +417,23 @@ direction from implementation or completed checks.
   [sequence](architecture.md#video-sequence), [actual results](local-summaries.md#actual-full-route-acceptance).
   Functional success is not speech-reference accuracy: Hebrew wording/negation
   and summary grounding remain limited. Separate demo duration, acceptable
-  quality, audio-only lecturer interpretation and live-demo expectations remain
+  quality and live-demo expectations remain
   Q-04/Q-09. Transcript editing/export and link import are not approved.
 
 ### UC-05 - Submit Homework, Review a Draft, and Publish Feedback
 
-**Status:** user-approved planning baseline D-46 through D-52; assignment/submission components are implemented under D-53, while all review/
-comparison/publication components are planned and model conclusion quality remains open.
+**Status:** user-approved planning baseline D-46 through D-52; assignment/submission components are implemented under D-53, and D-55 implements request/draft/publication mechanics with injected-provider
+tests only. Real-model review/comparison and conclusion quality remain open.
 
 1. A course Lecturer defines an assignment under a meeting, with instructions,
    criteria and requested Hebrew/English feedback language. Generation is enabled
    only for a language with recorded successful real-output review; neither is
    currently accepted for this planned workflow. Current creation implements
-   title/instructions/criteria only; feedback-language configuration is deferred.
+   title/instructions/criteria only; feedback-language selection is now implemented under D-55, without enabling a provider.
 2. A Student pastes a synthetic work and submits it as a new immutable version.
    This is implemented: show save confirmation, numbered history and Submitted
-   status, not a pending/generated review claim. Steps 3-8 remain planned.
+   status, not a pending/generated review claim. Steps 3-7 now have software workflow
+coverage under D-55, but normal generation is gated off; step 8 cleanup remains planned.
 3. The owner requests review, or the course Lecturer requests review for that
    version. Check current membership/role and target ownership. Atomically save
    target/version, instructions/criteria/language and latest-other-owner peer
@@ -524,10 +529,10 @@ parameters are explicit. AC-02 includes outside-class connected submission under
 
 | Check | Source | Requirement / use case | Planned evidence and expected result | Open dependencies |
 |-------|--------|------------------------|--------------------------------------|-------------------|
-| AC-01 | AS-01, D-01, D-05, D-06 | FR-01, FR-02; UC-01 | Using D-24 and D-27 through D-29, use two identified students and a rotating temporary QR in an open meeting window. Check valid registrations and recorded times; reject an expired code, a wrong-meeting code, and normal registration after window closure. Verify the displayed QR changes and apply the agreed validity rule across rotation boundaries, without assuming an unapproved grace period. Repeated scans by the same student produce one record for that meeting; the second student's valid scan produces a separate record. Export XLSX, open it and compare it with the online list at export time. Add a later valid attendance record and confirm the earlier file remains a snapshot; editing a copy does not change online records. These checks do not establish physical presence or prevent real-time sharing of valid codes. | D-27 through D-29 fix identity continuation, timings, additional windows, fields and no manual correction. Q-01/Q-02 lecturer interpretation and Q-07 production safeguards remain open. D-07 is not a required network gate. |
+| AC-01 | AS-01, D-01, D-05, D-06 | FR-01, FR-02; UC-01 | Using D-24 and D-27 through D-29, use two identified students and a rotating temporary QR in an open meeting window. Check valid registrations and recorded times; reject an expired code, a wrong-meeting code, and normal registration after window closure. Verify the displayed QR changes and apply the agreed validity rule across rotation boundaries, without assuming an unapproved grace period. Repeated scans by the same student produce one record for that meeting; the second student's valid scan produces a separate record. Export XLSX, open it and compare it with the online list at export time. Add a later valid attendance record and confirm the earlier file remains a snapshot; editing a copy does not change online records. These checks do not establish physical presence or prevent real-time sharing of valid codes. | D-27 through D-29 fix identity continuation, timings, additional windows, fields and no manual correction. Q-01/Q-02 email waiting is closed under D-54; Q-07 production safeguards remain open. D-07 is not a required network gate. |
 | AC-02 | AS-02, D-01, D-17 through D-19 | FR-03; UC-02 | Submit identified comment and suggestion samples through normal website POST during and outside class, including a meeting dated in the past. Verify the selected meeting and submitting student are persisted, personal history survives a fresh login, and a lecturer signing in later sees the stored requests in that meeting. Another student must not see them through the meeting page or access the lecturer feed. Retain checks for failed-save reporting, boundaries, duplicate submission, escaping and live lecturer updates. No local persistence, queues or disconnected synchronization is required. | D-17 resolves timing. D-30 fixes request length and visible-page refresh. Executed server evidence is in testing.md; browser/phone/classroom capacity and retention remain separate questions under Q-06/Q-07. |
 | AC-03 | AS-03, D-01, D-08 through D-11 | FR-04; UC-03 | Exercise both lecturer-selected types using real generation from known pasted material. Inspect relevance, four options, and, for comprehension, one correct option plus a short explanation. Edit all applicable draft fields and verify publication uses the approved version; reject later content edits. Cast known votes from two identified students and verify live lecturer counts/percentages, one final response each, no vote changes, and no second active poll in that meeting. Before closure, verify student-facing content exposes neither aggregates nor the comprehension answer/explanation. Close manually; reject later votes and show student aggregates without identities, plus the correct answer/explanation only for comprehension. Confirm opinion polls never designate or evaluate correctness and neither type assigns grades. Create a further poll after closure. Exercise generation failure and retry without a prepared-content substitution. Verify the basic flow has no file upload, open-ended response, or automatic scheduling. | D-31 resolves poll language/input length. Lifecycle evidence uses test fixtures and explicitly labeled demo data under D-32/D-33, not real generation. Q-06/Q-07 retain capacity and integrated-AI/data questions. Approved workflow is not conditional on P-05 approval. |
-| AC-04 | AS-04, D-01, D-12 through D-16 | FR-05; UC-04 | Manually upload permitted MP4 files for three planned cases: Hebrew speech, English speech, and a Hebrew lecture with English technical terms. Using agreed quality criteria, verify genuine audio extraction/transcription/model summarization, inspect known spoken facts and the intended meaning of technical terms, and confirm output is in the spoken language without translation (Hebrew for the terminology case). Verify a summary paragraph, 3-5 key points, and an option that exposes the full transcript rather than a partial excerpt. Compare the transcript and summary with the actual speech. Check each result clearly states that unspoken visual content is excluded. Check the candidate failed/unsupported-input path without false success after its details are agreed. Measure time and cost for samples of different durations/file sizes before proposing maximum duration and file size; choose demo duration separately. After numeric limits are agreed and implemented, add boundary checks at and above each limit without inventing thresholds now. | D-34 through D-37 cover initial limits and extraction infrastructure; Q-04 retains demo duration, real-model quality and lecturer interpretation; Q-07/Q-09 for resources and demo expectations. All three language cases are planned, not passed; sustained language switching is outside the commitment. Extraction-only measurements/limits are recorded separately; no end-to-end AI quality pass is assumed. |
+| AC-04 | AS-04, D-01, D-12 through D-16 | FR-05; UC-04 | Manually upload permitted MP4 files for three planned cases: Hebrew speech, English speech, and a Hebrew lecture with English technical terms. Using agreed quality criteria, verify genuine audio extraction/transcription/model summarization, inspect known spoken facts and the intended meaning of technical terms, and confirm output is in the spoken language without translation (Hebrew for the terminology case). Verify a summary paragraph, 3-5 key points, and an option that exposes the full transcript rather than a partial excerpt. Compare the transcript and summary with the actual speech. Check each result clearly states that unspoken visual content is excluded. Check the candidate failed/unsupported-input path without false success after its details are agreed. Measure time and cost for samples of different durations/file sizes before proposing maximum duration and file size; choose demo duration separately. After numeric limits are agreed and implemented, add boundary checks at and above each limit without inventing thresholds now. | D-34 through D-37 cover initial limits and extraction infrastructure; Q-04 retains demo duration and real-model quality; D-54 closes the interpretation-email wait; Q-07/Q-09 for resources and demo expectations. All three language cases are planned, not passed; sustained language switching is outside the commitment. Extraction-only measurements/limits are recorded separately; no end-to-end AI quality pass is assumed. |
 | AC-05 | AS-05, D-01, D-20 through D-22, D-46 through D-52 | FR-06, FR-07; UC-05 | Planned software and actual-model quality checks are separated in the UC-05 strategy. Verify owner/Lecturer requests, private drafts and separate publication; latest-other-owner snapshots including Lecturer initiation; immutable revisions; no-peers versus comparison failure versus no supported difference; system-controlled no-peer notice. For successful personal feedback plus failed comparison, assert private draft before explicit Lecturer individual-only publication and own published feedback plus the exact failed-comparison notice afterward. Personal failure yields no publishable draft. A later comparison stays hidden until separately reviewed/published. Assess real conclusions against source/criteria, A capacity coverage, B rollback and cache-only controlled correction, C actual gaps, and a grounded coverage/approach difference. | D-53 assignment/submission/read checks have software evidence in testing.md; AI review/comparison/publication and full AC-05 remain pending. Q-05 retains quality/language readiness, measured limits; D-52 resolves failure-publication; Q-07 real-data policy; Q-09 live demo. No existing trial constitutes a pass. |
 | AC-06 | AS-06, AS-07 | NFR-01, NFR-02; UC-01 through UC-05 | Exercise the relevant student flows on the agreed smartphone/browser set and all flows in the intended classroom environment at the agreed load; record devices, network conditions, observed durations, and failures. | Q-06; P-01. |
 | AC-07 | AS-09, D-01 | NFR-06; UC-01 through UC-05 | Rehearse the approximately ten-minute presentation and record what ran live, actual processing times, any earlier outputs, and any failures. Confirm all five capabilities have genuine execution evidence; label sample data and any separately approved presentation shortcuts. | Q-09; P-09. |
@@ -540,11 +545,11 @@ actual tool experiments (AS-11), or recorded test and demo outcomes (AS-14).
 
 The register remains authoritative for open items. In particular, resolve:
 
-1. Lecturer acceptance of automatically (Q-01); D-24 and D-27/D-28 now resolve initial identity, timings, code transitions and additional-window registration.
-2. Lecturer acceptance of the attendance online/offline interpretation (Q-02) remains open; D-06 approves the list/XLSX snapshot. Comments timing is separately resolved by D-17: online means during class and offline outside class, using the same website submission/history flow. Creation, submission and storage remain separate. D-18/D-19/D-30 scope and defaults are unchanged; capacity/data lifecycle remain Q-06/Q-07.
+1. D-54 closes the QR interpretation-email wait: the lecturer leaves design details to us. Review requirements 1-5 in the relevant lecture section; QR remains the project choice with its forwarding limitation.
+2. D-54 closes the attendance-output interpretation-email wait. The project chooses an online list and offline-readable XLSX snapshot without back-sync. D-17 comments during/outside class remains resolved and unchanged; phone/load verification remains open.
 3. Local English poll generation is implemented under D-44. Hebrew automatic generation and broad semantic/language acceptance remain open. Q-03 parameters are resolved; D-32 is historical disabled-provider behavior and D-33 remains a separate labeled demo path. No external-provider approval or paid fallback is implied.
 4. Separate video demo duration, real-model quality,
-   and lecturer interpretation (Q-04). Manual MP4 upload, a summary paragraph
+   and lecture-section review (Q-04/D-54). Manual MP4 upload, a summary paragraph
    with 3-5 key points and full-transcript viewing, Hebrew/English targets
    including Hebrew with English technical terms, same-language output without
    translation, and audio-only processing/disclosure are approved (D-12 through
@@ -627,7 +632,8 @@ pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
 unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
 D-52). The assignment/submission foundation is implemented under D-53;
-AI feedback/comparison remains feasibility/planning only, not a website feature. Functional operation does not establish reliable AI accuracy,
+real AI feedback/comparison remains unavailable; deterministic request/draft/publication
+mechanics are implemented with test-only provider evidence. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 Unit A supplied the shared foundation; Unit B added attendance/comments; the
@@ -670,3 +676,32 @@ is kept exactly, including leading/trailing whitespace and line breaks. The mode
 save path rejects editing an existing version; no edit/delete endpoint exists.
 This is application immutability, not a claim that privileged direct SQL cannot
 alter data. Demo data remains synthetic; no automatic cleanup is implemented.
+
+## UC-05 feedback workflow implementation boundary
+
+D-55 implements ReviewJob/FeedbackDraft and homework_review service functions plus
+a dedicated task processor. New requests freeze the target version, instructions,
+criteria, language and latest version per other owner; Lecturer initiation still
+excludes all target-owner versions. Original generated findings remain separate
+from Lecturer edits and published snapshots. Older-version feedback is explicitly
+labeled and never shown as feedback for the next submission. Published revisions
+cannot be edited. Later successful comparisons require a new request/review and
+explicit publication; previous published content remains unchanged in history.
+
+The normal factory always returns DisabledHomeworkReviewer. Both supported target
+languages are unavailable before request creation; direct POST checks enforce
+that and save no queued job. No runtime fake, manual seed feedback or accepted
+Qwen3 homework adapter exists. Fakes are injected only in tests. Software tests
+cannot establish genuine personal-feedback or comparison quality (AS-05).
+
+Comparison outcomes no_peers, failed, no_difference and compared remain distinct.
+Successful personal feedback plus failed comparison may be published only through
+the explicit individual-only action, displaying the D-52 notice verbatim. Personal
+failure has no publishable draft. Student HTML contains only published fields for
+that owned version; job snapshots/private comparison evidence are Lecturer-only.
+
+A single worker lock and shared compute lock serialize processing; no inference
+is held inside a database transaction. Interrupted running jobs are marked failed
+on worker restart, without automatic retry. Because no real provider is active,
+real inference cancellation/deadline, measured workload and hard-crash behavior
+remain open integration work. Intentional demo cleanup also remains unimplemented.

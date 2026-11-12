@@ -12,8 +12,8 @@ now run the current pipeline for new uploads.
 
 The following Unit D record is **historical extraction-only evidence**. Its
 extraction-only states and disabled-engine statements are not today's factories.
-The three lecturer interpretation questions have been sent by the user and are
-awaiting replies; see the [register](decisions-and-assumptions.md#lecturer-clarification-requests---sent-awaiting-reply).
+The lecturer response closes the email wait and leaves design details to the
+project; the three technical choices are project-owned, not lecturer-prescribed; see the [register](decisions-and-assumptions.md#lecturer-clarification-response-and-project-choices).
 
 # Unit D — Private MP4 Validation and Audio Extraction
 

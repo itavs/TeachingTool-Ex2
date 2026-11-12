@@ -6,14 +6,18 @@ The website implements authentication/course roles, meetings, attendance/XLSX,
 connected comments during/outside class (resolved D-17), poll lifecycle with local
 English draft generation, and background MP4 extraction/transcription/summarization.
 Homework assignment/submission and private version reading are implemented under
-D-53; AI review/comparison remains planned. Current foundation and later planned
+D-53; real-model AI review/comparison remains unavailable; request/draft/publication mechanics are implemented with test-only provider evidence. Current foundation and later planned
 review components are separated below. See [requirements/use cases](SRS.md#5-main-use-cases),
 [tools and observed evidence](local-ai-feasibility.md#current-tools-and-evidence-index),
 and [component-to-test strategy](testing.md#current-component-to-test-strategy).
 
-The QR, online-list/XLSX snapshot and speech-only video-summary interpretations
-are implemented choices. The user reports sending all three clarification
-questions to the lecturer; acceptance is **pending a reply**, not confirmed.
+The lecturer response, reported by the user, refers to requirements 1-5 in the
+lecture and gives us freedom over design/implementation. The email wait is closed.
+The project chooses rotating QR (valid codes can still be forwarded), an online
+attendance list plus an XLSX snapshot readable without a connection, and summaries
+of recorded speech excluding unspoken visuals. These choices are ours, not
+technical prescriptions by the lecturer. Review the relevant lecture section; no
+claim of independent lecture review is made here.
 D-17 comments timing is resolved and is not part of that pending set.
 
 ## Current components
@@ -347,8 +351,9 @@ No disconnected queue/local persistence/synchronization is required.
 ## Planned UC-05 components
 
 **Mixed status - D-46 through D-53.** HomeworkAssignment and SubmissionVersion
-are now implemented. ReviewJob, FeedbackDraft, HomeworkReviewService, reviewer/
-validator and background review worker remain planned additions. Existing
+are now implemented. ReviewJob, FeedbackDraft, the homework_review service module and homework_worker
+processor are now implemented under D-55. Real-model adapters remain unaccepted;
+normal-site availability is disabled for both languages. Existing
 Meeting/User/Membership, Django session/CSRF/Templates, short SQLite transactions
 and the local compute lock are integration points. Do not extend VideoJob or
 silently route homework through the video worker. A separate review worker is
@@ -359,12 +364,12 @@ is a candidate adapter, not an accepted homework engine in either language.
 |---|---|
 | HomeworkAssignment - implemented foundation | Meeting/creator, title, instructions, ordered criterion text and creation timestamp. Stable criterion IDs, rubric revision and feedback-language configuration are later review-stage extensions. |
 | SubmissionVersion - implemented | Exact submitted text, assignment/Student/version and timestamp; next number serialized under a short transaction, unique per owner/assignment/version. Submitted status is a display property. No update/delete route. |
-| ReviewJob | Requester separately from target owner, target/peer version IDs, copied instructions/criteria/language, processing/comparison states, actual engine metadata and errors. Freeze the latest version per other owner at request creation, even for Lecturer requests. |
-| FeedbackDraft | Original model findings separately from Lecturer edits, target and private comparison evidence, draft edit version, comparison outcome, published content and timestamp. Published content is immutable and version-bound. |
-| HomeworkReviewService | Current membership/ownership, submission/version creation, atomic source selection, request, optimistic draft editing, separate publication and safe Student projection. |
-| HomeworkReviewer protocol / LocalQwenHomeworkReviewer | Separate target assessment and actual-source comparison. Local Qwen implementation remains conditional on language/quality acceptance; no runtime fake or canned fallback. |
-| ReviewEvidenceValidator | Shape/criterion/source references and exact quote presence against the referenced version; never certify entailment or technical correctness from a substring match. |
-| Dedicated review worker | Claim queued requests, enforce planned control bounds and shared compute lock, evaluate target first and peers second, save explicit partial/failure states without publishing. |
+| ReviewJob - implemented | Requester separately from target owner, target/peer version IDs, copied instructions/criteria/language, processing/comparison states, actual engine metadata and errors. Freeze the latest version per other owner at request creation, even for Lecturer requests. |
+| FeedbackDraft - implemented | Original model findings separately from Lecturer edits, target and private comparison evidence, draft edit version, comparison outcome, published content and timestamp. Published content is immutable and version-bound. |
+| homework_review module - implemented | request_review, edit_draft, publish, owned_job, availability and published_feedback. Existing homework_services continues assignment/submission operations. No HomeworkReviewService class is claimed. |
+| HomeworkReviewer / DisabledHomeworkReviewer - implemented contract | available, assess_submission and compare_submissions. The factory always returns disabled; LocalQwenHomeworkReviewer remains a planned/unaccepted adapter, not a current class. |
+| homework_worker validation functions - implemented | validate_individual and validate_comparison check shape/source references/exact quotes. No ReviewEvidenceValidator class or semantic correctness guarantee is claimed. |
+| Dedicated review worker - implemented control flow | Claim queued requests, enforce planned control bounds and shared compute lock, evaluate target first and peers second, save explicit partial/failure states without publishing. |
 
 Choose sources by **target owner**, not actor: exclude every version of that owner,
 then latest submitted version per other owner in the same assignment at the saved
@@ -375,10 +380,9 @@ and never presents historical feedback as a review of new text.
 
 ### Planned homework class diagram
 
-Classes marked planned remain additions, not executable interfaces. The two
-submission foundation models are marked implemented; other existing infrastructure
-is marked existing. Method names here are design proposals; unlike
-the implemented diagrams above, they do not assert that Python methods exist.
+Classes marked planned remain additions, not executable interfaces. Implemented review/foundation models and module functions are distinguished from
+the planned LocalQwen adapter. Module boxes are not invented Python classes.
+Method lists are selected responsibilities, not complete signatures.
 
 ```mermaid
 classDiagram
@@ -392,10 +396,11 @@ classDiagram
         <<existing>>
     }
     class HomeworkAssignment {
-        <<implemented foundation>>
+        <<implemented>>
         title
         instructions
         criteria
+        feedback_language
         created_at
     }
     class SubmissionVersion {
@@ -405,39 +410,40 @@ classDiagram
         submitted_at
     }
     class ReviewJob {
-        <<planned>>
+        <<implemented>>
+        submission_id
         requester_id
-        target_owner_id
-        peer_version_ids
+        target_text
+        peer_snapshots
         instructions_snapshot
         criteria_snapshot
-        language_snapshot
+        language
         status
         comparison_status
         model_metadata
         error_code
     }
     class FeedbackDraft {
-        <<planned>>
-        generated_findings
-        edited_findings
-        private_comparison_evidence
-        comparison_outcome
+        <<implemented>>
+        individual_text
+        comparison_text
         version
-        published_content
+        published_individual
+        published_comparison
+        published_comparison_status
         published_at
     }
-    class HomeworkReviewService {
-        <<planned>>
-        submit()
+    class homework_review {
+        <<module>>
+        availability()
         request_review()
         edit_draft()
         publish()
         published_feedback()
-        cleanup_demo_data()
     }
     class HomeworkReviewer {
-        <<planned interface>>
+        <<interface>>
+        available(language)
         assess_submission()
         compare_submissions()
     }
@@ -446,10 +452,17 @@ classDiagram
         assess_submission()
         compare_submissions()
     }
-    class ReviewEvidenceValidator {
-        <<planned>>
-        validate_structure()
-        verify_quotes()
+    class homework_worker {
+        <<module>>
+        process_review_job()
+        validate_individual()
+        validate_comparison()
+    }
+    class DisabledHomeworkReviewer {
+        <<implemented>>
+        available(language)
+        assess_submission()
+        compare_submissions()
     }
     Meeting "1" --> "0..*" HomeworkAssignment
     HomeworkAssignment "1" --> "0..*" SubmissionVersion
@@ -457,18 +470,22 @@ classDiagram
     SubmissionVersion "1" --> "0..*" ReviewJob : target
     ReviewJob ..> SubmissionVersion : frozen peer IDs
     ReviewJob "1" --> "0..1" FeedbackDraft
-    HomeworkReviewService ..> Membership : fresh access checks
-    HomeworkReviewService ..> SubmissionVersion
-    HomeworkReviewService ..> ReviewJob
-    HomeworkReviewService ..> FeedbackDraft
+    homework_review ..> Membership : fresh access checks
+    homework_review ..> SubmissionVersion
+    homework_review ..> ReviewJob
+    homework_review ..> FeedbackDraft
     HomeworkReviewer <|.. LocalQwenHomeworkReviewer
-    LocalQwenHomeworkReviewer ..> ReviewEvidenceValidator
+    HomeworkReviewer <|.. DisabledHomeworkReviewer
+    homework_worker ..> HomeworkReviewer
+    homework_worker ..> ReviewJob
+    homework_worker ..> FeedbackDraft
 ```
 
 ### Planned homework submission to publication sequence
 
-The submission/create/read subset is implemented under D-53; all review/request/
-comparison/publication arrows below remain a proposed future path, not execution evidence. The English/Hebrew
+D-53/D-55 implement these control-flow arrows. Successful provider responses below
+are injected fixtures in tests only, not evidence of real-model generation. In the
+normal site the availability gate stops before request creation; no queue is seeded. The English/Hebrew
 language gate is closed until real-output review accepts that language for this
 workflow. The diagram assumes that gate has passed; earlier failed probes do not
 open it. Failures cannot become public feedback by following the success branch.
@@ -477,10 +494,10 @@ open it. Failures cannot become public feedback by following the success branch.
 sequenceDiagram
     actor S as Student
     actor L as Lecturer
-    participant V as Planned HomeworkReviewService
-    participant DB as Existing database with planned models
-    participant W as Planned review worker
-    participant AI as Planned HomeworkReviewer
+    participant V as homework_views / homework_review
+    participant DB as ReviewJob / FeedbackDraft / SQLite
+    participant W as homework_worker
+    participant AI as HomeworkReviewer, disabled normally
     S->>V: CSRF POST synthetic text
     V->>DB: Current membership, immutable SubmissionVersion
     alt Student initiates
@@ -567,8 +584,8 @@ reports and must not be read as current factories or full acceptance.
 The website is loopback development with DEBUG/SQLite, not a production/classroom
 deployment. Phone access, classroom load, HTTPS/hardening and the ten-minute demo
 remain unverified. Homework comparison/review has failed quality expectations in
-local feasibility work; only the assignment/submission foundation is implemented. The review/comparison
-classes and arrows above remain planned, with model quality unaccepted. Optional campus-network checks remain deferred and nonblocking.
+local feasibility work; only the assignment/submission foundation is implemented. The real-model review/comparison remains unavailable. The lifecycle arrows are
+software-tested with test-only providers, not accepted AI quality. Optional campus-network checks remain deferred and nonblocking.
 
 ## Implemented UC-05 submission foundation
 
@@ -590,3 +607,36 @@ line breaks and use dir=auto. Four new Templates and a small CSS rule reuse the
 existing layout; actual-phone rendering remains unverified. Database migration
 0007_homework_submissions adds only the two foundation models. No feedback model,
 review request action, worker task, language setting or publication route exists.
+
+## UC-05 feedback control flow
+
+Migration 0008 adds assignment feedback_language, ReviewJob snapshots and
+FeedbackDraft. The normal factory in homework_provider.py returns only
+DisabledHomeworkReviewer; no setting selects a test provider or an unaccepted
+Qwen adapter. Both HTML preflight and POST service checks block unavailable
+language requests before creating a job. Assignment language choice alone does
+not enable generation. A later real adapter needs explicit language/quality
+acceptance and measured runtime/input controls.
+
+homework_review.request_review snapshots the immutable target plus latest-other-
+owner versions under a short transaction, excluding all target-owner versions
+for both Student and Lecturer requests. One queued/running job per target version
+is enforced by database uniqueness. Processing is outside database transactions
+under the existing shared compute lock. Original generated individual/comparison
+JSON and source snapshots remain private; the editable draft is separate.
+
+The worker validates source quote presence, not entailment. Individual failure
+creates no draft; comparison failure retains a successful individual draft and
+requires explicit individual_only publication. There is no fabricated fallback.
+The dedicated run_homework_worker command recovers interrupted running tasks as
+failed on restart and processes queued work, but no normal-site jobs are currently
+created. Hard-crash/real-inference deadline behavior remains unvalidated.
+
+Lecturer edit/publication rechecks membership, source association and optimistic
+draft version. Published fields are immutable snapshots. Student pages use an
+explicit projection of published fields for that owned SubmissionVersion, never
+job source snapshots or mutable draft fields. V1 publication is labeled V1 even
+when V2 exists; later jobs/publications do not reassign its source or silently
+expose a comparison. Current/previous publications and source-request time are
+shown separately. Automatic text anonymization/semantic correctness is not
+claimed; the Lecturer must review generated/edited public text as well.

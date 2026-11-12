@@ -4,4 +4,9 @@
 <a class="back-link" href="{% url 'homework-detail' course.pk meeting.pk assignment.pk %}">← {{ assignment.title }}</a>
 <h1>Submitted work · Version {{ submission.version_number }}</h1>
 <section class="panel"><p><strong>Status: {{ submission.status_label }}</strong></p><p>Student: {{ submission.student.username }} · {{ submission.submitted_at|date:'j F Y H:i:s' }} (Asia/Jerusalem)</p><div class="submission-text" dir="auto">{{ submission.text }}</div></section>
+<section class="panel"><h2>Feedback for Version {{ submission.version_number }}</h2>
+{% if feedback_available %}<form method="post" action="{% url 'homework-review-request' course.pk meeting.pk assignment.pk submission.pk %}">{% csrf_token %}<button class="button" type="submit">Request feedback for Version {{ submission.version_number }}</button></form>{% else %}<p role="status">{{ feedback_reason }}</p>{% endif %}
+{% for state in request_states %}<p>Request status: {{ state }}</p>{% endfor %}
+{% for item in published_feedback %}<article><h3>{% if forloop.first %}Current published feedback{% else %}Previous published feedback{% endif %} · Version {{ submission.version_number }}</h3><p>Published: {{ item.published_at|date:'j F Y H:i:s' }} · Sources recorded: {{ item.requested_at|date:'j F Y H:i:s' }}</p><div class="submission-text" dir="auto">{{ item.individual }}</div>{% if item.notice %}<p role="status">{{ item.notice }}</p>{% endif %}{% if item.comparison %}<h4>Anonymous comparison</h4><div class="submission-text" dir="auto">{{ item.comparison }}</div>{% endif %}</article>{% empty %}<p>No feedback has been published for this version.</p>{% endfor %}
+{% if membership.role == 'lecturer' %}{% for job in jobs %}<p><a href="{% url 'homework-review' course.pk meeting.pk job.pk %}">Review request · Version {{ submission.version_number }} · {{ job.display_status }}</a></p>{% endfor %}{% endif %}</section>
 {% endblock %}

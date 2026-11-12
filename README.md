@@ -28,7 +28,7 @@ polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
 D-22. Homework remains a planning/quality target; implemented video/English-poll AI and participation evidence are described below;
 remaining operational parameters and open interpretations are explicit.
 The shared website foundation is now implemented under D-23 through D-26;
-Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Local English poll-draft generation is now available under D-44; Unit D implements private MP4 validation/audio extraction; Unit E now transcribes new video uploads locally and exposes private full transcripts; new uploads now include local Qwen3 automatic summaries; homework website AI remains unimplemented.
+Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Local English poll-draft generation is now available under D-44; Unit D implements private MP4 validation/audio extraction; Unit E now transcribes new video uploads locally and exposes private full transcripts; new uploads now include local Qwen3 automatic summaries; real homework AI remains unavailable; its version-bound request/draft/publication mechanics are implemented with test-only provider evidence.
 
 | Capability | Assignment behavior | Design direction and open proposals |
 |------------|---------------------|----------------------------------|
@@ -86,10 +86,9 @@ switching is outside the current commitment. Word accuracy and summary quality r
 D-34 now approves initial system limits of 4 minutes and 200 MB after the earlier measurements. Demo duration remains separate and undecided; unlimited-length/full-lesson support is not claimed. Actual checking/extraction is implemented under D-34 through D-37, while speech/summary quality remains unverified. See
 Section 8 of the [register](docs/decisions-and-assumptions.md).
 
-Attendance uses D-24 identity and the approved D-27 through D-29 timing, login-continuation and export rules. There are no manual corrections in this version (Q-01/Q-02 still track lecturer interpretation). The QR mechanism does not
+Attendance uses D-24 identity and the approved D-27 through D-29 timing, login-continuation and export rules. There are no manual corrections in this version (Q-01/Q-02 email clarifications are closed under D-54). The QR mechanism does not
 conclusively prove physical presence or prevent real-time sharing of a
-still-valid code. Lecturer acceptance of automatically and online/offline
-has not been verified. XLSX export does not imply disconnected registration.
+still-valid code. The email clarification is closed under D-54; QR/list/XLSX are project choices. XLSX export does not imply disconnected registration.
 
 A university-network-origin check is a conditional feasibility option only,
 not an approved implementation requirement (D-07, P-10, Q-10). The proposed
@@ -165,11 +164,14 @@ The D-17 comments timing interpretation is resolved; it does not change attendan
 
 ## Current Implementation Status
 
-The user has sent the lecturer three interpretation questions: rotating-QR
-attendance, online attendance list with XLSX snapshot, and speech-only video
-summary. All three await replies; implemented behavior is not lecturer acceptance.
+The user reports the lecturer replied: requirements 1-5 are detailed in the
+lecture, and implementation/design details are ours to decide. Email waiting is
+closed. Rotating QR, online attendance plus offline-readable XLSX snapshot, and
+speech-only video summaries are **project choices**, not technical prescriptions
+attributed to the lecturer. Review the relevant lecture section; it has not been
+independently reviewed in this update.
 D-17 comments during/outside class is already resolved. See the
-[clarification register](docs/decisions-and-assumptions.md#lecturer-clarification-requests---sent-awaiting-reply).
+[clarification register](docs/decisions-and-assumptions.md#lecturer-clarification-response-and-project-choices).
 
 The website implements Django/Templates authentication and course-membership roles,
 meeting management, attendance/QR/XLSX, connected comments during or outside class,
@@ -179,7 +181,7 @@ generation is unavailable. New MP4 jobs validate/extract audio, transcribe with 
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
 unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
-D-51) with an implemented assignment/submission foundation; AI feedback/comparison is not a website feature. Functional operation does not establish reliable AI accuracy,
+D-51) with an implemented assignment/submission foundation; real AI feedback/comparison is unavailable; its mechanical request/draft/publication workflow is implemented but has test-only provider evidence. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 Detailed component/test evidence: [architecture](docs/architecture.md),
@@ -371,8 +373,10 @@ The UC-05 submission foundation is implemented: Lecturers create meeting-linked
 assignments with instructions and one criterion per line; enrolled Students submit
 text as append-only numbered versions. Owners see their history; current course
 Lecturers can read all submitted versions. The status is **Submitted**, not reviewed
-or published. AI review requests, comparison, feedback drafts/publication, feedback
-language configuration and cleanup remain planned. No model is called by this stage.
+or published. Feedback request/draft/publication control flow and assignment language selection
+are implemented, but the normal provider is disabled in both languages. No review
+request is created when unavailable. Real-model individual feedback/comparison
+and explicit demo-data cleanup remain incomplete. No model is called by this stage.
 
 The local database migration `0007_homework_submissions` has been applied. On a
 fresh checkout run `python manage.py migrate` in the website environment. Restart
@@ -392,6 +396,36 @@ needed for homework submission.
 5. Optional privacy check: as **student_casey** (another CS101 member), the other
    Student's links are absent; directly opening Alex's version URL returns 404.
 
-No feedback-generation, comparison or publication controls are exposed. Assignment
+Each submitted version now explains feedback-provider availability. No request
+button or queue is offered while the selected language has no accepted provider. Assignment
 editing/deletion is not included in this slice. Automated evidence and remaining
 browser/phone limits are in [testing](docs/testing.md#uc-05-submission-foundation).
+
+## UC-05 feedback workflow - current availability
+
+The site stores a target feedback language (English/Hebrew) per assignment. **No
+real homework provider is active in either language.** Opening a submitted version
+shows that limitation before a request can be created. A forged/direct POST is
+also rejected without a ReviewJob or fake result. Choosing a language is not
+an AI-quality acceptance claim. There is no runtime demo/fake-provider setting.
+
+The version-bound request, source/peer snapshots, task processing, private Lecturer
+draft editing and separate publication are implemented as control flow. The full
+Alex Version 1 request -> Version 2 submission -> Lecturer V1 draft -> separate
+publication -> Student V1-only feedback route is verified with an injected
+**test-only** provider. It is not a completed real-model feature or a normal-site
+demo that a user can reproduce by clicking Generate today.
+
+For a future accepted provider, queued work is processed separately with
+`python manage.py run_homework_worker` (`--once` for one pass). With the current
+factory the site creates no queue, so this worker is not needed for browser
+checks. It cannot select a fake provider. Real-model adapters, per-language quality,
+measured runtime/length/workload bounds and standalone demo-data cleanup remain.
+See [executed workflow evidence](docs/testing.md#uc-05-feedback-workflow-controls)
+and [current components](docs/architecture.md#uc-05-feedback-control-flow).
+
+What can be checked now: as lecturer_alpha create an assignment with a chosen
+language, then as student_alex submit/read its versions and observe the provider-
+unavailable notice. No wait is started. Editing/publishing a generated draft can
+currently be tested only by the automated test-only provider scenarios; no
+prepared feedback is inserted into the live database.

@@ -7,6 +7,11 @@ class AssignmentForm(forms.Form):
     instructions = forms.CharField(strip=False, widget=forms.Textarea(attrs={"rows": 6, "dir": "auto"}))
     criteria = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, "dir": "auto"}),
                                help_text="Enter one review criterion per line.")
+    feedback_language = forms.ChoiceField(choices=[('en','English'), ('he','Hebrew')], required=False, initial='en',
+        help_text='Target feedback language. Automatic feedback generation is not currently available in either language.')
+
+    def clean_feedback_language(self):
+        return self.cleaned_data.get('feedback_language') or 'en'
 
     def clean_instructions(self):
         text = self.cleaned_data["instructions"]
@@ -31,3 +36,14 @@ class SubmissionForm(forms.Form):
         if not text.strip():
             raise forms.ValidationError("Paste your work before submitting.")
         return text
+
+
+class FeedbackEditForm(forms.Form):
+    version = forms.IntegerField(min_value=1, widget=forms.HiddenInput)
+    individual_text = forms.CharField(label='Individual feedback', widget=forms.Textarea(attrs={'rows':12,'dir':'auto'}))
+    comparison_text = forms.CharField(label='Anonymous comparison', required=False, widget=forms.Textarea(attrs={'rows':6,'dir':'auto'}))
+
+
+class FeedbackPublishForm(forms.Form):
+    version = forms.IntegerField(min_value=1, widget=forms.HiddenInput)
+    mode = forms.ChoiceField(choices=[('complete','Publish feedback'), ('individual_only','Publish individual feedback only')])
