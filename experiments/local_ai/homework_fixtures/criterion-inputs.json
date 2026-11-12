@@ -1,0 +1,44 @@
+[
+  {
+    "case": "alex-v1",
+    "instructions": "Explain how a stack and a queue remove items. Give one everyday example of each.",
+    "criteria": [
+      "1. Explains that a stack removes the most recently added item first (LIFO).",
+      "2. Explains that a queue removes the earliest added item first (FIFO).",
+      "3. Gives one everyday example of a stack and one everyday example of a queue."
+    ],
+    "submission": "A stack removes the most recently added item first. A pile of plates is an example."
+  },
+  {
+    "case": "alex-v2",
+    "instructions": "Explain how a stack and a queue remove items. Give one everyday example of each.",
+    "criteria": [
+      "1. Explains that a stack removes the most recently added item first (LIFO).",
+      "2. Explains that a queue removes the earliest added item first (FIFO).",
+      "3. Gives one everyday example of a stack and one everyday example of a queue."
+    ],
+    "submission": "A stack removes the most recently added item first, like a pile of plates. A queue removes the earliest added item first, like customers waiting at a service desk."
+  },
+  {
+    "case": "b-original",
+    "instructions": "Explain how a university registration system should handle two students simultaneously requesting the last seat. Discuss transactions, duplicate prevention, and the benefits and risks of caching. This is a theoretical answer, not a coding task.",
+    "criteria": [
+      "Correct atomicity and rollback",
+      "Distinguish duplicate enrollment from capacity concurrency",
+      "Concrete protection against overbooking",
+      "Cache latency versus staleness trade-off"
+    ],
+    "submission": "I would add a UNIQUE constraint on student ID and course ID. This guarantees that two different students cannot take the last seat. A transaction can update the seat count and save the enrollment together, with rollback if either fails. A cache makes reads faster. If the cache says a seat is available, we can confirm enrollment immediately without a database check."
+  },
+  {
+    "case": "b-cache-fixed",
+    "instructions": "Explain how a university registration system should handle two students simultaneously requesting the last seat. Discuss transactions, duplicate prevention, and the benefits and risks of caching. This is a theoretical answer, not a coding task.",
+    "criteria": [
+      "Correct atomicity and rollback",
+      "Distinguish duplicate enrollment from capacity concurrency",
+      "Concrete protection against overbooking",
+      "Cache latency versus staleness trade-off"
+    ],
+    "submission": "I would add a UNIQUE constraint on student ID and course ID. This guarantees that two different students cannot take the last seat. A transaction can update the seat count and save the enrollment together, with rollback if either fails. A cache makes reads faster. If the cache says a seat is available, we must check the database before confirming enrollment because cached availability may be stale."
+  }
+]

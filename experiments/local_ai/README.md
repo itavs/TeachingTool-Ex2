@@ -61,3 +61,54 @@ Schema-valid JSON establishes structure only. Manual review found semantic,
 language and cross-submission attribution failures in both tested models.
 No application permissions, publication lifecycle, classroom concurrency,
 offline behavior, or production acceptance were tested here.
+
+## Focused homework probes - reproduction
+
+The Qwen3 8B round is closed with **failed readiness**: per-criterion English
+assessment handles Alex's two synthetic stacks/queues versions, but the controlled
+B cache edit still changes unrelated judgments and leaves false UNIQUE conclusions.
+26/26 quote matches do not certify entailment. No homework provider is enabled.
+
+Source fixtures: `samples.json` contains original theoretical A/B/C and criteria;
+`homework_fixtures/criterion-inputs.json` contains Alex v1/v2 and B before/after.
+The three independent coverage/expectation maps are in `homework_fixtures/` and
+must stay out of model input. These are synthetic, not exported real coursework.
+Recorded source inputs, exact prompts, model outputs, configuration and timings
+are under `results/homework-focused/{comparison,personal,criterion}`. Only token
+context arrays were removed from those responses; the generated text is unchanged.
+
+Offline audit (no model, website database or API required), from repository root:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest experiments.local_ai.test_personal_review_probe -v
+```
+
+For new inference, prerequisites are the previously installed pinned local
+Ollama 0.40.14 portable binary/model store described above and the website Python
+environment (standard-library probe/helper imports, no database access). These
+large runtime/model assets are intentionally not in Git; missing assets fail,
+not download or substitute a provider. No secret/API key is needed. All source
+fixtures/maps required by the probes are in Git; none reads `.local` expectation
+files or the demo database. Start the local-only service in PowerShell:
+
+```powershell
+.\experiments\local_ai\start_ollama.ps1
+Invoke-RestMethod http://127.0.0.1:11435/api/version
+```
+
+Wait for that local readiness response before running a probe. Then choose one
+command, each generating separate local results without retries:
+
+```powershell
+.\.venv\Scripts\python.exe experiments/local_ai/homework_review_probe.py
+.\.venv\Scripts\python.exe experiments/local_ai/personal_review_probe.py
+.\.venv\Scripts\python.exe experiments/local_ai/criterion_review_probe.py
+```
+
+The first two probes create new timestamped folders and use their corresponding
+published maps for source consistency only; the criterion probe copies published
+inputs into a new timestamped folder by default and does not read expectations.
+`--run` is optional for an explicitly prepared input folder, never required for
+normal reproduction. Outputs remain ignored/local. Stop only the verified service
+started by start_ollama.ps1 afterward, as described above. No new inference was
+run while preparing this reproducible experiment commit.

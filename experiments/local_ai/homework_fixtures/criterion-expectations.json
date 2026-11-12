@@ -1,0 +1,44 @@
+{
+  "utc_prepared": "2026-11-12T10:23:49.516534+00:00",
+  "method": "Independent agent source review before generation; NEVER model input.",
+  "expected": {
+    "alex-v1": [
+      "correct: stack most-recent-first explicitly explained",
+      "missing: no queue-removal explanation",
+      "partial: plate example is explicitly present and valid, queue example absent; do not call both absent"
+    ],
+    "alex-v2": [
+      "correct: stack explanation remains valid; no invented new stack gap",
+      "correct: explicit earliest-first FIFO explanation added",
+      "correct: plates and service-desk customers provide both everyday examples"
+    ],
+    "b-original": [
+      "correct: grouped updates with explicit rollback if either fails",
+      "incorrect: UNIQUE student/course prevents same-owner duplicates, not different owners taking final seat",
+      "must reject claimed final-seat guarantee / identify absent concrete capacity-race safeguard, not approve ordinary transaction alone",
+      "incorrect: faster reads acknowledged but cache-only immediate authorization explicitly unsafe, not merely an absent risk discussion"
+    ],
+    "b-cache-fixed": [
+      "unchanged correct atomicity/rollback",
+      "unchanged incorrect UNIQUE guarantee",
+      "unchanged capacity-race issue; cache edit adds no atomic reservation or isolation",
+      "correct latency/staleness/final DB checking; unsafe cache criticism must disappear"
+    ]
+  },
+  "input_hashes": {
+    "alex-v1": "f720ddbb3589cf07b37c128cb62cfb9e3a1bcdc11b7a2e40e74a891f53dc5f24",
+    "alex-v2": "0d2f3615dd8d9f75d43e614aeb1563414e1a65944c10ca6f4e3496a2c91dea37",
+    "b-original": "c15c4195dbbfe3686677091b915a44cf97bcc44005e18c3efde99917c377f6a9",
+    "b-cache-fixed": "0ba6fe67c2c6684e3f7ba7c3ced926dd88a359d5dbd1cc7f446f90df6164b494"
+  },
+  "controlled_edit": {
+    "old": "If the cache says a seat is available, we can confirm enrollment immediately without a database check.",
+    "new": "If the cache says a seat is available, we must check the database before confirming enrollment because cached availability may be stale.",
+    "all_other_b_text_unchanged": true
+  },
+  "limitations": [
+    "one run per criterion, no repetition/statistical accuracy",
+    "exact quote is not proof of entailment",
+    "no peer input or comparison between students"
+  ]
+}

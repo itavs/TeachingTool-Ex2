@@ -32,7 +32,7 @@ prove that the quote supports the assessment.
 | video_jobs.owned_job/transcript_available/summary_available/purge_expired_transcripts | Owner/current role on direct URL; exact expiry; summary never outlives transcript | [Transcription tests](../classroom/test_transcription.py): test_demotion_revocation_and_mismatched_parent_block_saved_link, test_expiry_blocks_at_exact_deadline_even_before_cleanup; [summary tests](../classroom/test_summaries.py): test_expiry_hides_summary_on_direct_job_url_and_cleanup_clears_both | Actual owner pages opened; seven-day passage is tested with controlled time, not a seven-day live wait. Physical cleanup requires running maintenance. |
 | ProcessTree / exclusive_lock | Orphan compute and competing video/poll AI | [Summary tests](../classroom/test_summaries.py): test_windows_process_tree_close_terminates_owned_descendant; [video tests](../classroom/test_videos.py): test_single_worker_lock_and_fifo; generation adapter protocol test above | Owned-descendant test uses ordinary Python, not a real GPU hard-crash. Real sample services exited; classroom contention unmeasured. |
 | transcript_display.reading_paragraphs / Templates / browser scripts | Reordering/rewriting, RTL-LTR, escaping, hidden-page polling and double reload | [Display tests](../classroom/test_transcription.py): test_pause_boundaries_preserve_words_and_isolate_new_car, test_unmatched_legacy_segments_do_not_replace_text; [JS video tests](../tests_js/videos.test.cjs), [poll tests](../tests_js/polls.test.cjs), [participation tests](../tests_js/participation.test.cjs) | User opened STATIC transcript and SHORT summary/link. Actual-phone layout and full keyboard/browser matrix remain open. |
-| Personal-review audit helper (experiment only, not website class) | Fabricated quote versus unsupported conclusion | **Local only / unpublished:** experiments/local_ai/test_personal_review_probe.py (two reported audit tests); excluded from this documentation commit | **Local only / unpublished:** docs/homework-personal-review-feasibility.md reports 15/15 exact quotes, but technical false positives/negatives persist. No homework acceptance. |
+| Personal-review audit helper (experiment only, not website class) | Fabricated quote versus unsupported conclusion | [Quote-audit tests](../experiments/local_ai/test_personal_review_probe.py), now published with synthetic fixtures | [Personal probe](homework-personal-review-feasibility.md) reports 15/15 exact quotes, but technical false positives/negatives persist. No homework acceptance. |
 
 ### Evidence boundaries and outstanding acceptance
 
@@ -760,3 +760,36 @@ The model-generated draft/review-required notice is now selected by viewer role 
 ## English poll stage closure verification — 2026-11-11
 
 At the user's request, the complete website suite passed: **136 server tests**, 88.304 s, file-backed SQLite, no skips. **12 JavaScript tests passed**. System, schema-drift and dependency checks passed. This includes English real-provider integration regressions, preserved Hebrew lifecycle behavior, pre-publication privacy and Lecturer-only draft-review labels in list/detail/state. The explicit publication scope contains poll code/tests/documentation only; Gemini files, PDF, media, models, raw outputs, local databases and secrets remain excluded. No new model generations were needed for these automated checks.
+
+## Local homework review/comparison probe — 2026-11-11
+
+Prepared an independent source/rubric coverage map before generation (not passed to the model), then ran installed Qwen3 8B on each of three existing synthetic works with the other two as anonymous peer text, plus A alone. Four local generations, no retries, no download/external provider/Gemini call. Wall times A 14.859 s, B 7.363 s, C 10.427 s, A alone 7.929 s; first load 2.690 s, later warm loads ~0.003–0.004 s. All stopped normally with four criterion findings; flags matched actual peer availability.
+
+Quality review FAILED key expectations: A received invented capacity-condition gaps despite explicit coverage; B's rollback sentence was correctly quoted (no false absence claim), but its wrong UNIQUE/capacity and cache-only approval were not adequately corrected; C's real rollback/duplicate omissions were found, alongside unsupported recommendations and misaligned evidence. Comparison identified some actual coverage differences but confused approaches and invented ordinal peer labels. No source IDs/names/full peer works were emitted. 15/16 exact target-quote checks passed, showing that quotation presence alone does not prove the right assessment.
+
+The no-peer case provided personal feedback and comparison_performed=false, but its text only said אין תובנות משותפות, not that no other submissions are available; the explicit notice check therefore failed. Hebrew language corruption/readability problems remain. These are experiment findings, not homework capability acceptance. See [homework-review-feasibility.md](homework-review-feasibility.md). No homework website implementation or further commit/push was performed. The English poll stage was committed/pushed before this experiment; its previously recorded full suite is separate evidence.
+
+
+## Isolated personal criterion review — 2026-11-11
+
+Ran four real, local Qwen3 8B Q4_K_M/Ollama 0.40.14 requests: unchanged synthetic A/B/C separately, then B changing only its cache-authorization sentence. The independently timestamped coverage map and expected judgments were kept out of model input; no peers were supplied. Wall times: A 13.994 s (2.985 s initial load), B 11.232 s, C 11.888 s, cache-fixed B 9.047 s. All stopped normally; no retry or external provider was used.
+
+Mechanical audits passed 15/15 supplied exact source quotes and all four criterion-index sets. Two standalone quote-audit tests passed; they deliberately do not certify whether quotes support conclusions. Substantive source review FAILED key expectations: A's explicit capacity condition was recognized but a duplicate/capacity distinction gap was invented; B's rollback was explicitly recognized but initially penalized via confusion with concurrency, its wrong UNIQUE/last-seat claim was accepted in both versions, and unsafe cache approval was softened to partial coverage. After fixing only cache authorization, the cache criticism disappeared, but the unchanged capacity-protection criterion incorrectly improved to correct. C's explicit locking/recheck was labeled missing and its acknowledged duplicate-protection omission was missed. No incorrect status appeared despite explicit B errors. Hebrew wording also remained corrupted in places.
+
+Full verbatim B before/after feedback and evidence review: [homework-personal-review-feasibility.md](homework-personal-review-feasibility.md). Recommendation: improve isolated personal assessment before a separately approved comparison experiment; no homework website integration. Original samples and Gemini experiment files were left unchanged. No website test result, download, cloud call, billing, commit or push is claimed for this probe. Raw prompts/outputs/maps remain in ignored local experiment storage.
+
+
+## Closed per-criterion Qwen3 feedback probe - 2026-11-12
+
+Four synthetic works, 14 local GPU requests (one criterion each): Alex v1/v2
+conclusions matched expected LIFO/plates/FIFO/queue additions. B failed the
+controlled cache-edit test: all four statuses changed partial -> correct, with
+false approval of the unchanged UNIQUE/last-seat guarantee. All 26/26 supplied
+quotes were exact source substrings; separate meaning review still found false
+conclusions and irrelevant evidence. Times per work: 11.917, 7.197, 17.506 and
+12.854 seconds; first work includes 4.860 seconds loading. One run per case,
+no statistical acceptance. The experiment round is closed, not accepted as a
+real homework provider in either language. No further inference was run for
+publication. Fixtures, recorded outputs and [reproduction instructions](../experiments/local_ai/README.md#focused-homework-probes---reproduction)
+are now reviewable from the repository; model/runtime assets remain local-only.
+Full findings: [criterion probe](homework-criterion-review-feasibility.md).

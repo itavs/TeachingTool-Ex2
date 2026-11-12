@@ -1,0 +1,52 @@
+{
+  "utc_prepared": "2026-11-11T13:05:24.393570+00:00",
+  "source_sha256": "ee76fc2f5d17f8e9888976a678b4e226b59260b8b624389a4869a9ea90d31309",
+  "criteria": [
+    "Correct atomicity and rollback",
+    "Distinguish duplicate enrollment from capacity concurrency",
+    "Concrete protection against overbooking",
+    "Cache latency versus staleness trade-off"
+  ],
+  "coverage": {
+    "sample-a": {
+      "atomicity_rollback": "One transaction includes enrollment and seat update; explicit rollback on failure.",
+      "duplicate_vs_capacity": "UNIQUE(student,course) prevents same-student duplication; capacity handled separately.",
+      "overbooking": "Conditional update only if seats remain, or suitable isolation.",
+      "cache": "Faster reads; stale data; final authorization uses DB.",
+      "mandatory_gaps": [],
+      "approach": "Conditional seat update or isolation; does not specify an explicit lock."
+    },
+    "sample-b": {
+      "atomicity_rollback": "Explicitly groups seat update/enrollment and says rollback if either fails. This topic is present, not missing.",
+      "duplicate_vs_capacity": "False claim UNIQUE prevents two different students taking the final seat.",
+      "overbooking": "No sound capacity-race protection; UNIQUE is incorrectly substituted.",
+      "cache": "Faster reads is recognized, but immediate cache-only approval without DB check is unsafe.",
+      "mandatory_gaps": [
+        "Correct UNIQUE versus capacity claim",
+        "Provide capacity-concurrency safeguard",
+        "Correct cache-only last-seat authorization"
+      ],
+      "approach": "Relies on UNIQUE and cached availability, unlike peers with isolation/conditional update/locking."
+    },
+    "sample-c": {
+      "atomicity_rollback": "Concurrency transaction/isolation is mentioned, but atomic failure/rollback behavior is explicitly not addressed.",
+      "duplicate_vs_capacity": "Last-seat race diagnosed; repeated same-student registration explicitly not addressed.",
+      "overbooking": "Suitable isolation or lock on course row with recheck.",
+      "cache": "Recognizes stale data risk and refuses cache-only authorization.",
+      "mandatory_gaps": [
+        "Explain atomic failure/rollback",
+        "Explain duplicate enrollment protection"
+      ],
+      "approach": "Explicit row lock and recheck, or isolation; differs from A conditional-update option."
+    }
+  },
+  "comparison_checks": [
+    "A vs C: conditional update alternative versus explicit locking/recheck; both mention isolation.",
+    "B differs substantively through erroneous UNIQUE/cache-only approach; peers are not automatically correct because they agree.",
+    "Do not claim B or A omitted rollback.",
+    "C omissions do not make its concurrency/cache analysis wrong."
+  ],
+  "single_submission": "Review A against criteria; comparison_performed=false; comparison says no other submissions are available; no invented peer differences.",
+  "privacy": "Pass peer texts without IDs/names; output only aggregated topic/approach comparison, no peer identity/language labels/full quotations.",
+  "plan_not_supplied_to_model": true
+}

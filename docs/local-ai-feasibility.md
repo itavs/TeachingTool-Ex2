@@ -14,8 +14,8 @@ a clean clone after this documentation commit. **Local only / unpublished** mean
 an ignored or untracked artifact, or an unstaged update excluded from this commit;
 its filename is shown as plain text rather than a repository link. This index
 summarizes reported outcomes without publishing the independent experiment
-implementations or raw outputs. The 13 Gemini changes and homework probe files
-remain outside this documentation commit. No AI tool was rerun for this review.
+implementations or raw outputs. The homework probe code, synthetic fixtures and focused results are now published
+with this experiment closure. The 13 Gemini changes remain excluded. No AI tool was rerun for this review.
 
 | Tool / status | Purpose considered | What actually ran | Observed result and limit | Evidence and availability |
 |---|---|---|---|---|
@@ -34,7 +34,7 @@ remain outside this documentation commit. No AI tool was rerun for this review.
 | Ollama 0.40.14 / adopted | Run pinned local Qwen weights | Local GPU text experiments and supervised isolated website services | Local generation works; cold load and warm reuse differ. No external endpoint or paid fallback | [Runtime](local-summaries.md#model-and-isolated-runtime), [AI lock](../experiments/local_ai/requirements-lock.txt); executable/models local only |
 | Qwen3 4B Q4_K_M / rejected baseline | Smaller local text model | Four bilingual poll and four homework cases | Unsafe/inaccurate feedback and weak Hebrew/opinion quality; not website engine | [Historical text trials](#text-experiments-and-measured-results), [synthetic results](../experiments/local_ai/results/); models local only |
 | Qwen3 8B Q4_K_M / adopted selectively | Summaries and English poll drafts; candidate homework reviewer | Saved-transcript and MP4 summary paths, bilingual poll probes and real English generation route | SHORT summary succeeds; STATIC uploaded summary fails language check with transcript retained. English drafts need Lecturer semantic review; Hebrew generation unavailable | [Summary results](local-summaries.md#actual-full-route-acceptance), [poll generation](local-poll-generation.md#actual-local-validation-on-a-new-topic), [poll quality](local-poll-feasibility.md); real raw/video-derived output local only |
-| Qwen3 8B homework probes / feasibility only | Criteria-grounded feedback and same-assignment comparison | Three synthetic works plus single-work/no-peer case; later A/B/C and B cache-only correction in isolation | Prior comparison misattributed content; latest 15/15 quotes are exact but conclusions miss UNIQUE errors/invent gaps. No website review capability or semantic acceptance | **Local only / unpublished:** docs/homework-review-feasibility.md, docs/homework-personal-review-feasibility.md (verbatim B pair), experiments/local_ai/homework_review_probe.py, personal_review_probe.py and test_personal_review_probe.py. Raw runs/maps are in ignored .ai-lab/.local. This row is a summary of those observations, not clone-accessible raw evidence |
+| Qwen3 8B homework probes / experiment round closed, not accepted | Criteria-grounded feedback and comparison | Prior joint reviews plus one-criterion-per-call English review of Alex v1/v2 and B before/after cache correction (14 calls) | Per-criterion review succeeded for both Alex versions but failed controlled B. 26/26 exact quotes matched source; meaning review still found false conclusions and unrelated criterion changes. Neither language is enabled as a real homework provider. | [Closure report](homework-criterion-review-feasibility.md), [personal report](homework-personal-review-feasibility.md), [comparison report](homework-review-feasibility.md), [reproduction instructions](../experiments/local_ai/README.md#focused-homework-probes---reproduction), [synthetic inputs/maps](../experiments/local_ai/homework_fixtures/), [recorded outputs](../experiments/local_ai/results/homework-focused/). Runtime/models remain local-only. |
 | psutil 7.2.2, NVIDIA-SMI / measurement tools | Sample process RAM/device VRAM and GPU use | Initial local trials sampled memory and device data | Device-wide VRAM is not model-only; early 4B RAM missed worker. Latest personal probe has no new RAM/VRAM sample | [Measured results](#text-experiments-and-measured-results), [sanitized metrics](../experiments/local_ai/results/audio_speech_metrics.json) |
 | Gemini API via Python urllib/PowerShell / external candidate, paused | Check free text/audio alternative | Authenticated inventory/trivial smoke; task timeouts; bounded poll attempt; user-reported direct HTTP 503 | Connectivity partial, no substantive task-quality result. Direct failure does not establish original root cause; no basis to enable billing | [Committed initial Gemini report](gemini-free-feasibility.md) covers the original partial trial. **Local only / unpublished:** later report updates and experiments/gemini_free/results/poll-probe-20261105T141004-fa5b8f3a.json; direct 503 is user-reported, not independently reproduced here. Key/inventory and private data local only |
 | University-network origin gate / deferred option, not adopted tool | Possible attendance signal | No campus feasibility trial or runtime gate | Not required/approved; not a physical-presence guarantee; does not block other work | [Conditional study](decisions-and-assumptions.md#7-proposed-university-network-feasibility-study) |
@@ -43,12 +43,13 @@ Versions and digests specific to experiments remain in their detailed reports;
 the Python requirement files describe the two separate environments, not a single
 combined installation. No external service is needed by current website AI.
 Local media/weights/runtimes/credentials/databases/raw transcripts remain excluded
-from Git. The raw homework prompts reference independent maps in ignored storage;
-a clone can inspect the original synthetic samples and earlier committed results,
-plus the outcome summary in this index. The new probe code, detailed verdicts,
-verbatim B pair and independent maps are local-only/unpublished, so these later
-runs cannot be independently reproduced or fully audited from this commit alone. This is an evidence
-availability limitation, not a claim that the source map entered model input.
+from Git. The focused homework probes now use published synthetic fixtures and independent
+maps. The runner never passes expected judgments into model prompts. Recorded
+synthetic input/prompt/output/timing evidence is in results/homework-focused;
+private service logs, token-context arrays, binaries and weights are excluded.
+A clone can audit those results without a database or running model. New inference
+still needs the explicitly documented installed local runtime/checkpoint, and is
+not bit-for-bit reproducible across different hardware/runtime conditions.
 
 ## Historical initial local feasibility report
 
