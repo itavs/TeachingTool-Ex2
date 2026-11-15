@@ -19,6 +19,14 @@ def create_assignment(meeting, user, data):
 
 
 @transaction.atomic
+def update_rubric(meeting,assignment_id,user,text):
+    lock_and_authorize(meeting.pk,user,Membership.Role.LECTURER)
+    assignment=assignment_for(meeting,assignment_id)
+    assignment.professional_rubric=text
+    assignment.save(update_fields=['professional_rubric'])
+
+
+@transaction.atomic
 def submit_version(meeting, assignment_id, user, text):
     # SQLite IMMEDIATE acquires the write reservation before reading the maximum.
     # The meeting lock also expresses the locking order for a future row-lock DB.

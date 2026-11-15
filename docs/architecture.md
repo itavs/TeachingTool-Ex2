@@ -6,8 +6,7 @@ The website implements authentication/course roles, meetings, attendance/XLSX,
 connected comments during/outside class (resolved D-17), poll lifecycle with local
 English draft generation, and background MP4 extraction/transcription/summarization.
 Homework assignment/submission and private version reading are implemented under
-D-53; real-model AI review/comparison remains unavailable; request/draft/publication mechanics are implemented with test-only provider evidence. Current foundation and later planned
-review components are separated below. See [requirements/use cases](SRS.md#5-main-use-cases),
+D-53; D-56 now connects experimental local English AI review/comparison with a recorded professional rubric, private editable evidence and separate publication. Hebrew generation and robust model quality remain open. See [requirements/use cases](SRS.md#5-main-use-cases),
 [tools and observed evidence](local-ai-feasibility.md#current-tools-and-evidence-index),
 and [component-to-test strategy](testing.md#current-component-to-test-strategy).
 
@@ -25,7 +24,7 @@ D-17 comments timing is resolved and is not part of that pending set.
 | Source component | Actual responsibility and boundary |
 |---|---|
 | `teachingtool/settings.py`, Django middleware/auth, `classroom/views.py` | Django 5.2.19 Templates/session/CSRF and meeting management; fresh course-membership authorization, SQLite development database. No public account/course administration. |
-| `models.py` | Course/Membership/Meeting, AttendanceWindow/AttendanceRecord/MeetingRequest, Poll/PollVote and VideoJob persistence/constraints. |
+| `models.py` | Course/Membership/Meeting, AttendanceWindow/AttendanceRecord/MeetingRequest, Poll/PollVote, VideoJob, HomeworkAssignment/SubmissionVersion and ReviewJob/FeedbackDraft persistence/constraints. |
 | `attendance.py`, `participation_views.py`, `request_forms.py` | Rotating signed QR, POST registration/deduplication, XLSX snapshot, private comments/history and visible-page updates. |
 | `poll_views.py`, `poll_forms.py`, `poll_services.py` | Generation form, draft edit/version checks, publication, final vote, close and disclosure-safe payload. No inference inside a database write transaction. |
 | `poll_generation.py`, `local_poll_generator.py`, `poll_contract.py`, `local_poll_runner.py` | Replaceable PollGenerator contract, local Qwen3 8B English adapter, generated-output validation and isolated runtime. Fake providers are test-only; seed_demo_polls is a separate labeled local fixture command. |
@@ -33,7 +32,9 @@ D-17 comments timing is resolved and is not part of that pending set.
 | `video_worker.py`, `video_media.py`, `video_storage.py` | One persistent queue/worker; isolated CPU media validation and WAV extraction, locks, deadline/heartbeat and private file handling. |
 | `video_engines.py`, `local_transcriber.py`, `local_asr_runner.py`, `asr_checkpoint.py` | Transcriber contract/factory, pinned local large-v3-turbo, CUDA float16, offline checkpoint validation, supervised events and validated transcript results. |
 | `local_summarizer.py`, `local_summary_runner.py`, `summary_contract.py` | Summarizer implementation, pinned Qwen3 8B/structured paragraph plus 3-5 points, language/identity checks; no semantic-accuracy guarantee. |
-| `process_tree.py`, `process_lock.py` | Owned Windows process-tree lifetime and exclusive local compute access. Poll generation and video AI do not overlap on the shared compute lock. |
+| `homework_views.py`, `homework_review.py`, `homework_worker.py`, `homework_evidence.py` | Version-bound request/source snapshots, private narratives/evidence, exact quote verification, guarded editing/outcome correction and separate immutable publication. |
+| `local_homework_reviewer.py`, `local_homework_runner.py`, `homework_contract.py` | Pinned experimental English Qwen individual/comparison stages, rubric prompts, source limits, owned process deadline/cleanup and measured metadata. |
+| `process_tree.py`, `process_lock.py` | Owned Windows process-tree lifetime and exclusive local compute access. Poll generation, video AI and homework AI do not overlap on the shared compute lock. |
 | `transcript_display.py`, Templates, `static/js` | Word-preserving paragraphs/RTL-LTR isolation, escaped server-rendered results, visible-page polling and form interactions. |
 
 `get_transcriber()`, `get_summarizer()` and `get_poll_generator()` return the local
@@ -350,25 +351,22 @@ No disconnected queue/local persistence/synchronization is required.
 
 ## Planned UC-05 components
 
-**Mixed status - D-46 through D-53.** HomeworkAssignment and SubmissionVersion
-are now implemented. ReviewJob, FeedbackDraft, the homework_review service module and homework_worker
-processor are now implemented under D-55. Real-model adapters remain unaccepted;
-normal-site availability is disabled for both languages. Existing
-Meeting/User/Membership, Django session/CSRF/Templates, short SQLite transactions
-and the local compute lock are integration points. Do not extend VideoJob or
-silently route homework through the video worker. A separate review worker is
-planned; timeout, workload and queue controls need measured bounds. Existing Qwen3
-is a candidate adapter, not an accepted homework engine in either language.
+**Current status - D-56:** assignment/version/review/draft components are implemented.
+English uses the installed LocalHomeworkReviewer experimentally; Hebrew remains
+unavailable. The section anchor is retained for existing links. Separate homework
+processing integrates with Django sessions/CSRF/Templates, short SQLite writes
+and the shared GPU decoder lock; VideoJob is not extended for homework. See
+[limits, private evidence and setup](local-homework-review.md).
 
 | Component / status | Responsibility / integration |
 |---|---|
-| HomeworkAssignment - implemented foundation | Meeting/creator, title, instructions, ordered criterion text and creation timestamp. Stable criterion IDs, rubric revision and feedback-language configuration are later review-stage extensions. |
+| HomeworkAssignment - implemented foundation | Meeting/creator, title, instructions, ordered criterion text and creation timestamp. Professional rubric and feedback language are stored per assignment; each request copies its rubric/instructions/criteria. |
 | SubmissionVersion - implemented | Exact submitted text, assignment/Student/version and timestamp; next number serialized under a short transaction, unique per owner/assignment/version. Submitted status is a display property. No update/delete route. |
 | ReviewJob - implemented | Requester separately from target owner, target/peer version IDs, copied instructions/criteria/language, processing/comparison states, actual engine metadata and errors. Freeze the latest version per other owner at request creation, even for Lecturer requests. |
 | FeedbackDraft - implemented | Original model findings separately from Lecturer edits, target and private comparison evidence, draft edit version, comparison outcome, published content and timestamp. Published content is immutable and version-bound. |
 | homework_review module - implemented | request_review, edit_draft, publish, owned_job, availability and published_feedback. Existing homework_services continues assignment/submission operations. No HomeworkReviewService class is claimed. |
-| HomeworkReviewer / DisabledHomeworkReviewer - implemented contract | available, assess_submission and compare_submissions. The factory always returns disabled; LocalQwenHomeworkReviewer remains a planned/unaccepted adapter, not a current class. |
-| homework_worker validation functions - implemented | validate_individual and validate_comparison check shape/source references/exact quotes. No ReviewEvidenceValidator class or semantic correctness guarantee is claimed. |
+| HomeworkReviewer / DisabledHomeworkReviewer - implemented contract | available, assess_submission and compare_submissions. Factory returns LocalHomeworkReviewer: pinned isolated local English generation; no runtime fake/cloud fallback. DisabledHomeworkReviewer remains an injectable disabled contract implementation. |
+| homework_worker validation functions - implemented | validate_individual and validate_comparison check shape/source references; homework_evidence annotates exact quote matches and publish blocks unresolved evidence. No ReviewEvidenceValidator class or semantic correctness guarantee is claimed. |
 | Dedicated review worker - implemented control flow | Claim queued requests, enforce planned control bounds and shared compute lock, evaluate target first and peers second, save explicit partial/failure states without publishing. |
 
 Choose sources by **target owner**, not actor: exclude every version of that owner,
@@ -380,8 +378,7 @@ and never presents historical feedback as a review of new text.
 
 ### Planned homework class diagram
 
-Classes marked planned remain additions, not executable interfaces. Implemented review/foundation models and module functions are distinguished from
-the planned LocalQwen adapter. Module boxes are not invented Python classes.
+The initial planned section now documents implemented models, module functions and the experimental local adapter. Module boxes are not invented Python classes.
 Method lists are selected responsibilities, not complete signatures.
 
 ```mermaid
@@ -417,6 +414,8 @@ classDiagram
         peer_snapshots
         instructions_snapshot
         criteria_snapshot
+        rubric_snapshot
+        started_at
         language
         status
         comparison_status
@@ -427,6 +426,8 @@ classDiagram
         <<implemented>>
         individual_text
         comparison_text
+        evidence
+        comparison_outcome
         version
         published_individual
         published_comparison
@@ -447,8 +448,8 @@ classDiagram
         assess_submission()
         compare_submissions()
     }
-    class LocalQwenHomeworkReviewer {
-        <<planned candidate>>
+    class LocalHomeworkReviewer {
+        <<experimental English>>
         assess_submission()
         compare_submissions()
     }
@@ -474,7 +475,7 @@ classDiagram
     homework_review ..> SubmissionVersion
     homework_review ..> ReviewJob
     homework_review ..> FeedbackDraft
-    HomeworkReviewer <|.. LocalQwenHomeworkReviewer
+    HomeworkReviewer <|.. LocalHomeworkReviewer
     HomeworkReviewer <|.. DisabledHomeworkReviewer
     homework_worker ..> HomeworkReviewer
     homework_worker ..> ReviewJob
@@ -497,7 +498,7 @@ sequenceDiagram
     participant V as homework_views / homework_review
     participant DB as ReviewJob / FeedbackDraft / SQLite
     participant W as homework_worker
-    participant AI as HomeworkReviewer, disabled normally
+    participant AI as LocalHomeworkReviewer, experimental English
     S->>V: CSRF POST synthetic text
     V->>DB: Current membership, immutable SubmissionVersion
     alt Student initiates
@@ -506,14 +507,14 @@ sequenceDiagram
         L->>V: Request course submission feedback
     end
     V->>DB: Authorize actor and identify target owner
-    V->>DB: Freeze latest other-owner versions, instructions, criteria, language
+    V->>DB: Freeze latest other-owner versions, instructions, criteria, rubric, language
     Note over V,DB: Exclude all target-owner versions even if requester is Lecturer
     V-->>S: Own version and request state only, no draft
     W->>DB: Claim job, revalidate access and language readiness
     W->>AI: assess_submission(target snapshot, criteria)
     AI-->>W: Personal findings with evidence or explicit failure
-    W->>W: Validate structure and exact source quotes
-    alt Personal generation or evidence validation fails
+    W->>W: Validate structure, annotate exact source quote matches
+    alt Personal generation or structural/source-reference validation fails
         W->>DB: Failure state, preserve submission, no publication
     else Personal draft available
         alt No eligible peer snapshots
@@ -535,7 +536,7 @@ sequenceDiagram
             V-->>S: Published personal feedback and system-controlled comparison-failed notice
         else No peers or completed comparison
             L->>V: Separate CSRF Publish action
-            V->>DB: Recheck role, draft/source revisions and public privacy
+            V->>DB: Recheck role, draft/source revisions, resolved evidence and public privacy
             V->>DB: Publish immutable version-bound feedback
             S->>V: GET own published feedback
             V-->>S: Edited personal feedback and anonymous result or no-peer notice
@@ -610,33 +611,59 @@ review request action, worker task, language setting or publication route exists
 
 ## UC-05 feedback control flow
 
-Migration 0008 adds assignment feedback_language, ReviewJob snapshots and
-FeedbackDraft. The normal factory in homework_provider.py returns only
-DisabledHomeworkReviewer; no setting selects a test provider or an unaccepted
-Qwen adapter. Both HTML preflight and POST service checks block unavailable
-language requests before creating a job. Assignment language choice alone does
-not enable generation. A later real adapter needs explicit language/quality
-acceptance and measured runtime/input controls.
+Migrations 0008–0010 persist version/peer/instruction/criteria/rubric snapshots,
+processing start, private evidence and editable comparison outcome. Normal
+get_homework_reviewer returns LocalHomeworkReviewer. Language/model/rubric
+preflight and source-capacity checks reject unavailable requests before enqueue.
+The per-request deadline spans both owned inference subprocesses. The decoder
+lock is acquired inside each isolated runner; no inference holds a DB transaction.
 
-homework_review.request_review snapshots the immutable target plus latest-other-
-owner versions under a short transaction, excluding all target-owner versions
-for both Student and Lecturer requests. One queued/running job per target version
-is enforced by database uniqueness. Processing is outside database transactions
-under the existing shared compute lock. Original generated individual/comparison
-JSON and source snapshots remain private; the editable draft is separate.
+homework_review.request_review excludes all versions of the target owner, freezes
+the latest version of every other owner, and rejects overflow rather than sampling.
+homework_worker stores original private structured results and creates a separate
+FeedbackDraft. Shape/source-reference failures fail a stage; unmatched quotes are
+annotated unverified, editable/removable and publication-blocking. Published
+Student projections contain narrative/outcome only. Private evidence and peer
+source snapshots are never serialized to the Student. Publication also screens
+known peer identities and long verbatim peer passages; semantic anonymity still
+requires Lecturer review. Source matching does not establish conclusion quality.
 
-The worker validates source quote presence, not entailment. Individual failure
-creates no draft; comparison failure retains a successful individual draft and
-requires explicit individual_only publication. There is no fabricated fallback.
-The dedicated run_homework_worker command recovers interrupted running tasks as
-failed on restart and processes queued work, but no normal-site jobs are currently
-created. Hard-crash/real-inference deadline behavior remains unvalidated.
+```mermaid
+sequenceDiagram
+    actor S as Student
+    actor L as Lecturer
+    participant R as homework_review
+    participant DB as ReviewJob / FeedbackDraft
+    participant W as homework_worker
+    participant A as LocalHomeworkReviewer
+    participant Q as local_homework_runner / Qwen
+    S->>R: request_review(immutable version)
+    R->>DB: freeze rubric, instructions, criteria, latest other-owner sources
+    W->>DB: claim queued request, started_at
+    W->>A: configure(job), assess_submission(...)
+    A->>Q: isolated per-criterion generation, bounded deadline
+    Q-->>W: original individual findings and timings
+    alt peers exist
+        W->>A: compare_submissions(target, peers)
+        A->>Q: actual source comparison
+        Q-->>W: comparison text, outcome, private evidence
+    end
+    W->>DB: originals + private editable draft, quote annotations
+    L->>R: edit_draft(narratives, outcome, evidence)
+    L->>R: publish(version, explicit mode)
+    R->>R: recheck role, draft revision, quotes and privacy
+    alt unmatched evidence
+        R-->>L: publication blocked; correct/remove and save
+    else reviewed valid draft
+        R->>DB: immutable version-bound publication
+        S->>R: published_feedback(own version)
+        R-->>S: published narratives and system outcome only
+    end
+```
 
-Lecturer edit/publication rechecks membership, source association and optimistic
-draft version. Published fields are immutable snapshots. Student pages use an
-explicit projection of published fields for that owned SubmissionVersion, never
-job source snapshots or mutable draft fields. V1 publication is labeled V1 even
-when V2 exists; later jobs/publications do not reassign its source or silently
-expose a comparison. Current/previous publications and source-request time are
-shown separately. Automatic text anonymization/semantic correctness is not
-claimed; the Lecturer must review generated/edited public text as well.
+Personal failure creates no draft; comparison failure preserves successful
+personal feedback for explicit individual-only publication. No peers and completed
+no-supported-difference are separate outcomes. The Lecturer can correct a false
+completed outcome in the draft without changing the original generation. The
+single-worker command marks interrupted tasks failed on restart; hard-stopped
+workers are not automatically supervised. [Software versus model evidence](testing.md#experimental-local-homework-integration).

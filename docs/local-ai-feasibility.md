@@ -266,3 +266,18 @@ Hebrew speech is degraded and is not accepted for a reliable demo. No website,
 classroom test, offline implementation, maximum input limit, or paid fallback
 has been approved by this experiment. Do not change the existing scope to
 hide these gaps.
+
+
+## Experimental homework integration update - 2026-11-15
+
+The English fixed-rubric continuation and subsequent UC-05 integration are now
+recorded in [draft-pair findings](homework-rubric-draft-pair-feasibility.md),
+[local homework operation](local-homework-review.md), and
+[executed software versus real-model evidence](testing.md#experimental-local-homework-integration).
+The installed Qwen3 8B produces private editable Lecturer drafts; it is not a
+reliable automatic evaluator. The detailed rubric improved UNIQUE/cache tests
+but retained false atomicity criticism. In integration the individual examples
+were credited, while real approach differences were repeatedly missed and one
+peer quote was misattributed to the target and blocked publication. English is
+experimental; Hebrew feedback remains unavailable. Earlier failed-readiness
+results remain historical evidence and are not overwritten by enabling review.

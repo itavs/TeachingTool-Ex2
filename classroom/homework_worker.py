@@ -1,13 +1,10 @@
-"""Review task processor; production provider remains disabled, fakes are test injection only."""
-from pathlib import Path
-from django.conf import settings
+"""Version-bound experimental local processing; fake providers are test injection only."""
 from django.db import transaction
 from django.utils import timezone
 from .attendance import CourseAccessError
 from .models import ReviewJob, FeedbackDraft, Membership
 from .homework_review import check_requester
 from .homework_provider import get_homework_reviewer
-from .process_lock import exclusive_lock
 
 
 def validate_individual(data, job):
@@ -29,10 +26,10 @@ def validate_individual(data, job):
             raise ValueError('Invalid status')
         if any(not isinstance(row[k],str) for k in ['what_student_wrote','reasoning','suggested_correction']) or not row['reasoning'].strip():
             raise ValueError('Invalid explanation')
-        if not isinstance(row['quotes'],list) or any(not isinstance(q,str) or not q or q not in job.target_text for q in row['quotes']):
-            raise ValueError('Unsupported quote')
+        if not isinstance(row['quotes'],list) or len(row['quotes'])>2 or any(not isinstance(q,str) or not q for q in row['quotes']):
+            raise ValueError('Invalid quote structure')
         text.append((i, '\n'.join([job.criteria_snapshot[i], row['status'].capitalize(), row['what_student_wrote'],
-                     *['"'+q+'"' for q in row['quotes']], row['reasoning'], row['suggested_correction']]).strip()))
+                     row['reasoning'], row['suggested_correction']]).strip()))
     return '\n\n'.join(t for _,t in sorted(text))
 
 
@@ -53,8 +50,8 @@ def validate_comparison(data, job):
             source=job.peer_snapshots[item['peer_index']]['text']
         else:
             raise ValueError('Wrong comparison source')
-        if not isinstance(item['quote'],str) or not item['quote'] or item['quote'] not in source:
-            raise ValueError('Unsupported comparison quote')
+        if not isinstance(item['quote'],str) or not item['quote']:
+            raise ValueError('Invalid comparison quote structure')
         sources.add(item['source'])
     if sources != {'target','peer'}:
         raise ValueError('Evidence must reference target and peers')
@@ -74,7 +71,7 @@ def process_review_job(job_id, *, reviewer=None):
         job=ReviewJob.objects.select_for_update().select_related('submission__assignment__meeting','submission__student','requester').get(pk=job_id)
         if job.status != 'queued':
             return
-        job.status='running';job.save(update_fields=['status'])
+        job.status='running';job.started_at=timezone.now();job.save(update_fields=['status','started_at'])
     stage='individual_failed'
     try:
         access_valid(job)
@@ -82,28 +79,41 @@ def process_review_job(job_id, *, reviewer=None):
         if not provider.available(job.language):
             stage='provider_unavailable'
             raise ValueError('Provider unavailable')
-        # No inference under a database transaction; no real provider is enabled.
-        with exclusive_lock(Path(settings.VIDEO_STORAGE_ROOT)/'.decoder.lock'):
-            individual=provider.assess_submission(job.instructions_snapshot,job.criteria_snapshot,job.target_text,job.language)
-            individual_text=validate_individual(individual,job)
-            comparison,comparison_text={},''
-            comparison_state='no_peers'
-            if job.peer_snapshots:
-                try:
-                    comparison=provider.compare_submissions(job.instructions_snapshot,job.criteria_snapshot,job.target_text,
-                                                          [p['text'] for p in job.peer_snapshots],job.language)
-                    comparison_state,comparison_text=validate_comparison(comparison,job)
-                except Exception:
-                    comparison_state='failed';comparison={};comparison_text=''
-            with transaction.atomic():
-                # Refresh access before persisting any draft after processing.
-                job=ReviewJob.objects.select_for_update().select_related('submission__assignment__meeting','submission__student','requester').get(pk=job_id)
-                access_valid(job)
-                FeedbackDraft.objects.create(job=job,individual_text=individual_text,comparison_text=comparison_text)
-                job.generated_individual=individual;job.generated_comparison=comparison
-                job.comparison_status=comparison_state
-                job.model_metadata=getattr(provider,'metadata',{})
-                job.error_code='comparison_failed' if comparison_state=='failed' else ''
-                job.status='ready';job.finished_at=timezone.now();job.save()
-    except Exception:
-        ReviewJob.objects.filter(pk=job_id).update(status='failed',error_code=stage,finished_at=timezone.now())
+        if hasattr(provider,'configure'): provider.configure(job)
+        # Owned isolated runners acquire the shared GPU lock; no inference transaction.
+        individual=provider.assess_submission(job.instructions_snapshot,job.criteria_snapshot,job.target_text,job.language)
+        # Retain private output for diagnosis even if structural validation fails.
+        ReviewJob.objects.filter(pk=job_id).update(generated_individual=individual,
+            model_metadata=getattr(provider,'metadata',{}))
+        individual_text=validate_individual(individual,job)
+        comparison,comparison_text={},''
+        comparison_original={}
+        comparison_state='no_peers'
+        if job.peer_snapshots:
+            try:
+                comparison=provider.compare_submissions(job.instructions_snapshot,job.criteria_snapshot,job.target_text,
+                                                      [p['text'] for p in job.peer_snapshots],job.language)
+                comparison_original=comparison
+                comparison_state,comparison_text=validate_comparison(comparison,job)
+                from .homework_evidence import privacy_error
+                if privacy_error(job,comparison_text): raise ValueError('Unsafe public comparison')
+            except Exception:
+                comparison_state='failed';comparison={};comparison_text=''
+        with transaction.atomic():
+            # Refresh access before persisting any draft after processing.
+            job=ReviewJob.objects.select_for_update().select_related('submission__assignment__meeting','submission__student','requester').get(pk=job_id)
+            access_valid(job)
+            from .homework_evidence import collect_evidence
+            FeedbackDraft.objects.create(job=job,individual_text=individual_text,comparison_text=comparison_text,
+                evidence=collect_evidence(individual,comparison))
+            job.generated_individual=individual;job.generated_comparison=comparison_original
+            job.comparison_status=comparison_state
+            job.model_metadata=getattr(provider,'metadata',{})
+            job.error_code='comparison_failed' if comparison_state=='failed' else ''
+            job.status='ready';job.finished_at=timezone.now();job.save()
+    except Exception as error:
+        metadata = dict(getattr(locals().get('provider'),'metadata',{}))
+        metadata['failure_type'] = type(error).__name__
+        if isinstance(error,ValueError): metadata['validation_error'] = str(error)[:100]
+        ReviewJob.objects.filter(pk=job_id).update(status='failed',error_code=stage,
+            model_metadata=metadata,finished_at=timezone.now())

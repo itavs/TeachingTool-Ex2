@@ -1,4 +1,4 @@
-"""Replaceable homework contract. No real provider or runtime fake is enabled."""
+"""Replaceable homework contract; experimental local English provider, no runtime fake."""
 from typing import Protocol
 
 
@@ -24,5 +24,5 @@ class DisabledHomeworkReviewer:
 
 
 def get_homework_reviewer() -> HomeworkReviewer:
-    # Deliberately no settings flag, demo fallback, endpoint or test-provider switch.
-    return DisabledHomeworkReviewer()
+    from .local_homework_reviewer import LocalHomeworkReviewer
+    return LocalHomeworkReviewer()

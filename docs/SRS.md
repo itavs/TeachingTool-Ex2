@@ -422,14 +422,15 @@ direction from implementation or completed checks.
 
 ### UC-05 - Submit Homework, Review a Draft, and Publish Feedback
 
-**Status:** user-approved planning baseline D-46 through D-52; assignment/submission components are implemented under D-53, and D-55 implements request/draft/publication mechanics with injected-provider
-tests only. Real-model review/comparison and conclusion quality remain open.
+**Status:** D-53/D-55 implement source versions and review/publication controls.
+D-56 enables experimental English local Qwen review/comparison, with a Lecturer
+professional rubric. Hebrew generation and reliable conclusion quality remain open.
+See [operating envelope and evidence rules](local-homework-review.md).
 
-1. A course Lecturer defines an assignment under a meeting, with instructions,
-   criteria and requested Hebrew/English feedback language. Generation is enabled
-   only for a language with recorded successful real-output review; neither is
-   currently accepted for this planned workflow. Current creation implements
-   title/instructions/criteria only; feedback-language selection is now implemented under D-55, without enabling a provider.
+1. A course Lecturer defines a meeting assignment with instructions, criteria,
+   requested language and professional rubric. The rubric can also be updated on
+   the assignment page; each request freezes its own copy. Only English is enabled
+   experimentally; unavailable language/assets and missing rubric prevent enqueue.
 2. A Student pastes a synthetic work and submits it as a new immutable version.
    This is implemented: show save confirmation, numbered history and Submitted
    status, not a pending/generated review claim. Steps 3-7 now have software workflow
@@ -448,7 +449,7 @@ coverage under D-55, but normal generation is gated off; step 8 cleanup remains 
    reviewing both meaning and privacy. Exact quoting/structural checks cannot
    establish correctness. Students cannot read drafts in HTML, lists or JSON.
 6. A separate CSRF-protected Publish action rechecks current Lecturer membership,
-   draft version and source/rubric status. It publishes an immutable feedback
+   draft version, source/rubric status, source-bound quote verification and public-output privacy. Unmatched private evidence must be corrected or removed and saved before publication. A successful comparison outcome can also be corrected by the Lecturer without changing the original generated result. It publishes an immutable feedback
    revision associated with the assessed version, without silently relabeling an
    older draft as current. A fresh version needs its own feedback/publication.
 7. The Student sees only their own published feedback and anonymous comparison,
@@ -533,7 +534,7 @@ parameters are explicit. AC-02 includes outside-class connected submission under
 | AC-02 | AS-02, D-01, D-17 through D-19 | FR-03; UC-02 | Submit identified comment and suggestion samples through normal website POST during and outside class, including a meeting dated in the past. Verify the selected meeting and submitting student are persisted, personal history survives a fresh login, and a lecturer signing in later sees the stored requests in that meeting. Another student must not see them through the meeting page or access the lecturer feed. Retain checks for failed-save reporting, boundaries, duplicate submission, escaping and live lecturer updates. No local persistence, queues or disconnected synchronization is required. | D-17 resolves timing. D-30 fixes request length and visible-page refresh. Executed server evidence is in testing.md; browser/phone/classroom capacity and retention remain separate questions under Q-06/Q-07. |
 | AC-03 | AS-03, D-01, D-08 through D-11 | FR-04; UC-03 | Exercise both lecturer-selected types using real generation from known pasted material. Inspect relevance, four options, and, for comprehension, one correct option plus a short explanation. Edit all applicable draft fields and verify publication uses the approved version; reject later content edits. Cast known votes from two identified students and verify live lecturer counts/percentages, one final response each, no vote changes, and no second active poll in that meeting. Before closure, verify student-facing content exposes neither aggregates nor the comprehension answer/explanation. Close manually; reject later votes and show student aggregates without identities, plus the correct answer/explanation only for comprehension. Confirm opinion polls never designate or evaluate correctness and neither type assigns grades. Create a further poll after closure. Exercise generation failure and retry without a prepared-content substitution. Verify the basic flow has no file upload, open-ended response, or automatic scheduling. | D-31 resolves poll language/input length. Lifecycle evidence uses test fixtures and explicitly labeled demo data under D-32/D-33, not real generation. Q-06/Q-07 retain capacity and integrated-AI/data questions. Approved workflow is not conditional on P-05 approval. |
 | AC-04 | AS-04, D-01, D-12 through D-16 | FR-05; UC-04 | Manually upload permitted MP4 files for three planned cases: Hebrew speech, English speech, and a Hebrew lecture with English technical terms. Using agreed quality criteria, verify genuine audio extraction/transcription/model summarization, inspect known spoken facts and the intended meaning of technical terms, and confirm output is in the spoken language without translation (Hebrew for the terminology case). Verify a summary paragraph, 3-5 key points, and an option that exposes the full transcript rather than a partial excerpt. Compare the transcript and summary with the actual speech. Check each result clearly states that unspoken visual content is excluded. Check the candidate failed/unsupported-input path without false success after its details are agreed. Measure time and cost for samples of different durations/file sizes before proposing maximum duration and file size; choose demo duration separately. After numeric limits are agreed and implemented, add boundary checks at and above each limit without inventing thresholds now. | D-34 through D-37 cover initial limits and extraction infrastructure; Q-04 retains demo duration and real-model quality; D-54 closes the interpretation-email wait; Q-07/Q-09 for resources and demo expectations. All three language cases are planned, not passed; sustained language switching is outside the commitment. Extraction-only measurements/limits are recorded separately; no end-to-end AI quality pass is assumed. |
-| AC-05 | AS-05, D-01, D-20 through D-22, D-46 through D-52 | FR-06, FR-07; UC-05 | Planned software and actual-model quality checks are separated in the UC-05 strategy. Verify owner/Lecturer requests, private drafts and separate publication; latest-other-owner snapshots including Lecturer initiation; immutable revisions; no-peers versus comparison failure versus no supported difference; system-controlled no-peer notice. For successful personal feedback plus failed comparison, assert private draft before explicit Lecturer individual-only publication and own published feedback plus the exact failed-comparison notice afterward. Personal failure yields no publishable draft. A later comparison stays hidden until separately reviewed/published. Assess real conclusions against source/criteria, A capacity coverage, B rollback and cache-only controlled correction, C actual gaps, and a grounded coverage/approach difference. | D-53 assignment/submission/read checks have software evidence in testing.md; AI review/comparison/publication and full AC-05 remain pending. Q-05 retains quality/language readiness, measured limits; D-52 resolves failure-publication; Q-07 real-data policy; Q-09 live demo. No existing trial constitutes a pass. |
+| AC-05 | AS-05, D-01, D-20 through D-22, D-46 through D-52 | FR-06, FR-07; UC-05 | Planned software and actual-model quality checks are separated in the UC-05 strategy. Verify owner/Lecturer requests, private drafts and separate publication; latest-other-owner snapshots including Lecturer initiation; immutable revisions; no-peers versus comparison failure versus no supported difference; system-controlled no-peer notice. For successful personal feedback plus failed comparison, assert private draft before explicit Lecturer individual-only publication and own published feedback plus the exact failed-comparison notice afterward. Personal failure yields no publishable draft. A later comparison stays hidden until separately reviewed/published. Assess real conclusions against source/criteria, A capacity coverage, B rollback and cache-only controlled correction, C actual gaps, and a grounded coverage/approach difference. | D-53 assignment/submission/read checks have software evidence in testing.md; Experimental English AI review/comparison/publication now has separate software and real-model evidence; full AC-05 remains pending. Q-05 retains quality/language readiness, measured limits; D-52 resolves failure-publication; Q-07 real-data policy; Q-09 live demo. No existing trial constitutes a pass. |
 | AC-06 | AS-06, AS-07 | NFR-01, NFR-02; UC-01 through UC-05 | Exercise the relevant student flows on the agreed smartphone/browser set and all flows in the intended classroom environment at the agreed load; record devices, network conditions, observed durations, and failures. | Q-06; P-01. |
 | AC-07 | AS-09, D-01 | NFR-06; UC-01 through UC-05 | Rehearse the approximately ten-minute presentation and record what ran live, actual processing times, any earlier outputs, and any failures. Confirm all five capabilities have genuine execution evidence; label sample data and any separately approved presentation shortcuts. | Q-09; P-09. |
 
@@ -688,11 +689,12 @@ labeled and never shown as feedback for the next submission. Published revisions
 cannot be edited. Later successful comparisons require a new request/review and
 explicit publication; previous published content remains unchanged in history.
 
-The normal factory always returns DisabledHomeworkReviewer. Both supported target
-languages are unavailable before request creation; direct POST checks enforce
-that and save no queued job. No runtime fake, manual seed feedback or accepted
-Qwen3 homework adapter exists. Fakes are injected only in tests. Software tests
-cannot establish genuine personal-feedback or comparison quality (AS-05).
+The initial D-55 disabled-provider boundary is historical. D-56 returns
+LocalHomeworkReviewer for experimental English generation using the installed
+pinned model and rubric. Hebrew/assets/rubric preflight prevents unsupported
+requests. No runtime fake, seeded model result or external fallback exists.
+Independent source-bound evidence is editable/removable, and unmatched evidence
+blocks publication. Lecturer narrative review remains essential for AS-05 quality.
 
 Comparison outcomes no_peers, failed, no_difference and compared remain distinct.
 Successful personal feedback plus failed comparison may be published only through
@@ -702,6 +704,4 @@ that owned version; job snapshots/private comparison evidence are Lecturer-only.
 
 A single worker lock and shared compute lock serialize processing; no inference
 is held inside a database transaction. Interrupted running jobs are marked failed
-on worker restart, without automatic retry. Because no real provider is active,
-real inference cancellation/deadline, measured workload and hard-crash behavior
-remain open integration work. Intentional demo cleanup also remains unimplemented.
+on worker restart, without automatic retry. The local adapter enforces a 180-second total processing deadline with owned-process cleanup, explicit source/peer bounds and recorded timings. Three-peer throughput, classroom capacity, hard-stop automatic supervision and intentional demo cleanup remain open. See [operating envelope](local-homework-review.md).

@@ -28,7 +28,7 @@ polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
 D-22. Homework remains a planning/quality target; implemented video/English-poll AI and participation evidence are described below;
 remaining operational parameters and open interpretations are explicit.
 The shared website foundation is now implemented under D-23 through D-26;
-Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Local English poll-draft generation is now available under D-44; Unit D implements private MP4 validation/audio extraction; Unit E now transcribes new video uploads locally and exposes private full transcripts; new uploads now include local Qwen3 automatic summaries; real homework AI remains unavailable; its version-bound request/draft/publication mechanics are implemented with test-only provider evidence.
+Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Local English poll-draft generation is now available under D-44; Unit D implements private MP4 validation/audio extraction; Unit E now transcribes new video uploads locally and exposes private full transcripts; new uploads now include local Qwen3 automatic summaries; homework now has experimental local English feedback/comparison with a recorded professional rubric and separate Lecturer publication; Hebrew generation remains unavailable.
 
 | Capability | Assignment behavior | Design direction and open proposals |
 |------------|---------------------|----------------------------------|
@@ -45,7 +45,7 @@ remain open. Website identity/access follows D-24; production readiness remains 
 
 For comments, D-17 was clarified by the user on 2026-11-11: online means during class and offline means outside class. In both cases, identified students submit normally through the website to an associated meeting, including one that has already taken place. Creating content, submitting it and confirming storage remain separate responsibilities. Local persistence, a send queue and disconnected synchronization are not required. D-18/D-19 retain stored history, student-own visibility, lecturer access to meeting requests and live updates. Lecturer replies, discussion threads, attachments, votes and notifications remain excluded.
 
-Homework feedback/comparison remains **planned / feasibility only**, under D-20 through D-22
+Homework feedback/comparison now has **experimental local English integration**, with mandatory Lecturer review, under D-20 through D-22
 and the approved UC-05 baseline D-46 through D-51. A Student may request feedback
 on their version; a course Lecturer may request a submission review. AI prepares
 a private Lecturer draft, which the Lecturer edits/reviews and publishes separately
@@ -60,7 +60,7 @@ with the fixed failure notice in UC-05; personal generation failure has no draft
 Any later comparison requires separate Lecturer review and explicit publication. Eligible
 peers with failed comparison and completed comparison with no supported difference
 are distinct states. Feedback language is chosen per assignment; Hebrew/English
-are test targets, neither yet accepted for this planned workflow. Keep synthetic
+remain test targets; English is enabled experimentally, while Hebrew generation remains unavailable. Keep synthetic
 demo versions/feedback through the demo and submission checking, then support
 intentional cleanup; real-student-work policy is separate. No grades, plagiarism
 determinations or code execution. See [UC-05](docs/SRS.md#uc-05---submit-homework-review-a-draft-and-publish-feedback),
@@ -131,11 +131,11 @@ linked sections; detailed historical evidence is separate from current status.
 | 2 | Technical tools report, with actual trials of suggested tools | [Tools and evidence index](docs/local-ai-feasibility.md#current-tools-and-evidence-index) | Trials and failures documented; homework quality insufficient, Gemini partial; some evidence local-only/uncommitted. |
 | 3 | SoW document | [Scope and deliverables](docs/SoW.md#3-planned-capability-coverage) | Draft maintained against implemented boundaries and open interpretations. |
 | 4 | SRS document | [Functional requirements](docs/SRS.md#4-functional-requirements) | FR/NFR and acceptance targets defined; full acceptance not claimed. |
-| 5 | Main use cases / client stories | [UC-01 through UC-05](docs/SRS.md#5-main-use-cases) | Five main flows documented; UC-05 planning baseline approved, quality/limits still open. |
-| 6 | Main software components | [Current components](docs/architecture.md#current-components) | Implemented responsibilities mapped; planned UC-05 additions are separate from existing code. |
-| 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence), [planned homework](docs/architecture.md#planned-uc-05-components) | Current video/poll paths covered; homework assignment/version classes are implemented; review/comparison remains planned. |
+| 5 | Main use cases / client stories | [UC-01 through UC-05](docs/SRS.md#5-main-use-cases) | Five main flows documented; UC-05 workflow and experimental English integration implemented; quality remains open and initial operating limits are explicit. |
+| 6 | Main software components | [Current components](docs/architecture.md#current-components) | Implemented responsibilities mapped, including the experimental English homework adapter and review controls. |
+| 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence), [homework design](docs/architecture.md#planned-uc-05-components) | Current video/poll paths covered; homework assignment/version classes are implemented; review/comparison is experimentally integrated in English; quality remains limited. |
 | 8 | Testing strategy addressing the classes in item 7 | [Component-to-test strategy](docs/testing.md#current-component-to-test-strategy) | Software checks mapped separately from real-model evidence and open acceptance. |
-| 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Foundation/participation/polls/video implemented; homework submissions implemented; AI feedback/comparison missing. |
+| 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Foundation/participation/polls/video implemented; homework submissions and experimental English AI feedback/comparison implemented; reliability and full acceptance remain open. |
 | 10 | Perform a demo in class | [Classroom/demo acceptance](docs/SRS.md#7-future-acceptance-checks-and-traceability) | Not recorded as performed; phone, network, load and ten-minute rehearsal outstanding. |
 | 11 | Conclude; write a short account of results | [Interim results](#interim-results-and-final-conclusion-status) | Interim findings available; final conclusion awaits remaining work and actual class demo. |
 
@@ -374,9 +374,7 @@ assignments with instructions and one criterion per line; enrolled Students subm
 text as append-only numbered versions. Owners see their history; current course
 Lecturers can read all submitted versions. The status is **Submitted**, not reviewed
 or published. Feedback request/draft/publication control flow and assignment language selection
-are implemented, but the normal provider is disabled in both languages. No review
-request is created when unavailable. Real-model individual feedback/comparison
-and explicit demo-data cleanup remain incomplete. No model is called by this stage.
+are implemented. The initial disabled-provider milestone is historical; experimental English generation now uses local Qwen and a professional rubric. Hebrew generation and explicit demo-data cleanup remain incomplete.
 
 The local database migration `0007_homework_submissions` has been applied. On a
 fresh checkout run `python manage.py migrate` in the website environment. Restart
@@ -403,29 +401,15 @@ browser/phone limits are in [testing](docs/testing.md#uc-05-submission-foundatio
 
 ## UC-05 feedback workflow - current availability
 
-The site stores a target feedback language (English/Hebrew) per assignment. **No
-real homework provider is active in either language.** Opening a submitted version
-shows that limitation before a request can be created. A forged/direct POST is
-also rejected without a ReviewJob or fake result. Choosing a language is not
-an AI-quality acceptance claim. There is no runtime demo/fake-provider setting.
+The site now enables **experimental English** feedback and comparison through
+installed local Qwen3 8B, with a required professional rubric and private Lecturer
+draft editing followed by separate publication. Hebrew generation remains
+unavailable. Source/peer versions and rubric are frozen per request. Unmatched
+private evidence blocks publication until corrected or removed; a Lecturer can
+also correct a false comparison outcome. No runtime fake or cloud fallback exists.
 
-The version-bound request, source/peer snapshots, task processing, private Lecturer
-draft editing and separate publication are implemented as control flow. The full
-Alex Version 1 request -> Version 2 submission -> Lecturer V1 draft -> separate
-publication -> Student V1-only feedback route is verified with an injected
-**test-only** provider. It is not a completed real-model feature or a normal-site
-demo that a user can reproduce by clicking Generate today.
-
-For a future accepted provider, queued work is processed separately with
-`python manage.py run_homework_worker` (`--once` for one pass). With the current
-factory the site creates no queue, so this worker is not needed for browser
-checks. It cannot select a fake provider. Real-model adapters, per-language quality,
-measured runtime/length/workload bounds and standalone demo-data cleanup remain.
-See [executed workflow evidence](docs/testing.md#uc-05-feedback-workflow-controls)
-and [current components](docs/architecture.md#uc-05-feedback-control-flow).
-
-What can be checked now: as lecturer_alpha create an assignment with a chosen
-language, then as student_alex submit/read its versions and observe the provider-
-unavailable notice. No wait is started. Editing/publishing a generated draft can
-currently be tested only by the automated test-only provider scenarios; no
-prepared feedback is inserted into the live database.
+Start `python manage.py run_homework_worker` in a separate terminal. Use
+`python manage.py seed_demo_homework_review` for synthetic works only; it changes
+no credentials and creates no generated/public feedback. See
+[setup, explicit limits and browser steps](docs/local-homework-review.md) and
+[separate software/model evidence](docs/testing.md#experimental-local-homework-integration).

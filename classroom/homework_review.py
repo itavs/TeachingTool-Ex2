@@ -17,6 +17,8 @@ class ReviewError(Exception):
 def availability(assignment):
     language = assignment.get_feedback_language_display()
     enabled = get_homework_reviewer().available(assignment.feedback_language)
+    if enabled and not assignment.professional_rubric.strip():
+        return False, 'A professional rubric is required before requesting experimental English feedback. No request will be created.'
     return enabled, '' if enabled else f'Automatic feedback generation is unavailable for {language}. No request will be created.'
 
 
@@ -46,8 +48,14 @@ def request_review(submission, user):
         if version.student_id not in owners:
             peers.append({'id':version.pk, 'student_id':version.student_id, 'version':version.version_number, 'text':version.text})
             owners.add(version.student_id)
+    from .homework_contract import capacity_error
+    error = capacity_error(assignment.instructions,assignment.criteria,assignment.professional_rubric,
+                           submission.text,[p['text'] for p in peers])
+    if error:
+        raise ReviewError(error)
     return ReviewJob.objects.create(submission=submission, requester=user, instructions_snapshot=assignment.instructions,
-        criteria_snapshot=assignment.criteria, target_text=submission.text, peer_snapshots=peers, language=assignment.feedback_language)
+        criteria_snapshot=assignment.criteria, rubric_snapshot=assignment.professional_rubric,
+        target_text=submission.text, peer_snapshots=peers, language=assignment.feedback_language)
 
 
 def owned_job(meeting, job_id, user):
@@ -75,6 +83,16 @@ def edit_draft(meeting, job_id, user, data):
     ensure_editable(draft, data['version'])
     draft.individual_text = data['individual_text']
     draft.comparison_text = data['comparison_text'] if job.comparison_status in ['compared','no_difference'] else ''
+    outcome = data.get('comparison_outcome')
+    if outcome:
+        if job.comparison_status not in ['compared','no_difference'] or outcome not in ['compared','no_difference']:
+            raise ReviewError('Only a completed comparison outcome can be edited.')
+        draft.comparison_outcome = outcome
+    if 'evidence_edits' in data:
+        if len(data['evidence_edits']) != len(draft.evidence):
+            raise ReviewError('Evidence list changed. Reload before editing.')
+        draft.evidence = [{**original,'quote':edit['quote'],'removed':edit['removed']}
+                          for original,edit in zip(draft.evidence,data['evidence_edits'])]
     draft.version += 1
     draft.save()
     return draft
@@ -95,11 +113,16 @@ def publish(meeting, job_id, user, version, mode):
         raise ReviewError('Individual feedback cannot be empty.')
     if job.comparison_status in ['compared','no_difference'] and not draft.comparison_text.strip():
         raise ReviewError('Review and complete the anonymous comparison before publication.')
+    from .homework_evidence import annotated_evidence, privacy_error
+    if any(not e['removed'] and not e['verified'] for e in annotated_evidence(job,draft.evidence)):
+        raise ReviewError('Unverified evidence: correct or remove each unmatched quote, save the draft, then publish separately.')
+    error = privacy_error(job,draft.individual_text+'\n'+draft.comparison_text)
+    if error: raise ReviewError(error)
     # Every publication is tied to this immutable source, including older versions.
     # It never becomes feedback for a later submission simply because that exists.
     draft.published_individual = draft.individual_text
     draft.published_comparison = draft.comparison_text if job.comparison_status in ['compared','no_difference'] else ''
-    draft.published_comparison_status = job.comparison_status
+    draft.published_comparison_status = draft.comparison_outcome or job.comparison_status
     draft.published_at = timezone.now()
     draft.published_by = user
     draft.version += 1

@@ -1,4 +1,4 @@
-"""Separate task runner; no runtime test provider or accepted model is configured."""
+"""Separate single task runner for bounded experimental local homework reviews."""
 import time
 from pathlib import Path
 from django.conf import settings
@@ -10,7 +10,7 @@ from classroom.process_lock import exclusive_lock
 
 
 class Command(BaseCommand):
-    help='Process queued homework reviews (generation is currently disabled in the normal site).'
+    help='Process queued English homework reviews using the installed local Qwen model.'
 
     def add_arguments(self,parser):
         parser.add_argument('--once',action='store_true')

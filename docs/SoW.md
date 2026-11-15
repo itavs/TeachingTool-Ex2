@@ -33,7 +33,7 @@ Detailed behavior and proposed acceptance checks belong in the
 | D-12 through D-16 | Target Hebrew and English video recordings, including Hebrew with English technical terms, through manual computer-file upload with initial MP4 support. Use audio extraction/transcription/model summarization, same-language output without translation, and an explicit unspoken-visual-content notice. Return a summary paragraph, 3-5 key points, and full-transcript viewing. Sustained language switching is outside the commitment. Set maximum duration/file size after time/cost measurements; demo duration is separate. Unit D implements validation/audio extraction; local transcription is implemented under Unit E; word accuracy and summary quality remain unverified. |
 | D-17 | Clarified by the user on 2026-11-11: online means during class; offline means outside class. Both use normal website submission to a meeting, including a past meeting. Creation, submission and storage remain distinct; no local persistence, send queue or disconnected synchronization is required. |
 | D-18/D-19 | Identified meeting comments/suggestions, storage/history, student-own and lecturer-meeting views, and live lecturer updates. No lecturer replies, threads, attachments, votes, or notifications. D-17 resolves during/outside-class use through the same connected workflow. |
-| D-20 through D-22 | Theoretical Hebrew/English pasted homework, lecturer criteria, real LLM review and same-assignment comparison, student-own feedback without peer identities/full works, lecturer access to all assignment submissions/feedback, and explicit no-peer comparison notice. No grades, plagiarism determinations, or code execution. D-46 through D-51 add private Lecturer drafts/separate publication, immutable source/peer snapshots, assignment language and synthetic-demo retention/explicit cleanup. D-55 implements request/draft/publication mechanics with test-only provider evidence; real generation/comparison remains unavailable. Sample count is not a system limit. |
+| D-20 through D-22 | Theoretical Hebrew/English pasted homework, lecturer criteria, real LLM review and same-assignment comparison, student-own feedback without peer identities/full works, lecturer access to all assignment submissions/feedback, and explicit no-peer comparison notice. No grades, plagiarism determinations, or code execution. D-46 through D-51 add private Lecturer drafts/separate publication, immutable source/peer snapshots, assignment language and synthetic-demo retention/explicit cleanup. D-55 implements request/draft/publication mechanics with test-only provider evidence; D-56 now enables experimental local English generation/comparison with a recorded rubric; reliability remains limited. Sample count is not a system limit. |
 
 The reviewed handout does not specify a programming language. No conflict with
 Python was found; this finding does not select a framework or AI service.
@@ -275,7 +275,7 @@ review jobs, AI, comparisons, publication or cleanup. It preserves all later
 approved UC-05 behavior as planned work. See [manual check](../README.md#uc-05-submission-foundation---local-browser-check)
 and [executed software evidence](testing.md#uc-05-submission-foundation).
 
-## UC-05 second implementation slice - provider-gated workflow
+## UC-05 second implementation slice - historical provider-gated workflow
 
 D-55 adds version-bound request snapshots, private Lecturer draft editing and
 separate immutable publication, plus explicit individual-only publication when
@@ -288,3 +288,16 @@ The central automated scenario requests Alex v1, submits v2 before processing,
 then confirms the Lecturer edits/publishes a clearly labeled v1 draft and only
 the owned v1 page exposes that publication. No real feedback was generated or
 seeded into the normal site during this stage. See [test boundary](testing.md#uc-05-feedback-workflow-controls).
+
+## UC-05 experimental English integration
+
+D-56 enables installed Qwen3 8B for individual criteria and anonymous comparison,
+with an instructor-entered professional rubric frozen in each request. The
+existing background/version-bound private draft/edit/separate publication path
+is active in English. Private evidence is source-checked and must be corrected
+or removed when unmatched; public text and comparison outcome are editable.
+Hebrew generation, robust model quality, classroom capacity and intentional
+post-demo cleanup remain open. [Operational limits and setup](local-homework-review.md)
+and [executed evidence](testing.md#experimental-local-homework-integration)
+separate site correctness from model mistakes. These are project choices under
+the approved scope, not new handout requirements.

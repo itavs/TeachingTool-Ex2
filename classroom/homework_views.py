@@ -1,13 +1,16 @@
-"""Submitted-work foundation only: no review request or AI-generation endpoints."""
+"""Course-scoped sources, experimental review requests and Lecturer publication."""
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
+from django.forms import formset_factory
 from .attendance import CourseAccessError
 from .models import Membership
 from .participation_views import scoped, context
-from .homework_forms import AssignmentForm, SubmissionForm, FeedbackEditForm, FeedbackPublishForm
+from .homework_forms import AssignmentForm, SubmissionForm, FeedbackEditForm, FeedbackPublishForm, EvidenceEditForm
 from . import homework_services as services
 from . import homework_review as reviews
+from .homework_evidence import annotated_evidence
+from .homework_forms import RubricForm
 
 
 @scoped()
@@ -30,10 +33,15 @@ def assignment_create(request, meeting, membership):
 def assignment_detail(request, meeting, membership, assignment_id):
     assignment = services.assignment_for(meeting, assignment_id)
     is_student = membership.role == Membership.Role.STUDENT
+    rubric_form = RubricForm(request.POST if request.method=='POST' else None,
+        initial={'professional_rubric':assignment.professional_rubric}) if not is_student else None
     if request.method == "POST" and not is_student:
-        raise CourseAccessError(403)
+        if request.POST.get('action') != 'rubric': raise CourseAccessError(403)
+        if rubric_form.is_valid():
+            services.update_rubric(meeting,assignment.pk,request.user,rubric_form.cleaned_data['professional_rubric'])
+            return redirect('homework-detail',course_id=meeting.course_id,meeting_id=meeting.pk,assignment_id=assignment.pk)
     form = SubmissionForm(request.POST if request.method == "POST" else None) if is_student else None
-    if request.method == "POST" and form.is_valid():
+    if request.method == "POST" and is_student and form.is_valid():
         submission = services.submit_version(meeting, assignment.pk, request.user, form.cleaned_data["text"])
         messages.success(request, f"Your work was saved. Version {submission.version_number} — Submitted.")
         return redirect("homework-submission", course_id=meeting.course_id, meeting_id=meeting.pk,
@@ -42,7 +50,7 @@ def assignment_detail(request, meeting, membership, assignment_id):
     if is_student:
         versions = versions.filter(student=request.user)
     return render(request, "classroom/homework_detail.html", {**context(meeting, membership),
-                  "assignment": assignment, "form": form, "versions": versions})
+                  "assignment": assignment, "form": form, "versions": versions,'rubric_form':rubric_form})
 
 
 @scoped()
@@ -76,24 +84,34 @@ def review_detail(request,meeting,membership,job_id):
     job=reviews.owned_job(meeting,job_id,request.user)
     draft=getattr(job,'draft',None)
     form=FeedbackEditForm(request.POST if request.method=='POST' else None,
-        initial={'version':draft.version,'individual_text':draft.individual_text,'comparison_text':draft.comparison_text} if draft else {})
+        initial={'version':draft.version,'individual_text':draft.individual_text,'comparison_text':draft.comparison_text,
+                 'comparison_outcome':draft.comparison_outcome or job.comparison_status} if draft else {})
+    EvidenceForms = formset_factory(EvidenceEditForm,extra=0,max_num=32,absolute_max=32)
+    evidence_forms = EvidenceForms(request.POST if request.method=='POST' else None,
+        initial=draft.evidence if draft else [],prefix='evidence')
     if job.comparison_status not in ['compared','no_difference']:
         from django.forms import HiddenInput
         form.fields['comparison_text'].disabled=True
         form.fields['comparison_text'].widget=HiddenInput()
+        form.fields['comparison_outcome'].disabled=True
+        form.fields['comparison_outcome'].widget=HiddenInput()
+        form.initial['comparison_outcome']=''
     if request.method=='POST':
         if not draft or draft.published_at:
             return HttpResponse('No editable draft is available.',status=409)
-        if form.is_valid():
+        if form.is_valid() and evidence_forms.is_valid():
+            form.cleaned_data['evidence_edits'] = evidence_forms.cleaned_data
             try:reviews.edit_draft(meeting,job.pk,request.user,form.cleaned_data)
             except reviews.ReviewError as error:form.add_error(None,str(error))
             else:return redirect('homework-review',course_id=meeting.course_id,meeting_id=meeting.pk,job_id=job.pk)
     newer=job.submission.assignment.submissions.filter(student=job.submission.student,version_number__gt=job.submission.version_number).exists()
     failure_reason={'provider_unavailable':'No accepted feedback provider is active for this language.',
-                    'individual_failed':'Individual feedback could not be generated or validated. No draft can be published.',
+                    'individual_failed':'Individual feedback could not be generated or validated within the experimental processing limits. No draft can be published. You may explicitly request another review.',
                     'comparison_failed':'The comparison could not be completed. Individual feedback is available for your review.',
                     'interrupted':'The feedback request was interrupted. No new feedback was published.'}.get(job.error_code,'')
+    evidence_rows=annotated_evidence(job,draft.evidence) if draft else []
     return render(request,'classroom/homework_review.html',{**context(meeting,membership),'job':job,'draft':draft,'form':form,
+        'evidence_forms':evidence_forms,'evidence_pairs':list(zip(evidence_forms,evidence_rows)),
         'newer_version':newer,'failure_reason':failure_reason,'publish_form':FeedbackPublishForm(initial={'version':draft.version}) if draft else None})
 
 

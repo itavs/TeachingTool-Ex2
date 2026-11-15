@@ -8,7 +8,7 @@ from .test_homework import HomeworkFixture
 from .models import HomeworkAssignment, SubmissionVersion, Membership, ReviewJob, FeedbackDraft
 from .homework_services import submit_version
 from .homework_review import request_review, publish, edit_draft, ReviewError, COMPARISON_FAILED, NO_PEERS, NO_DIFFERENCE
-from .homework_provider import get_homework_reviewer
+from .homework_provider import get_homework_reviewer, DisabledHomeworkReviewer
 from .homework_worker import process_review_job
 
 V1='A stack removes the most recently added item first. A pile of plates is an example.'
@@ -48,9 +48,12 @@ class HomeworkReviewTests(HomeworkFixture,TestCase):
         cls.assignment.title='Stacks and queues'
         cls.assignment.instructions='Explain how a stack and a queue remove items. Give one everyday example of each.'
         cls.assignment.criteria=['Explain stack LIFO','Explain queue FIFO','Give one example of each']
+        cls.assignment.professional_rubric="Accept conceptual LIFO and FIFO explanations with everyday examples."
         cls.assignment.save()
 
     def setUp(self):
+        unavailable=patch("classroom.homework_review.get_homework_reviewer",return_value=DisabledHomeworkReviewer())
+        unavailable.start();self.addCleanup(unavailable.stop)
         self.v1=submit_version(self.meeting,self.assignment.pk,self.student,V1)
 
     def job_url(self,name,job):
@@ -98,7 +101,9 @@ class HomeworkReviewTests(HomeworkFixture,TestCase):
         self.assertNotContains(response,V2)
         csrf=teacher.cookies['csrftoken'].value
         response=teacher.post(url,{'version':job.draft.version,'individual_text':'Lecturer-approved V1 feedback.',
-                                  'comparison_text':'','csrfmiddlewaretoken':csrf})
+                                  'comparison_text':'','csrfmiddlewaretoken':csrf,
+                                  'evidence-TOTAL_FORMS':'3','evidence-INITIAL_FORMS':'3',
+                                  **{f'evidence-{i}-quote':V1 for i in range(3)}})
         self.assertEqual(response.status_code,302)
         job.draft.refresh_from_db()
         response=teacher.post(self.job_url('homework-review-publish',job),{'version':job.draft.version,'mode':'complete','csrfmiddlewaretoken':csrf})
@@ -121,7 +126,7 @@ class HomeworkReviewTests(HomeworkFixture,TestCase):
                 self.assertContains(response,'No request will be created.')
         self.assertEqual(ReviewJob.objects.count(),0)
         with override_settings(HOMEWORK_FAKE_PROVIDER=True):
-            self.assertFalse(get_homework_reviewer().available('en'))
+            self.assertFalse(get_homework_reviewer().available('he'))
 
     def test_assignment_form_persists_language_but_does_not_enable_generation(self):
         self.client.force_login(self.teacher)
@@ -163,8 +168,8 @@ class HomeworkReviewTests(HomeworkFixture,TestCase):
         self.assertNotContains(page,NO_PEERS);self.assertNotContains(page,NO_DIFFERENCE)
         self.assertNotContains(page,'Private peer source')
 
-    def test_personal_failure_and_invalid_quotes_have_no_publishable_draft(self):
-        for fake in [FakeReviewer(personal_fail=True),FakeReviewer(invalid_quote=True)]:
+    def test_personal_failure_has_no_publishable_draft(self):
+        for fake in [FakeReviewer(personal_fail=True)]:
             job=self.make_job(fake);process_review_job(job.pk,reviewer=fake);job.refresh_from_db()
             self.assertEqual(job.status,'failed');self.assertFalse(FeedbackDraft.objects.filter(job=job).exists())
             with self.assertRaises(ReviewError):publish(self.meeting,job.pk,self.teacher,1,'complete')
@@ -227,7 +232,8 @@ class HomeworkReviewTests(HomeworkFixture,TestCase):
     def test_duplicate_active_request_reuses_snapshot_and_no_fake_runtime_setting(self):
         job=self.make_job();again=self.make_job(user=self.teacher)
         self.assertEqual(job.pk,again.pk);self.assertEqual(ReviewJob.objects.count(),1)
-        process_review_job(job.pk)  # Normal factory is disabled, not a synthetic fallback.
+        with patch('classroom.homework_worker.get_homework_reviewer',return_value=DisabledHomeworkReviewer()):
+            process_review_job(job.pk)
         job.refresh_from_db();self.assertEqual(job.status,'failed')
         self.assertFalse(FeedbackDraft.objects.filter(job=job).exists())
 
@@ -255,12 +261,13 @@ class HomeworkReviewTests(HomeworkFixture,TestCase):
         job.refresh_from_db();self.assertEqual(job.status,'failed');self.assertEqual(job.error_code,'interrupted')
         self.assertFalse(FeedbackDraft.objects.filter(job=job).exists())
 
-    def test_invalid_comparison_evidence_keeps_individual_draft_but_not_bad_comparison(self):
+    def test_unmatched_comparison_evidence_keeps_private_draft_and_blocks_publication(self):
         fake=FakeReviewer()
         original=fake.compare_submissions
         def invalid(*args):
             result=original(*args);result['evidence'][1]['quote']='fabricated peer quote';return result
         fake.compare_submissions=invalid
         job=self.ready(fake,peer=True)
-        self.assertEqual(job.comparison_status,'failed');self.assertEqual(job.generated_comparison,{})
-        self.assertTrue(job.draft.individual_text);self.assertEqual(job.draft.comparison_text,'')
+        self.assertEqual(job.comparison_status,'compared')
+        self.assertTrue(job.draft.individual_text)
+        with self.assertRaises(ReviewError):publish(self.meeting,job.pk,self.teacher,job.draft.version,'complete')

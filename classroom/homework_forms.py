@@ -3,12 +3,15 @@ from django import forms
 
 
 class AssignmentForm(forms.Form):
+    professional_rubric = forms.CharField(required=False, max_length=4000,
+        widget=forms.Textarea(attrs={'rows': 8}),
+        help_text='Professional principles and valid alternative solutions for each criterion. Required for experimental English AI feedback. Synthetic work only.')
     title = forms.CharField(max_length=160)
     instructions = forms.CharField(strip=False, widget=forms.Textarea(attrs={"rows": 6, "dir": "auto"}))
     criteria = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, "dir": "auto"}),
                                help_text="Enter one review criterion per line.")
     feedback_language = forms.ChoiceField(choices=[('en','English'), ('he','Hebrew')], required=False, initial='en',
-        help_text='Target feedback language. Automatic feedback generation is not currently available in either language.')
+        help_text='Experimental local generation supports English only, with a professional rubric. Hebrew generation remains unavailable.')
 
     def clean_feedback_language(self):
         return self.cleaned_data.get('feedback_language') or 'en'
@@ -39,6 +42,9 @@ class SubmissionForm(forms.Form):
 
 
 class FeedbackEditForm(forms.Form):
+    comparison_outcome = forms.ChoiceField(required=False,
+        choices=[('','Keep generated outcome'),('compared','Supported difference found'),('no_difference','No supported difference found')],
+        help_text='Review the generated outcome as well as the comparison text.')
     version = forms.IntegerField(min_value=1, widget=forms.HiddenInput)
     individual_text = forms.CharField(label='Individual feedback', widget=forms.Textarea(attrs={'rows':12,'dir':'auto'}))
     comparison_text = forms.CharField(label='Anonymous comparison', required=False, widget=forms.Textarea(attrs={'rows':6,'dir':'auto'}))
@@ -47,3 +53,12 @@ class FeedbackEditForm(forms.Form):
 class FeedbackPublishForm(forms.Form):
     version = forms.IntegerField(min_value=1, widget=forms.HiddenInput)
     mode = forms.ChoiceField(choices=[('complete','Publish feedback'), ('individual_only','Publish individual feedback only')])
+
+
+class EvidenceEditForm(forms.Form):
+    quote = forms.CharField(required=False,widget=forms.Textarea(attrs={'rows':2}))
+    removed = forms.BooleanField(required=False,label='Remove this evidence')
+
+
+class RubricForm(forms.Form):
+    professional_rubric = AssignmentForm.base_fields['professional_rubric']

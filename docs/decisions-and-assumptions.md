@@ -195,11 +195,11 @@ source/version/privacy rules in D-46 through D-51 remain in force.
 |---|---|---|
 | D-54 | User-reported lecturer reply: requirements 1-5 are detailed in the lecture; implementation and design details are ours to decide. Retain the project's rotating authenticated QR with validated automatic registration/deduplication, online attendance with offline-readable XLSX snapshot, and recorded-speech video summary with unspoken-visual exclusion. | Attribute design freedom to the lecturer and the three technical choices to the project. Close the email wait; review the relevant lecture section without claiming it was reviewed here. Valid QR forwarding remains possible. This is not proof of physical presence, classroom/phone readiness or AI accuracy. D-17 remains resolved. |
 
-### Approved UC-05 workflow mechanics with no active provider
+### Historical UC-05 workflow mechanics with no active provider
 
 | ID | User-approved stage | Actual evidence boundary |
 |---|---|---|
-| D-55 | Implement version-bound feedback request, private Lecturer draft editing and separate publication after closing the failed Qwen3 experiment round. Use fake providers in tests only. Before creating a request in the normal site, show that the selected language has no active provider. Keep real-model individual feedback/comparison as open requirements. | Software models, snapshots, processor, guarded routes and publication controls are implemented. Normal factory is DisabledHomeworkReviewer for English/Hebrew and creates no waiting request. Alex v1-request/v2-resubmission/v1-publication is tested with an injected provider only; no live draft is seeded. Actual inference quality/availability and measured runtime/input limits remain open; implementation is separate from experiment commit bb9cc58; real-model feedback/comparison acceptance remains open. |
+| D-55 | Implement version-bound feedback request, private Lecturer draft editing and separate publication after closing the failed Qwen3 experiment round. Use fake providers in tests only. Before creating a request in the normal site, show that the selected language has no active provider. Keep real-model individual feedback/comparison as open requirements. | Software models, snapshots, processor, guarded routes and publication controls are implemented. At this historical milestone the normal factory was DisabledHomeworkReviewer for both languages. D-56 supersedes this availability state with experimental local English integration. Alex v1-request/v2-resubmission/v1-publication is tested with an injected provider only; no live draft is seeded. Actual inference quality/availability and measured runtime/input limits remain open; implementation is separate from experiment commit bb9cc58; real-model feedback/comparison acceptance remains open. |
 
 ## 4. Proposal Register
 
@@ -389,3 +389,26 @@ The university-network study remains deferred, conditional, and non-blocking
 (D-07/Q-10). The historical readiness review did not itself approve technology. Later
 D-23 through D-26 approve Unit A; its design and verification are recorded in
 architecture.md and testing.md.
+
+## D-56 - Experimental English homework integration
+
+User approved local Qwen3 8B with a professional rubric for English individual
+feedback and comparison, within the existing version-bound background/private
+Lecturer draft/edit/separate-publication workflow. The Lecturer enters the rubric
+per assignment and its exact text is frozen with the request. Original generation
+remains separate from edits. Evidence is checked against its matching frozen
+source; unmatched evidence stays private/unverified and blocks publication until
+corrected or removed. The Lecturer can edit personal/comparison narrative and a
+completed comparison outcome, including correcting a false no-difference claim.
+No peers, failed comparison and completed/no-supported-difference remain distinct;
+individual-only publication after comparison failure retains D-52 wording.
+
+Initial engineering limits: 1–4 criteria (250 characters each), 2,000 instruction
+characters, 4,000 rubric characters, 4,000 per work, 3 peers, 8,000 combined source
+characters, 180 seconds processing excluding queue wait. Reject comparison
+overflow explicitly, never silently omit eligible latest-other-owner versions.
+These are implemented operational limits, not demonstrated classroom capacity.
+Only synthetic work is used; Hebrew generation remains unavailable. The model
+still makes semantic errors despite exact quotes and requires substantive review.
+No fake runtime, external request, billing or automatic publication is enabled.
+[Current implementation, measurements and limitations](local-homework-review.md).

@@ -858,3 +858,160 @@ real homework provider in either language. No further inference was run for
 publication. Fixtures, recorded outputs and [reproduction instructions](../experiments/local_ai/README.md#focused-homework-probes---reproduction)
 are now reviewable from the repository; model/runtime assets remain local-only.
 Full findings: [criterion probe](homework-criterion-review-feasibility.md).
+
+
+## Experimental local homework integration
+
+2026-11-15, D-56. English Qwen3 8B Q4_K_M with the professional rubric is
+connected to the ordinary UC-05 request/worker/private draft/edit/publication
+routes. Synthetic fixture only. No model download, external request, Gemini,
+billing, staging, commit or push. Earlier disabled-provider and failed-readiness
+sections above are historical measurements, not the current availability state.
+
+### Software checks versus actual inference
+
+The full file-backed SQLite suite initially passed 175 server tests in 54.843 s.
+The final full file-backed SQLite suite passed **177 server tests in 65.398 s**,
+including two further regressions for correction of a false no-difference outcome
+and timeout termination/private IPC cleanup. After routine invalid-rubric-form,
+original-failed-output retention and deadline-start corrections, **26 focused
+workflow/provider tests passed**. No concurrency test was skipped. All 12 JavaScript tests passed;
+system, migration-drift and dependency checks passed.
+
+The first focused test invocation used shared in-memory SQLite: 30 passed and
+one existing multi-connection submission test failed with `database table is locked`.
+The same 39 focused tests passed with file-backed SQLite, matching the development
+DB mode. This was not concealed by skipping the concurrency test.
+
+| Component / responsibility | Risk | Existing exercised test |
+|---|---|---|
+| request_review and rubric snapshots | Changed rubric/new submission silently changes request | test_rubric_edit_frozen_in_existing_job_and_course_authorized; existing latest-other-owner snapshot/Lecturer-initiation tests |
+| Source-bound evidence | Another version/peer quote incorrectly accepted; unsupported quote published | test_correct_quote_against_frozen_source_not_new_version; test_peer_quote_checked_against_referenced_peer_not_target; test_unmatched_quote_remains_private_and_blocks_publish_until_removed_via_form |
+| edit_draft / publish | Wrong outcome survives Lecturer correction; original result lost | test_lecturer_can_correct_false_no_difference_outcome_without_rewriting_raw_result; stale-edit/publication regressions |
+| Public projection and privacy guard | Student reads draft, peer text/identity or another owner's feedback | Existing direct-URL/HTML privacy/role revocation tests; test_privacy_guard_blocks_peer_passage_and_identity_even_after_lecturer_edit |
+| Capacity / preflight | Silent source sampling, queue for unavailable language/assets/rubric | test_capacity_overflow_rejects_request_without_silent_peer_sampling; test_missing_rubric_prevents_waiting_request; test_missing_runtime_and_hebrew_are_not_available |
+| LocalHomeworkReviewer subprocess | Timed-out process keeps GPU/IPC; hidden provider fallback | test_provider_timeout_terminates_owned_tree_and_removes_private_ipc; installed-model identity checks and separate actual inference |
+| Partial/no-peer/no-difference states | Failure becomes no peers or automatic publication | Existing comparison-failure individual-only, personal failure, no-difference and later-publication tests |
+
+Fixtures/test doubles prove workflow invariants only, not generated feedback
+quality. No fake provider is selectable in the normal site.
+
+### Real local provider route and measurements
+
+Authenticated Django clients with CSRF enforcement used normal HTTP view/form
+routes and the actual `run_homework_worker --once`, normal provider factory and
+isolated installed model. This is an agent-operated integration check, not a
+user-reported browser/phone check. Initial synthetic sources were prepared by
+seed_demo_homework_review through the authorized submission services. Alex then
+submitted a second version through the normal submission POST before completion
+of the first version's review. Exact source and rubric snapshots remained bound
+to Version 1. The peer group for a later Casey request correctly used Alex's
+latest Version 2, not both Alex versions and not Casey's own work.
+
+| Run | Result | Request POST to ready/failure | Model request wall, excluding runner startup/teardown |
+|---|---|---:|---:|
+| student_alex, job 1 | ready, private draft; generated no_difference | 35.345 s | 26.513 s |
+| student_casey, job 3 | ready, private draft; generated no_difference | 35.216 s | 25.984 s |
+| First Casey attempt, job 2 | individual_failed; no draft, no publication | 33.465 s worker interval | Not retained |
+| Alex Version 2, job 4, manual-review sample | ready/private; generated no_difference | 41.446 s | 33.243 s |
+
+The failed first Casey attempt predates added private failure diagnostics/output
+retention; its exact structural/runtime cause and output are unavailable. Do not
+attribute it to timeout, GPU load or model quality without evidence. An explicit
+new request succeeded with unchanged prompt/settings. No automatic retry ran.
+Future individual failures retain available original structured output, safe
+failure type/code and stage metadata; structural failure still creates no draft.
+
+The later Alex job records all 6,194,766,806 model-resident bytes in GPU memory
+for both individual and comparison stages through /api/ps. This establishes GPU
+residency, not peak total device usage/RAM. Metadata retains pinned model hashes,
+Ollama 0.40.14, prompt homework-rubric-en-v1, temperature .1, seed 42,
+8192 context/2304 maximum output tokens, think=false, no retries, per-call wall,
+load and generation times. The first call in each owned service includes loading.
+
+### Content findings and actual publication
+
+The two different approaches are (a) positive-capacity conditional update and
+(b) exclusive shared-row lock with recheck. Both works cover the four criteria.
+All four individual statuses were correct in each successful integration run.
+The Casey capacity rationale loosely conflates atomicity/rollback with the
+capacity mechanism and should be sharpened to describe the lock and recheck.
+Repeated full-work descriptions also need shortening. Source-exact quotations
+are not semantic acceptance.
+
+All three successful comparison drafts wrongly concluded no supported difference,
+despite the real approach difference. Casey's comparison also referred to the
+peer's second version rather than focusing on the technical difference. This is
+a substantive model error, not proof of absent differences. Lecturer must change
+the comparison text AND the reviewed outcome to compared when correcting it.
+No prompt tuning was performed after these results to hide this failure.
+
+Alex V1 job 1's original comparison included:
+
+> No supported difference exists in topic coverage or approach.
+
+The agent acting through the Lecturer's normal CSRF form corrected it to:
+
+> Your submission reserves capacity using a conditional positive-count update. Another submission holds an exclusive lock on the shared capacity row and rechecks availability before writing. Both are valid approaches described in these works. Both distinguish duplicate enrollment from shared capacity and use database-authoritative enrollment rather than cached availability. The solution approaches differ even though topic coverage is similar.
+
+The outcome was changed from no_difference to compared, saved, then published in
+a separate POST. Save/publication/Student verification requests took 0.063 seconds,
+excluding the intervening analysis/edit preparation time; no human editing time was measured. Student Alex V1 showed the corrected publication and no false
+system no-difference notice. V2 did not show V1's feedback. Another student's
+source URL returned 404; Student draft URLs returned 403. Neither private evidence,
+peer sources, model JSON nor rubric appeared in Student responses. The original
+model no_difference result remains recorded privately.
+
+Job 1 had 14/14 exact evidence matches; Casey job 3 also had 14/14. Before the
+user's subsequent manual review, the Alex V2 draft (job 4) had 13/14: evidence item 13 was an exact quote from the PEER's
+cache explanation, but the model labels it as TARGET. Correct matching-source
+validation flags it unverified. A real publication POST returned 409 and left the
+draft private. For manual review, remove item 13 or replace it with an exact
+relevant target quote; then correct the false comparison and outcome and save
+before a separate Publish. This demonstrates why both attribution and source
+presence are checked. Do not silently fix or discard the original evidence.
+
+### Review links, artifacts and limits
+
+The local site was started on 127.0.0.1:8000 without network/firewall changes.
+An authenticated request to the active HTTP server verified the experimental
+warning, unverified-evidence indicator and editable outcome field on job 4.
+This is HTTP integration, not visual/mobile browser validation.
+
+- Meeting: Homework AI review demo, DEMO-CS101; synthetic assignment 2.
+- Alex V2 review record (subsequently edited/published by the user): http://127.0.0.1:8000/courses/1/meetings/7/homework/reviews/4/
+- Alex V2 page: http://127.0.0.1:8000/courses/1/meetings/7/homework/2/versions/5/
+- Reviewed/published Alex V1: http://127.0.0.1:8000/courses/1/meetings/7/homework/2/versions/3/
+
+IDs are local database examples, not portable repository fixtures. The saved
+local-only .local/homework-model-acceptance.json contains unchanged generated
+outputs, timings and audit records; .local scripts/logs/database remain excluded
+from Git. The reproducible synthetic sources are classroom/demo_homework.json.
+Fresh checkouts use the seed command and their own generated IDs.
+
+English draft integration is useful for supervised editing, not reliable grading
+or automatic publication. Comparison is particularly unreliable in this sample;
+quote correctness does not repair its conclusion. Hebrew, largest allowed peer
+sets, throughput under classroom load, adversarial anonymity, human editing time,
+phone behavior and intentional post-demo data cleanup remain unverified/open.
+[Operating limits and manual steps](local-homework-review.md).
+
+### User-reported manual review and version-specific publication
+
+The user reported completing the following browser checks:
+
+- Edited the comparison in the Version 2 draft, removed Evidence 13, saved the
+  draft and separately published it.
+- As Alex, saw the individual feedback and the manually corrected comparison
+  on Version 2.
+- Opened Version 1 and confirmed that its previous feedback retained its
+  original publication time and comparison, unchanged by Version 2 publication.
+
+This is user-reported manual interface evidence for editing/removing evidence,
+separate publication, Student visibility and preservation of historical
+version-specific publication. The comparison was corrected manually; this is
+**not** evidence that the model generated the comparison correctly. It does not
+establish word-by-word feedback accuracy, phone behavior, additional permission
+scenarios or classroom capacity. Automated server authorization checks and
+actual-model content findings remain separate above. No model inference or
+application-code change was performed while recording this report.
