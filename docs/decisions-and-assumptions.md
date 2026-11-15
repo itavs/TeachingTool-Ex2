@@ -412,3 +412,15 @@ Only synthetic work is used; Hebrew generation remains unavailable. The model
 still makes semantic errors despite exact quotes and requires substantive review.
 No fake runtime, external request, billing or automatic publication is enabled.
 [Current implementation, measurements and limitations](local-homework-review.md).
+
+## D-57 - Approved current demo boundary
+
+Keep the existing rotating-QR attendance mechanism; no face recognition or other
+attendance expansion is included. Automatic poll generation is English-only;
+manual Hebrew poll editing/publication/voting remains supported. Automatic
+homework feedback and comparison are English-only and experimental, with private
+Lecturer review/editing and separate publication. Comparison quality is not
+certified. The original bilingual direction (D-31 and D-50) is retained as a
+future target; automatic Hebrew generation is not a blocker for the current
+user-approved demo. This is a project demo-scope decision, not a new assignment
+requirement or a claim of completed Hebrew generation.

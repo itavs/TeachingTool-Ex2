@@ -7,8 +7,9 @@ This section addresses To Do 8 and the real names in the
 It is a current strategy/index over existing tests, not a new execution record.
 Dated results below retain provenance. The original documentation-only round
 ran no software tests or AI; subsequent runtime verification is recorded below.
-Latest workflow verification is 167 server and 12 JavaScript tests, separate from
-the two standalone experiment quote-audit tests. No new AI inference occurred.
+Latest full workflow verification is 177 server and 12 JavaScript logic tests,
+with 26 focused workflow/provider checks after routine corrections; these are
+separate from standalone experiment quote audits and device/browser evidence.
 
 Use software tests for deterministic contracts, state/permission/retention and
 process-control assertions; use bounded real-model samples for inference wiring
@@ -20,7 +21,7 @@ prove that the quote supports the assessment.
 | Diagram component / responsibility | Risk or invariant | Existing software evidence (named tests) | Real-model / open boundary |
 |---|---|---|---|
 | User, Course, Membership, Meeting, MeetingForm | Cross-course access, forged role/parent and invalid writes | [Foundation suite](../classroom/tests.py); [class-aware assertions](#class-aware-coverage) | User browser checks are separate; production identities/phone/load open. |
-| AttendanceWindow, AttendanceRecord and attendance module | QR expiry/login continuation/duplicate registration; one record per student/meeting | [Participation suite](../classroom/test_participation.py): test_close_invalidates_every_code_even_after_reopen, test_window_closed_after_get_rejects_post_and_next_scan_requires_new_code; concurrent registration cases in same suite | User QR report is not a phone/classroom acceptance or physical-presence proof. Email wait closed by D-54; implementation/classroom verification remains separate. |
+| AttendanceWindow, AttendanceRecord and attendance module | QR expiry/login continuation/duplicate registration; one record per student/meeting | [Participation suite](../classroom/test_participation.py): test_close_invalidates_every_code_even_after_reopen, test_window_closed_after_get_rejects_post_and_next_scan_requires_new_code; concurrent registration cases in same suite | Earlier QR report was not phone evidence; the later iPhone/Safari report below verifies the stated happy path only. Classroom use and physical-presence proof are not established. Email wait closed by D-54. |
 | MeetingRequest and request form/views | Outside-class persistence and Student-own/Lecturer visibility | [Participation suite](../classroom/test_participation.py): test_outside_class_requests_for_past_meeting_persist_for_later_lecturer | User reported live appearance of a comment; D-17 resolved. Broader load/retention open. |
 | Poll/PollVote, poll_services.edit_draft/publish/vote/close | Stale edits; second Active poll; concurrent duplicate vote; vote/close ordering | [Poll suite](../classroom/test_polls.py): test_draft_edit_all_content_and_optimistic_version, test_same_student_parallel_votes_are_final_and_unique, test_parallel_publications_only_one_active_poll, test_vote_racing_close_has_one_consistent_order | Real local generated drafts exercised lifecycle; not classroom load. |
 | poll_services.public_payload and Poll views | Draft/answer privacy; review notice only Lecturer/Draft | [Poll suite](../classroom/test_polls.py): test_student_cannot_see_drafts_in_list_detail_or_state, test_ai_review_notice_is_lecturer_draft_only_in_list_detail_and_state | User opinion-results checks reported separately; browser/phone matrix incomplete. |
@@ -1015,3 +1016,123 @@ establish word-by-word feedback accuracy, phone behavior, additional permission
 scenarios or classroom capacity. Automated server authorization checks and
 actual-model content findings remain separate above. No model inference or
 application-code change was performed while recording this report.
+
+
+## Phone evidence and focused demo test gaps
+
+### User-reported manual device results
+
+The user reported the following tests in Safari on a real iPhone connected to
+the home Wi-Fi network:
+
+| Reported path | Reported result | Evidence limit |
+|---|---|---|
+| Login using the LAN website | Successful login | No reported device/OS version, login error, logout or session-expiry scenario. |
+| Scan QR and register attendance | Registration appeared to the Lecturer. A later user report also confirms a scan led to login, an expired-code message appeared, and a new scan registered attendance. | Do not infer an exact delay/expiry boundary, automatic return details, window closure, duplicate or concurrent scan checks on the phone. |
+| Submit a comment | Comment appeared to the Lecturer | No reported refresh behavior/timing, suggestion-type check, other-student privacy or boundary-input test on the phone. |
+| Vote in a poll and view results after closure | Voting and post-close results worked. In the later comprehension-poll report, correct answer, explanation and results were hidden before closure and all appeared after closure plus reload in Safari on iPhone. | UI observations only; do not infer exact timing, additional screens, voter-identity inspection or server-payload inspection from the report. |
+
+These are user-reported manual checks, not tests executed/observed by the agent.
+No screenshots or inferred screen coverage are claimed. The phone round has ended for now. No video upload/transcript/summary, homework, Lecturer editing/publication,
+XLSX, landscape, accessibility, long-text or all-screen phone acceptance follows
+from these four results. See [phone record and remaining plan](phone-testing.md).
+
+### Separate test layers and existing infrastructure
+
+| Layer | Existing infrastructure / evidence | What it does not establish |
+|---|---|---|
+| Server | Django TestCase/TransactionTestCase, authenticated Client with CSRF checks, file-backed SQLite concurrency. Last full run: 177 tests; subsequent focused corrections: 26 passed. Login/course authorization in classroom/tests.py; QR/comment checks in test_participation.py; poll checks in test_polls.py; video and homework suites separate. | Actual browser event handling, CSS/layout, native camera, Safari/network/session behavior. Django Client is not a browser. |
+| JavaScript logic | 12 node:test tests in tests_js; vm with hand-built fake document/fetch/timers. Lecturer polling/visibility, QR rotation rendering, scan POST form submission and result refresh/state transitions. | Real DOM rendering, radio hit areas, browser networking, WebKit or a mobile viewport. These are not browser tests or phone emulation. |
+| Browser with phone emulation | No committed Playwright/Selenium/Cypress/Puppeteer config, package manifest or browser suite found. Playwright/Selenium are not installed in the website environment. No new browser/emulation run occurred in this review. | No emulated-device pass is claimed. Environment tooling for interactive browser control, if used later, is separate from a maintained repository suite. |
+| Real device | The four user-reported Safari/iPhone happy paths above. | No general cross-device/browser acceptance or classroom-network result. |
+
+Server coverage already checks login continuation and code expiry at POST,
+closing a QR window, tampering/wrong meeting, duplicate/concurrent registration,
+Lecturer-only roster/export, comment bounds/persistence/outside-class submission,
+Student-own history and course authorization. Poll tests cover associated labels
+and single explicit submission, final/duplicate votes and close races, hidden
+drafts, pre-close answer/result privacy in HTML/state responses, and post-close
+results. Do not duplicate these as a second broad browser authorization suite.
+
+### Focused completion proposal, not executed
+
+Before the demo, prioritize one timed rehearsal on the intended demonstration
+network using the existing desktop browser and accounts. Cover all five approved
+capabilities in presentation order, actual waiting time, worker readiness and
+Lecturer corrections/publication of homework; distinguish live operations from
+any explicitly approved earlier results. Home Wi-Fi success does not establish
+classroom Wi-Fi reachability. Repeat only a short connectivity/login/QR smoke
+check if the demonstration network or server address changes.
+
+The formerly pending narrow comprehension disclosure UI check is now covered
+by the subsequent user-reported Safari/iPhone observation below. The later user report
+now supplies real-device evidence for a QR scan leading to login, an expired-code
+message and successful registration after a new scan; exact timing/redirect details
+are not inferred. Server tests already cover both paths. Reuse
+existing accounts and browser sessions when resuming testing; do not add another
+server test package or install a browser framework for this documentation round.
+They are proposed targeted checks, not reported phone passes or a reason to
+resume the paused phone round without the user.
+
+Optional later work: a thin reproducible browser smoke with a mobile viewport,
+additional iPhone/Android models, landscape/long-text/accessibility review and
+classroom-load measurement. A viewport check would still not replace a physical
+phone/camera test. No large E2E framework, duplicate suite, application code,
+new AI experiment, network/firewall change, software-test rerun, commit or push
+was performed during this review.
+
+
+## Focused comprehension-browser check - blocked, not executed
+
+The agent attempted to observe the existing local website through the available
+Computer Use browser tool. A saved user permission/browser security policy denied
+access to the localhost origin. No alternate browser surface, raw browser protocol,
+injected session or other workaround was used. No poll was created, voted or closed
+by this attempted browser check, and no browser/phone-emulation pass is claimed.
+Existing server HTML/state disclosure tests remain separate evidence.
+
+The manual replacement check is now completed as a user report below. These
+were the proposed instructions, not agent-executed actions; do not infer that
+the user used the suggested seed command or every optional assertion:
+
+1. Prepare an English comprehension draft with a known correct answer and
+   explanation. To avoid another AI call, use the existing explicitly labeled
+   demo command below and choose only the comprehension draft. This creates
+   synthetic lifecycle fixtures, not AI-generation evidence.
+2. Lecturer: review and publish the comprehension draft. Student in a separate
+   browser/private session: open it, verify no designated correct answer,
+   explanation or vote distribution is visible. Options themselves remain visible.
+3. Student: select one option and Submit final response. Before Lecturer closure,
+   verify the page still hides the designated answer, explanation and aggregate
+   counts/percentages, including after reload.
+4. Lecturer: Close voting. Student: reload and verify the correct answer and
+   explanation plus aggregate counts/percentages appear, with no voter identities.
+   Record the observed result; do not infer a pass from the server tests.
+
+From the project root, replacing MEETING_ID with an authorized meeting ID:
+
+```powershell
+.\.venv\Scripts\python.exe manage.py seed_demo_polls --meeting-id MEETING_ID --language en --new-set
+```
+
+The command also prepares an unused opinion draft; do not publish it for this
+single test. Do not close/overwrite unrelated polls; select an appropriate meeting
+with no active poll. [Ten-minute demo plan and frozen AI backup](demo-runbook.md).
+
+
+### User-reported comprehension disclosure check - completed
+
+The user reported Safari on an iPhone: before the comprehension poll closed,
+the correct answer, explanation and results were hidden. After closure and
+reloading the page, all three appeared correctly. This is user-reported real-
+device browser/UI evidence; the agent's browser attempt above remains blocked.
+No browser automation or phone emulation pass is claimed. No extra assertion
+about counts, voter identities, payloads, timing or other screens is inferred.
+
+The user also reported seeing a “model busy” message, without identifying its
+exact stage or cause. The shared nonblocking decoder lock can reject competing
+video, poll and homework inference. This is a scheduling risk, not evidence of
+a missing model, VRAM exhaustion or a confirmed provider-specific cause.
+[Updated rehearsal plan](demo-runbook.md) serializes model stages and avoids
+repeated requests while busy. No new AI call or software test was run for this
+documentation closure.

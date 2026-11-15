@@ -422,6 +422,10 @@ direction from implementation or completed checks.
 
 ### UC-05 - Submit Homework, Review a Draft, and Publish Feedback
 
+D-57 fixes the current demo at experimental English generation with Lecturer
+review/editing and separate publication; automatic Hebrew is a future test
+target and does not block this demo. The original bilingual direction remains.
+
 **Status:** D-53/D-55 implement source versions and review/publication controls.
 D-56 enables experimental English local Qwen review/comparison, with a Lecturer
 professional rubric. Hebrew generation and reliable conclusion quality remain open.

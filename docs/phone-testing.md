@@ -1,8 +1,35 @@
-# Private-Network Phone Test — Instructions, Not Executed
+# Private-Network Phone Test — Limited User-Reported Results and Remaining Plan
 
-Current development binding remains `127.0.0.1:8000`. No LAN binding,
-ALLOWED_HOSTS change, firewall rule, router configuration or phone test was
-performed for Unit B. Loopback QR links cannot be opened by a different device.
+The original Unit B plan below preceded phone execution. A later temporary
+server was bound to the verified home Wi-Fi address `10.0.0.17:8000`, with that
+exact host allowed only in the server process. The original loopback server and
+tracked settings were preserved. The agent did not create a firewall rule; a
+narrow Private-profile/local-subnet/port-8000 rule was supplied for the user if
+needed. Its execution by the user has not been reported. LAN IPs can change;
+recheck before a future test. No public exposure or router forwarding is approved.
+
+## User-reported real-device checks
+
+The user reported Safari on an iPhone over the home network:
+
+- Login succeeded.
+- QR scanning registered attendance, which appeared to the Lecturer.
+- In another user-reported sequence, a QR scan led to login; an expired-code
+  message appeared; a new QR scan subsequently registered attendance.
+- A comment was submitted and appeared to the Lecturer.
+- A poll vote was submitted; results were viewed on the phone after closure.
+- In the subsequently reported comprehension-poll check, the correct answer,
+  explanation and results were hidden before closure. After closure and a page
+  reload, all three appeared correctly in Safari on the iPhone.
+
+The manual phone round has ended for now at the user's request. These are
+user-reported paths only, not agent-observed device execution. iPhone model,
+iOS/Safari versions, layout/orientation checks and timings were not supplied.
+Only the stated post-close reload behavior is confirmed. Do not infer checks of
+other screens, unreported disclosure/expiry variants, duplicate submission, XLSX,
+video processing/transcripts/summaries or homework review/publication on iPhone.
+Server authorization and concurrency checks remain separate evidence; see
+[the coverage review](testing.md#phone-evidence-and-focused-demo-test-gaps).
 
 ## Preparation for a separately approved LAN test
 
@@ -69,6 +96,7 @@ performed for Unit B. Loopback QR links cannot be opened by a different device.
   keyboard/form labels, focus, text wrapping, horizontal roster scrolling and
   button reachability. Record actual phone, browser, network and failures.
 
-No offline interpretation is established by these connected tests. No
+The during/outside-class interpretation was already resolved by D-17; these
+connected tests make no claim of disconnected operation. No
 university-network-origin check is implemented or required to continue. QR
 does not conclusively prove physical presence or prevent real-time forwarding.

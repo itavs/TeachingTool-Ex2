@@ -4,6 +4,16 @@ An individual Exercise 2 project for Introduction to Software Engineering
 (OOP / OOD): design a practical, simple web application for classroom teaching
 and demonstrate its behavior in approximately ten minutes.
 
+Current user-approved demo boundary ([D-57](docs/decisions-and-assumptions.md#d-57---approved-current-demo-boundary)):
+keep existing QR attendance without face recognition; generate polls in English
+only while retaining manual Hebrew poll workflows; generate experimental homework
+feedback/comparison in English only, with Lecturer review/editing and separate
+publication. Automatic Hebrew remains a future bilingual target, not a blocker
+for this demo. Comparison quality remains limited and requires review.
+
+Demo preparation: [ten-minute runbook, prerequisites and labeled AI backups](docs/demo-runbook.md).
+This is a plan, not a completed classroom demo. The comprehension disclosure check has [user-reported Safari/iPhone evidence](docs/testing.md#user-reported-comprehension-disclosure-check---completed); the agent browser attempt remains blocked.
+
 ## Problem and Scope
 
 The sections below distinguish assignment capabilities from approved design choices.
