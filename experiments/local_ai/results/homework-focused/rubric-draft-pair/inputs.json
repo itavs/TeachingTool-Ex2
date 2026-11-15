@@ -1,0 +1,24 @@
+[
+  {
+    "case": "conditional-update",
+    "instructions": "Explain how a university registration system should handle two students simultaneously requesting the last seat. Discuss transactions, duplicate prevention, and the benefits and risks of caching. This is a theoretical answer, not a coding task.",
+    "criteria": [
+      "Correct atomicity and rollback",
+      "Distinguish duplicate enrollment from capacity concurrency",
+      "Concrete protection against overbooking",
+      "Cache latency versus staleness trade-off"
+    ],
+    "submission": "Author: SyntheticAuthorCedar\nI use one database transaction to create the enrollment and consume a seat, committing both together. If either fails, rollback undoes both changes. A UNIQUE constraint on (student, course) prevents the same student enrolling twice, but does not reserve capacity for different students. For capacity I perform a conditional update that reduces remaining seats only when the count is positive. I accept the enrollment only if that update succeeds and roll back the transaction if enrollment creation fails. Thus competing requests cannot both consume the same final seat. Cached availability speeds up display reads but may be stale, so cached results never authorize enrollment; the conditional database reservation is authoritative."
+  },
+  {
+    "case": "locked-recheck",
+    "instructions": "Explain how a university registration system should handle two students simultaneously requesting the last seat. Discuss transactions, duplicate prevention, and the benefits and risks of caching. This is a theoretical answer, not a coding task.",
+    "criteria": [
+      "Correct atomicity and rollback",
+      "Distinguish duplicate enrollment from capacity concurrency",
+      "Concrete protection against overbooking",
+      "Cache latency versus staleness trade-off"
+    ],
+    "submission": "Author: SyntheticAuthorMaple\nI start a transaction and hold an exclusive lock on the shared course-capacity row. After acquiring that lock I read the current capacity again; when there is a seat I decrement it and insert the enrollment, then commit and release the lock. The next request waits for the lock and rechecks the updated availability. Failure of either write rolls back all transaction changes. Separately, a UNIQUE key on (student, course) rejects repeated enrollment by the same student; this is different from the lock protecting capacity across students. Cached course availability makes browsing faster but can be stale even with a short TTL. Enrollment uses the database recheck under the lock, never cached availability."
+  }
+]

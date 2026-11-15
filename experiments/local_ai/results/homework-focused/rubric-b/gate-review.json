@@ -1,0 +1,13 @@
+{
+  "assessed_by": "Agent source/rubric review, not another model. Expected map was prepared before inference.",
+  "unique_error_identified_in_both": true,
+  "only_cache_status_changed": true,
+  "rollback_assessment_correct": false,
+  "remaining_semantic_error": "Both versions invent an atomicity gap despite explicit grouped writes/rollback; the fixed version additionally imports a new concurrency-rollback demand.",
+  "overall_pass": false,
+  "new_pair_inference_performed": false,
+  "comparison_inference_performed": false,
+  "quotes_exact": 10,
+  "quotes_checked": 10,
+  "no_retry_or_rubric_revision": true
+}

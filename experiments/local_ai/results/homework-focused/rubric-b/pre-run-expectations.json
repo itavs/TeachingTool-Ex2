@@ -1,0 +1,43 @@
+{
+  "prepared_utc": "2026-11-15T08:24:53.968297+00:00",
+  "not_model_input": true,
+  "method": "Independent source assessment prepared before any detailed-rubric generation. Assignment-level rubric is identical across all four works.",
+  "b_gate": {
+    "b-original": [
+      "correct: explicit grouped writes and rollback; no cache-based downgrade",
+      "incorrect: explicitly reject UNIQUE(student,course) as a guarantee against different students taking the last seat",
+      "must reject the false UNIQUE guarantee / absent sound concurrent reservation; not correct; must not credit a plain transaction as capacity protection",
+      "incorrect: explicit cache-only authorization policy, not merely missing risk discussion"
+    ],
+    "b-cache-fixed": [
+      "same correct atomicity/rollback credit",
+      "same incorrect UNIQUE guarantee, explicitly identified",
+      "same unsound last-seat protection; cache correction adds no atomic reservation",
+      "correct: speed/staleness/final database validation acknowledged"
+    ]
+  },
+  "pass_rule": "Both versions explicitly reject the UNIQUE last-seat guarantee; unaffected criteria have stable, source-supported assessments, including correct rollback credit. Only cache assessment substantively improves; no materially false conclusions. Exact wording need not match. For protection, incorrect is the expected status; consistent partial may be accepted only if reasoning clearly corrects the false guarantee and identifies the real missing reservation mechanism. Transport/structure/quote checks alone are insufficient.",
+  "stop_rule": "On B semantic failure, do not run the new pair or comparison; do not revise the rubric/prompt and retry in this round.",
+  "pair_expected": {
+    "conditional-update": [
+      "correct",
+      "correct",
+      "correct",
+      "correct"
+    ],
+    "locked-recheck": [
+      "correct",
+      "correct",
+      "correct",
+      "correct"
+    ]
+  },
+  "comparison_expected": "Both cover all four topics soundly. Conditional-update work uses an atomic positive-capacity conditional decrement; locked-recheck holds an exclusive shared row lock and rechecks before writes. Do not invent missing rollback, missing duplicates or missing cache risk. Do not imply one valid method is mandatory, rank works, or reveal identities.",
+  "rubric_sha256": "e3ea88e1f26860c676c18d498384b2d2dd7a3bc0cb9ef6c0c7032879480c4d09",
+  "input_hashes": {
+    "b-original": "c15c4195dbbfe3686677091b915a44cf97bcc44005e18c3efde99917c377f6a9",
+    "b-cache-fixed": "0ba6fe67c2c6684e3f7ba7c3ced926dd88a359d5dbd1cc7f446f90df6164b494",
+    "conditional-update": "2623ca1e124df9f0447cffd706e5b0b355daa9d8d0198d5c7b7b311b1967068e",
+    "locked-recheck": "990bccc6523a737c494ac446d94c6be7aa27d4a9cf2b0509a9cb0f4363de23bd"
+  }
+}

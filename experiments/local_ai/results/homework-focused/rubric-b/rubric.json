@@ -1,0 +1,43 @@
+{
+  "assignment_instructions": "Explain how a university registration system should handle two students simultaneously requesting the last seat. Discuss transactions, duplicate prevention, and the benefits and risks of caching. This is a theoretical answer, not a coding task.",
+  "policy": "Assess theoretical understanding. A valid conceptual explanation suffices; do not require SQL code, every listed alternative, or topics outside the selected criterion. Separate independent criteria. An explicitly false claim is incorrect, not just missing coverage.",
+  "criteria": [
+    {
+      "criterion": "Correct atomicity and rollback",
+      "professional_principle": "Atomicity groups the enrollment write and seat-count update as one all-or-nothing unit. If either fails, rollback undoes all changes in that transaction. Atomicity is distinct from isolation and capacity-race protection.",
+      "valid_solutions": [
+        "A transaction encompassing both changes, committing together on success and rolling back both on any failure.",
+        "An equivalent conceptual all-or-nothing operation with explicit failure reversal."
+      ],
+      "scope": "Credit explicit transaction grouping plus rollback without requiring the word atomicity or an isolation-level name. Evaluate cache safety and concurrent capacity reservation in their own criteria; neither substitutes for nor negates an otherwise correct description of rollback."
+    },
+    {
+      "criterion": "Distinguish duplicate enrollment from capacity concurrency",
+      "professional_principle": "Duplicate enrollment means the same student enrolling in the same course twice. Capacity concurrency means different students competing for limited seats. A UNIQUE key on the pair (student, course) rejects a repeated pair; different students form different pairs, so this key alone cannot enforce a course-wide capacity bound.",
+      "valid_solutions": [
+        "Explicitly distinguish the per-student duplicate key from a separate shared-capacity reservation rule.",
+        "Explain that duplicate prevention and last-seat concurrency need distinct protections, even when both are used inside a transaction."
+      ],
+      "scope": "Judge the actual meaning of a claimed guarantee, not just the presence of UNIQUE or transaction keywords. A claim that a student/course uniqueness key prevents different students taking the final seat is technically incorrect."
+    },
+    {
+      "criterion": "Concrete protection against overbooking",
+      "professional_principle": "A correct reservation must atomically check and consume shared remaining capacity under concurrent requests. Plain transaction grouping or per-student uniqueness alone does not make the capacity check safe. Separate reads followed by updates can race unless protected.",
+      "valid_solutions": [
+        "Within the enrollment transaction, a conditional capacity update succeeds only while remaining seats are positive; accept enrollment only when it succeeds, and roll back on later failure.",
+        "Hold an exclusive lock on the shared course-capacity record inside the transaction, then recheck capacity, consume a seat and create enrollment before commit.",
+        "Serializable processing with correct handling/retry of serialization conflicts, or an equivalent explicitly explained atomic capacity reservation."
+      ],
+      "scope": "Any one sound approach is sufficient. Do not demand locks if a valid conditional update is given, or vice versa. A cache availability check, an unprotected database recheck, an ordinary transaction or a per-student UNIQUE key does not alone prove safe shared-capacity reservation."
+    },
+    {
+      "criterion": "Cache latency versus staleness trade-off",
+      "professional_principle": "Caching can reduce read latency but cached seat availability can be stale. Cached availability may be a display hint; authoritative enrollment decisions must be validated against database state, with capacity concurrency handled by the separate reservation criterion.",
+      "valid_solutions": [
+        "Explain faster cached reads and stale-data risk, with a final database validation instead of trusting cached availability alone.",
+        "Equivalent separation of cached display/read optimization and authoritative database enrollment decisions, with appropriate invalidation or freshness handling."
+      ],
+      "scope": "A policy accepting enrollment solely because the cache reports a free seat is explicitly wrong, not merely an omitted discussion. A final database check resolves the cache-trust issue but does not automatically satisfy atomicity or safe concurrent capacity reservation."
+    }
+  ]
+}
