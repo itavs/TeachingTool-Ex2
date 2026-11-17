@@ -48,7 +48,7 @@ prove that the quote supports the assessment.
 - **Manual interface:** user reports are labeled as such below. They do not
   establish unreported phone, audio-reference accuracy or classroom-load tests.
 - **Open:** review the relevant lecture section under D-54, phone/network/load conditions,
-  broad AI quality and the actual ten-minute class demo/final conclusion.
+  broad AI quality and assignment acceptance beyond the observed workflows. The written results account is in [README](../README.md#results-summary).
   D-17 comments timing is resolved; no disconnected queue is required.
 - **Reproducibility:** repository links above point to tracked files included in a clean clone.
   New homework probes/reports/audit tests and later Gemini updates remain
@@ -1189,9 +1189,9 @@ were supplied. Preparation measurements above must not be used as rehearsal time
 
 The five approved demo paths now have a user-reported guided walkthrough record.
 Experimental English scope, mandatory Lecturer review and known comparison errors
-remain unchanged. Classroom demonstration and a short final results account are
-still outstanding. A continuous timed rehearsal remains a readiness check, not a
-new handout deliverable. No additional implementation, software/browser testing,
+remain unchanged. This record does not establish uninterrupted ten-minute or
+classroom evidence. The written results account now summarizes the observed work
+in [README](../README.md#results-summary), without relabeling this walkthrough. No additional implementation, software/browser testing,
 AI experiment, commit or push was performed by the agent while documenting this
 report. [Runbook and preparation history](demo-runbook.md).
 
@@ -1210,3 +1210,24 @@ a user report, not uninterrupted ten-minute/classroom evidence. Known comparison
 errors, local-only artifacts and the incomplete intentional cleanup/real-data
 policy remain explicit. Submission deadline/packaging (Q-08) and classroom live-
 processing expectations/acceptable quality (Q-09) are not invented by this review.
+
+
+## Final visual diagram review and written results
+
+The seven architecture Mermaid blocks were rendered locally with Mermaid CLI
+12.2.0 / Mermaid 12.3.0 using the existing Chrome executable in an isolated
+headless profile. This is offline document rendering, not application/browser
+workflow testing. One actual sequence parse failure was corrected: the semicolon
+in `publication blocked; correct/remove and save` was replaced with a comma so
+Mermaid does not treat the message tail as a separate statement. No application
+behavior changed. Participant columns were widened in render configuration to
+avoid splitting long component names mid-word. The resulting diagrams were
+inspected as overview images and detailed PNG regions for labels, clipping,
+branch frames and arrow readability. [SVG gallery and render provenance](diagrams/README.md).
+
+The earlier source-only review remains a historical record; this review supplies
+the previously missing visual rendering evidence. The [written results summary](../README.md#results-summary)
+is complete for existing implementation, experiments and user-reported guided
+observations. It explicitly preserves the false automatic-comparison finding and
+manual Lecturer correction. No application tests, AI experiments, implementation
+changes, commit or push were performed in this documentation/rendering round.

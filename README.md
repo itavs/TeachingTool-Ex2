@@ -11,8 +11,7 @@ feedback/comparison in English only, with Lecturer review/editing and separate
 publication. Automatic Hebrew remains a future bilingual target, not a blocker
 for this demo. Comparison quality remains limited and requires review.
 
-Demo preparation: [ten-minute runbook, prerequisites and labeled AI backups](docs/demo-runbook.md).
-This is a plan, not a completed classroom demo. The comprehension disclosure check has [user-reported Safari/iPhone evidence](docs/testing.md#user-reported-comprehension-disclosure-check---completed); the agent browser attempt remains blocked.
+Earlier planning/preparation record: [runbook and labeled AI backups](docs/demo-runbook.md). The comprehension disclosure check has [user-reported Safari/iPhone evidence](docs/testing.md#user-reported-comprehension-disclosure-check---completed); the agent browser attempt remains blocked.
 
 ## Problem and Scope
 
@@ -143,11 +142,11 @@ linked sections; detailed historical evidence is separate from current status.
 | 4 | SRS document | [Functional requirements](docs/SRS.md#4-functional-requirements) | FR/NFR and acceptance targets defined; full acceptance not claimed. |
 | 5 | Main use cases / client stories | [UC-01 through UC-05](docs/SRS.md#5-main-use-cases) | Five main flows documented; UC-05 workflow and experimental English integration implemented; quality remains open and initial operating limits are explicit. |
 | 6 | Main software components | [Current components](docs/architecture.md#current-components) | Implemented responsibilities mapped, including the experimental English homework adapter and review controls. |
-| 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence), [homework design](docs/architecture.md#planned-uc-05-components) | Current video/poll paths covered; homework assignment/version classes are implemented; review/comparison is experimentally integrated in English; quality remains limited. |
+| 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence), [homework design](docs/architecture.md#planned-uc-05-components) | Current class/sequence sources plus [seven visually reviewed SVG renders](docs/diagrams/README.md); experimental English review/comparison remains quality-limited. |
 | 8 | Testing strategy addressing the classes in item 7 | [Component-to-test strategy](docs/testing.md#current-component-to-test-strategy) | Software checks mapped separately from real-model evidence and open acceptance. |
 | 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Five paths have a [user-reported guided walkthrough](docs/testing.md#user-reported-guided-rehearsal---2026-11-17); experimental English homework comparison required human correction. Reliability/full acceptance remain open. |
-| 10 | Perform a demo in class | [Classroom/demo acceptance](docs/SRS.md#7-future-acceptance-checks-and-traceability) | Classroom demo not performed. Guided walkthrough with pauses and limited phone checks are recorded; no uninterrupted ten-minute run or classroom-network result. |
-| 11 | Conclude; write a short account of results | [Interim results](#interim-results-and-final-conclusion-status) | Interim findings and guided-walkthrough report available; short final conclusion remains to be completed after the classroom demo. |
+| 10 | Perform a demo in class | [Assignment acceptance](docs/SRS.md#7-future-acceptance-checks-and-traceability) | Not performed. |
+| 11 | Conclude; write a short account of results | [Results summary](#results-summary) | Written summary completed from existing implementation, experiments and the user-reported guided walkthrough; model limitations and human corrections are explicit. |
 
 The exact deadline, submission packaging and live-processing expectations remain
 unconfirmed. No specific report filename/template is prescribed by the handout.
@@ -364,23 +363,46 @@ D-41 makes the verified local large-v3-turbo checkpoint the default for new vide
 
 New MP4 uploads now use the existing local Qwen3 8B adapter after the full turbo transcript is saved. Output is an automatic paragraph plus 3–5 points in the detected recording language, owner-only with a transcript link and an error warning. Failed summaries retain the completed transcript. The same overall 600-second processing budget, course-membership/uploader authorization and at-most-seven-day text retention apply; summaries never outlive their source. Existing completed tasks remain unchanged. No external provider, model download or canned fallback is used. Current implementation, setup, measured checks and unresolved Hebrew grounding errors are in [local-summaries.md](docs/local-summaries.md). Historical extraction/transcription-only jobs retain their original outcomes; this pipeline applies to new uploads.
 
-## Interim Results and Final Conclusion Status
+## Results Summary
 
-The implemented website has server-side authorization/lifecycle checks and
-user-reported browser checks, recorded separately in [testing](docs/testing.md).
-SHORT completed the real video-to-summary route and the user opened its summary
-and transcript. STATIC transcription is understandable with remaining errors;
-its uploaded summary failed language validation while the transcript stayed
-available. English poll generation has narrow real-model evidence and requires
-Lecturer review; Hebrew automatic generation is unavailable. Homework probes
-missed real errors and invented gaps. The experimental website review/publication
-workflow has user-reported evidence, but automatic comparison quality is not accepted.
-Gemini produced no substantive task-quality result. See the [tools report](docs/local-ai-feasibility.md#current-tools-and-evidence-index).
+The project produced a Django/Templates/Python teaching tool with course-scoped
+Lecturer/Student permissions and five integrated workflows. The current scope
+uses English automatic polls and experimental English homework feedback, with
+manual Hebrew poll workflows retained (D-57). The following concludes the work
+actually implemented and observed; it does not certify broad AI accuracy.
 
-A [guided walkthrough with pauses](docs/testing.md#user-reported-guided-rehearsal---2026-11-17) is now reported by the user for all five paths. It is neither
-an uninterrupted ten-minute run nor a class demonstration. Classroom demo (To Do
-10) and the short final results conclusion (To Do 11) remain outstanding; limited
-phone evidence does not establish all-screen/classroom-load acceptance.
+| Capability | Observed result | Evidence and limitation |
+|---|---|---|
+| Attendance | Rotating QR registered an identified Student and appeared in the Lecturer roster; XLSX snapshot export is implemented. | Server checks and user-reported Safari/iPhone registration, including login/expired-code/new-scan flow. QR can be forwarded and is not certain physical-presence proof. |
+| Comments/suggestions | Meeting-bound messages persist with Student-own history and Lecturer visibility. Online/offline means during/outside class using the connected site. | Server checks cover privacy and outside-class persistence; the user reported comment submission and Lecturer receipt. No disconnected send queue is claimed. |
+| Polls | Local Qwen creates English drafts; Lecturer editing/publication, final voting, closure and aggregates work. | User-reported phone checks confirmed hidden comprehension answer/explanation/results before close and visibility after reload on close. Structural checks do not replace Lecturer meaning review; automatic Hebrew is unavailable. |
+| Video | Local turbo transcription followed by Qwen summary and full-transcript viewing worked for SHORT. | Measured preparation: 33.400 s total processing, 4.650 s transcription, 9.536 s summary, not a rehearsal duration. Hebrew STATIC retains word/negation errors; one uploaded summary failed language validation while its transcript remained available. Analysis is speech-only. |
+| Homework | Version-bound requests, frozen sources/rubric, private editable drafts and separate Lecturer publication work. | The user reported Alex seeing feedback on the matching version. The generated no-difference conclusion was manually changed to distinguish conditional update from locking with recheck. **This is workflow success and a human correction, not successful automatic comparison.** |
+
+Existing records contain 177 passing server tests, 26 focused checks after routine
+corrections and 12 JavaScript logic tests. These are separate from actual-model
+experiments and user-reported device observations; no new tests were run for this
+summary. The user-reported five-feature walkthrough was guided with pauses and
+provides no uninterrupted ten-minute measurement. [Detailed evidence](docs/testing.md#user-reported-guided-rehearsal---2026-11-17).
+
+The AI experiments demonstrate the limits of fluent, structured output: Qwen's
+per-criterion Alex feedback improved, but B still produced wrong conclusions even
+when 26/26 quotations matched source. The fixed professional rubric improved
+UNIQUE/cache findings while false atomicity criticism and comparison errors
+remained. Exact source matching catches invented/misattributed quotations but
+cannot establish that a quotation supports a conclusion. Lecturer semantic review
+and explicit publication therefore remain essential. Gemini trials were partial
+and established no substantive task-quality result. [Tools report](docs/local-ai-feasibility.md#current-tools-and-evidence-index).
+
+The result is a functioning, limited local teaching-tool implementation with
+human-controlled AI drafts, not an autonomous assessor. It uses one shared
+nonblocking compute lock; a busy operation may fail rather than wait behind
+another feature. The observed CUDA DLL loading failure was resolved through a
+process-local startup environment, without changing drivers or model settings.
+Retained limitations include Hebrew generation/accuracy, classroom-scale load,
+indirect identity disclosure requiring Lecturer review, intentional post-demo
+cleanup and real-student-data policy. These are disclosed boundaries, not newly
+completed capabilities. The original bilingual direction remains future work.
 
 ## UC-05 submission foundation - local browser check
 

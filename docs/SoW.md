@@ -227,12 +227,12 @@ resolved for comments only; D-54 closes the attendance interpretation-email wait
 
 Evidence and limitations: [tools report](local-ai-feasibility.md#current-tools-and-evidence-index),
 [current architecture](architecture.md), [class-aware strategy and results](testing.md#current-component-to-test-strategy).
-The current experimental English demo scope is implemented; remaining assignment
-completion includes the classroom demonstration and short final results account.
-A continuous timed rehearsal is a readiness check. Original bilingual targets
-remain future work under D-57, not a current-demo blocker. Known automatic
-comparison errors and manual corrections must be disclosed. No actual class
-demo or uninterrupted ten-minute result is claimed by the guided walkthrough.
+The current experimental English scope is implemented. The written
+[results summary](../README.md#results-summary) concludes existing implementation,
+experiments and the user-reported guided walkthrough; automatic-comparison errors
+and manual corrections remain explicit. Original bilingual targets remain future
+work under D-57. Requirement completion is reported in the numbered submission
+map, without substituting guided workflow evidence for another deliverable.
 
 
 ## Approved UC-05 planning baseline

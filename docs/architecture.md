@@ -44,6 +44,10 @@ selected. Models/runtimes/private data remain outside Git.
 
 ## Class and interface diagrams
 
+[Static SVG gallery and completed visual review](diagrams/README.md) accompany
+the seven editable Mermaid blocks below. Open the vector files at full size
+for dense class models and long sequences.
+
 These diagrams name real classes/interfaces and selected real operations. Boxes
 marked **module** describe function-based modules, not invented Python classes.
 Fields/operations are selected for responsibilities, not a complete ORM listing.
@@ -685,7 +689,7 @@ sequenceDiagram
     L->>R: publish(version, explicit mode)
     R->>R: recheck role, draft revision, quotes and privacy
     alt unmatched evidence
-        R-->>L: publication blocked; correct/remove and save
+        R-->>L: publication blocked, correct/remove and save
     else reviewed valid draft
         R->>DB: immutable version-bound publication
         S->>R: published_feedback(own version)
