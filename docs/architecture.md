@@ -397,6 +397,7 @@ classDiagram
         title
         instructions
         criteria
+        professional_rubric
         feedback_language
         created_at
     }
@@ -450,6 +451,8 @@ classDiagram
     }
     class LocalHomeworkReviewer {
         <<experimental English>>
+        available(language)
+        configure(job)
         assess_submission()
         compare_submissions()
     }
@@ -458,6 +461,21 @@ classDiagram
         process_review_job()
         validate_individual()
         validate_comparison()
+    }
+    class homework_evidence {
+        <<module>>
+        source_text(job, evidence)
+        collect_evidence(individual, comparison)
+        annotated_evidence(job, rows)
+        privacy_error(job, text)
+    }
+    class local_homework_runner {
+        <<module>>
+        main()
+    }
+    class ProcessTree {
+        attach(pid)
+        close()
     }
     class DisabledHomeworkReviewer {
         <<implemented>>
@@ -480,16 +498,23 @@ classDiagram
     homework_worker ..> HomeworkReviewer
     homework_worker ..> ReviewJob
     homework_worker ..> FeedbackDraft
+    homework_worker ..> homework_evidence
+    homework_review ..> homework_evidence
+    LocalHomeworkReviewer ..> local_homework_runner
+    LocalHomeworkReviewer ..> ProcessTree
 ```
 
 ### Planned homework submission to publication sequence
 
-D-53/D-55 implement these control-flow arrows. Successful provider responses below
-are injected fixtures in tests only, not evidence of real-model generation. In the
-normal site the availability gate stops before request creation; no queue is seeded. The English/Hebrew
-language gate is closed until real-output review accepts that language for this
-workflow. The diagram assumes that gate has passed; earlier failed probes do not
-open it. Failures cannot become public feedback by following the success branch.
+D-53/D-55 implement source/version and publication controls; D-56 enables the
+actual local English provider. Hebrew is unavailable; D-57 retains it as future
+work outside the current demo. The diagram shows implemented control flow, not
+semantic model acceptance. Original findings may be wrong even when quotes match;
+Lecturer edits/outcome correction and separate publication are essential. Fake
+providers remain test injection only. Failed stages cannot become public feedback
+by following a success branch; unmatched quotes remain private and block publication
+until corrected/removed. Shared nonblocking GPU access can report busy rather
+than enqueue behind a different feature.
 
 ```mermaid
 sequenceDiagram
@@ -522,11 +547,11 @@ sequenceDiagram
             Note over W,DB: System-controlled no-other-submissions notice
         else Eligible peers exist
             W->>AI: compare_submissions(actual frozen texts)
-            AI-->>W: Grounded differences, no supported difference, or failure
+            AI-->>W: Candidate comparison/outcome and evidence, or failure
             W->>DB: Save distinct comparison outcome and private evidence
         end
         L->>V: Read target, private draft and comparison state
-        L->>V: CSRF edit findings and anonymous comparison
+        L->>V: CSRF edit findings, anonymous comparison, outcome and evidence
         V->>DB: Recheck Lecturer role and draft version, retain original output
         alt Comparison failed with eligible peers
             V-->>L: Separate comparison failure, personal draft retained
@@ -542,7 +567,10 @@ sequenceDiagram
             V-->>S: Edited personal feedback and anonymous result or no-peer notice
         end
     end
-    opt Later comparison succeeds after personal feedback was published
+    opt Explicit later review request after earlier personal publication
+        L->>V: New review request for the recorded submission version
+        V->>DB: Freeze current peer/rubric sources in a new ReviewJob
+        W->>AI: Assess target and compare eligible peer snapshots again
         W->>DB: New private feedback revision with recorded comparison sources
         Note over S,DB: Previous published content remains unchanged
         L->>V: Review and explicitly publish new comparison revision
@@ -561,8 +589,10 @@ generation fails, no draft exists for publication. The failed-comparison notice
 is fixed by [UC-05](SRS.md#uc-05---submit-homework-review-a-draft-and-publish-feedback).
 A later comparison remains private until separate Lecturer review/publication;
 it is a new feedback revision, not a silent mutation of published content.
-Student-facing output never includes internal peer IDs, stable identifying labels,
-full peer works or private evidence. No grades, ranking, plagiarism judgment or
+The Student projection omits internal source fields and private evidence.
+Published narrative must omit peer identities and full peer works; known-identity/
+verbatim-passage checks are defensive only, and indirect identification still
+requires Lecturer review. No grades, ranking, plagiarism judgment or
 code execution. Similarity is not a finding of copying.
 
 Retain synthetic versions/feedback until the demo and submission checking finish,
@@ -582,19 +612,21 @@ Unit E added ASR. D-41/D-42/D-43/D-44 supersede those old disabled boundaries fo
 new uploads/English drafts. Historical records remain in testing and experiment
 reports and must not be read as current factories or full acceptance.
 
-The website is loopback development with DEBUG/SQLite, not a production/classroom
-deployment. Phone access, classroom load, HTTPS/hardening and the ten-minute demo
-remain unverified. Homework comparison/review has failed quality expectations in
-local feasibility work; only the assignment/submission foundation is implemented. The real-model review/comparison remains unavailable. The lifecycle arrows are
-software-tested with test-only providers, not accepted AI quality. Optional campus-network checks remain deferred and nonblocking.
+The website uses DEBUG/SQLite with loopback by default and an explicitly scoped
+temporary private-LAN process for phone/demo use, not production hosting. Limited
+Safari/iPhone flows and a guided five-feature walkthrough are user-reported;
+classroom networking/load and an uninterrupted ten-minute run are unverified.
+English homework processing/review/publication is implemented experimentally under
+D-56/D-57. Comparison errors required human correction and quality is not accepted.
+The historical injected-provider milestone is not current factory availability.
+Optional campus-network checks remain deferred and nonblocking.
 
 ## Implemented UC-05 submission foundation
 
 `homework_forms.py` validates nonblank input and an ordered line-per-criterion
 list; submission text uses strip=False. `homework_views.py` reuses the existing
 scoped/context guard. `homework_services.py` provides actual create_assignment,
-submit_version, assignment_for and submission_for functions; it is not the
-planned HomeworkReviewService class. Writes recheck role under transaction and
+submit_version, assignment_for and submission_for functions; it is a module of functions, not a HomeworkReviewService class. Writes recheck role under transaction and
 assign meeting/owner server-side. SQLite IMMEDIATE plus the unique version
 constraint serializes concurrent submissions. SubmissionVersion.save rejects
 existing-row edits; direct ORM bulk/SQL administration is outside that application

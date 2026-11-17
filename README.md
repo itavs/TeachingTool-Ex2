@@ -145,9 +145,9 @@ linked sections; detailed historical evidence is separate from current status.
 | 6 | Main software components | [Current components](docs/architecture.md#current-components) | Implemented responsibilities mapped, including the experimental English homework adapter and review controls. |
 | 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence), [homework design](docs/architecture.md#planned-uc-05-components) | Current video/poll paths covered; homework assignment/version classes are implemented; review/comparison is experimentally integrated in English; quality remains limited. |
 | 8 | Testing strategy addressing the classes in item 7 | [Component-to-test strategy](docs/testing.md#current-component-to-test-strategy) | Software checks mapped separately from real-model evidence and open acceptance. |
-| 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Foundation/participation/polls/video implemented; homework submissions and experimental English AI feedback/comparison implemented; reliability and full acceptance remain open. |
-| 10 | Perform a demo in class | [Classroom/demo acceptance](docs/SRS.md#7-future-acceptance-checks-and-traceability) | Not recorded as performed; phone, network, load and ten-minute rehearsal outstanding. |
-| 11 | Conclude; write a short account of results | [Interim results](#interim-results-and-final-conclusion-status) | Interim findings available; final conclusion awaits remaining work and actual class demo. |
+| 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Five paths have a [user-reported guided walkthrough](docs/testing.md#user-reported-guided-rehearsal---2026-11-17); experimental English homework comparison required human correction. Reliability/full acceptance remain open. |
+| 10 | Perform a demo in class | [Classroom/demo acceptance](docs/SRS.md#7-future-acceptance-checks-and-traceability) | Classroom demo not performed. Guided walkthrough with pauses and limited phone checks are recorded; no uninterrupted ten-minute run or classroom-network result. |
+| 11 | Conclude; write a short account of results | [Interim results](#interim-results-and-final-conclusion-status) | Interim findings and guided-walkthrough report available; short final conclusion remains to be completed after the classroom demo. |
 
 The exact deadline, submission packaging and live-processing expectations remain
 unconfirmed. No specific report filename/template is prescribed by the handout.
@@ -190,9 +190,12 @@ drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
 generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
-unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
-D-51) with an implemented assignment/submission foundation; real AI feedback/comparison is unavailable; its mechanical request/draft/publication workflow is implemented but has test-only provider evidence. Functional operation does not establish reliable AI accuracy,
-phone usability, classroom capacity or a completed in-class demonstration.
+unchanged. D-53/D-55 implement versioned homework submissions and Lecturer
+review/publication controls; D-56 enables experimental local English feedback
+and comparison with a professional rubric. D-57 retains automatic Hebrew as a
+future target. The [guided walkthrough](docs/testing.md#user-reported-guided-rehearsal---2026-11-17) is user-reported and included manual comparison correction; it is not
+reliable automatic comparison, all-screen phone acceptance, a timed ten-minute
+run or a completed class demonstration.
 
 Detailed component/test evidence: [architecture](docs/architecture.md),
 [testing strategy](docs/testing.md#current-component-to-test-strategy),
@@ -370,12 +373,14 @@ and transcript. STATIC transcription is understandable with remaining errors;
 its uploaded summary failed language validation while the transcript stayed
 available. English poll generation has narrow real-model evidence and requires
 Lecturer review; Hebrew automatic generation is unavailable. Homework probes
-missed real errors and invented gaps, so no homework website acceptance is claimed.
+missed real errors and invented gaps. The experimental website review/publication
+workflow has user-reported evidence, but automatic comparison quality is not accepted.
 Gemini produced no substantive task-quality result. See the [tools report](docs/local-ai-feasibility.md#current-tools-and-evidence-index).
 
-No in-class presentation, full phone acceptance, classroom load result or final
-assignment conclusion is recorded. This is an interim results account for To Do
-11, to be completed with observed demo results, limitations and remaining gaps.
+A [guided walkthrough with pauses](docs/testing.md#user-reported-guided-rehearsal---2026-11-17) is now reported by the user for all five paths. It is neither
+an uninterrupted ten-minute run nor a class demonstration. Classroom demo (To Do
+10) and the short final results conclusion (To Do 11) remain outstanding; limited
+phone evidence does not establish all-screen/classroom-load acceptance.
 
 ## UC-05 submission foundation - local browser check
 

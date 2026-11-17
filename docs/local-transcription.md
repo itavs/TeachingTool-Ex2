@@ -33,7 +33,7 @@ Both originals were read locally, uploaded as two new jobs through the normal up
 
 Load timing covers model constructor; transcription includes language detection and segment iteration. Total also includes validation, decoding, interpreter/library startup, shutdown, cleanup and persistence. These are single observed runs, not repeatable cold/warm benchmarks. Both fit 4 minutes/200 MB and the shared 10-minute budget. WAV and pending-result files were absent after each run. No new RAM/VRAM peak measurement was collected; CUDA use follows explicit adapter configuration and successful real inference, not a CPU fallback.
 
-**Word/term accuracy remains unverified against a manually transcribed reference.** Initially requested listening-only windows were SHORT 00:05.000–00:40.000 and STATIC 00:30.000–01:10.000, with the latter's English-term coverage unverified. The user reported difficulty deciphering the source and approved continuing functional checks without references. No WER, verified correct/incorrect terms or quality pass is claimed. Full AS-04 still needs summary implementation and source-grounded quality review.
+**Word/term accuracy remains unverified against a manually transcribed reference.** Initially requested listening-only windows were SHORT 00:05.000–00:40.000 and STATIC 00:30.000–01:10.000, with the latter's English-term coverage unverified. The user reported difficulty deciphering the source and approved continuing functional checks without references. No WER, verified correct/incorrect terms or quality pass is claimed. That transcription-only milestone preceded the summary implementation under D-42/D-43; broad source-grounded AS-04 quality remains unaccepted.
 
 ## Run and manual check
 
@@ -76,3 +76,29 @@ The reading page is titled Automatic transcript, with the concise warning Some w
 ## Subsequent summary integration
 
 New uploads now continue to local automatic Qwen3 8B summarization after the transcript is saved. The transcript survives a summary failure; existing completed tasks remain unchanged. Statements above that summaries were disabled describe the earlier transcription-only stage. See [local-summaries.md](local-summaries.md) for current behavior and quality limitations.
+
+
+## Process-local CUDA startup
+
+The 2026-11-17 preparation found that os.add_dll_directory alone did not let
+CTranslate2 load the installed cublas64_12.dll. The same checkpoint/settings
+worked after the existing CUDA directory was added to the video worker's process
+PATH. This is an observed local startup requirement, not a driver/global PATH
+change or a new model. From the repository root, start one video worker only
+(after stopping any existing video coordinator):
+
+```powershell
+$previousVideoPath = $env:PATH
+try {
+    $env:PATH = (Join-Path $PWD '.ai-lab/ollama/lib/ollama/cuda_v12') + ';' + $previousVideoPath
+    .\.venv\Scripts\python.exe -B manage.py run_video_worker
+} finally {
+    $env:PATH = $previousVideoPath
+}
+```
+
+This reproduces the preparation's process environment without depending on an
+ignored local helper. Installed runtimes/checkpoints remain prerequisites, not
+files included in Git. Other local AI tasks share the nonblocking compute lock;
+finish one inference before starting another. The [guided walkthrough](testing.md#user-reported-guided-rehearsal---2026-11-17)
+is user-reported evidence, not a new quality or classroom acceptance claim.

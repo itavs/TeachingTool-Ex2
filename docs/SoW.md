@@ -212,9 +212,12 @@ drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
 generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
-unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
-D-51) with an implemented assignment/submission foundation; AI feedback/comparison is not a website feature. Functional operation does not establish reliable AI accuracy,
-phone usability, classroom capacity or a completed in-class demonstration.
+unchanged. Homework now includes experimental English individual feedback and
+comparison under D-56/D-57, with version-bound private drafts and Lecturer editing
+and separate publication. The [user-reported guided walkthrough](testing.md#user-reported-guided-rehearsal---2026-11-17) covers the five paths, with manual correction of the model comparison. It was
+guided with pauses, not a continuous timed or classroom demonstration. Functional
+operation does not establish reliable AI accuracy, general phone usability or
+classroom capacity.
 
 The original Unit C disabled-provider and Unit D extraction-only milestones are
 historical, not current capability descriptions. D-34 fixes 240 seconds and
@@ -224,11 +227,13 @@ resolved for comments only; D-54 closes the attendance interpretation-email wait
 
 Evidence and limitations: [tools report](local-ai-feasibility.md#current-tools-and-evidence-index),
 [current architecture](architecture.md), [class-aware strategy and results](testing.md#current-component-to-test-strategy).
-The full assignment still requires homework feedback/comparison implementation/integration if the unchanged
-five-capability target is retained, actual classroom/phone verification, an
-approximately ten-minute demonstration and a final results conclusion. No such
-class demonstration or final conclusion has been recorded. These are remaining
-deliverables, not permission to begin them.
+The current experimental English demo scope is implemented; remaining assignment
+completion includes the classroom demonstration and short final results account.
+A continuous timed rehearsal is a readiness check. Original bilingual targets
+remain future work under D-57, not a current-demo blocker. Known automatic
+comparison errors and manual corrections must be disclosed. No actual class
+demo or uninterrupted ten-minute result is claimed by the guided walkthrough.
+
 
 ## Approved UC-05 planning baseline
 

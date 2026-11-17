@@ -24,11 +24,13 @@ drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
 generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
-unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
-D-52). The assignment/submission foundation is implemented under D-53;
-real AI feedback/comparison remains unavailable; deterministic request/draft/publication
-mechanics are implemented with test-only provider evidence. Functional operation does not establish reliable AI accuracy,
-phone usability, classroom capacity or a completed in-class demonstration.
+unchanged. Homework source/version and review/publication mechanics are implemented
+under D-53/D-55, with experimental local English generation and a recorded rubric
+under D-56. D-57 retains automatic Hebrew as future work. The [user-reported guided
+walkthrough](testing.md#user-reported-guided-rehearsal---2026-11-17) exercised the five
+paths with pauses and manual comparison correction. This establishes neither
+reliable AI conclusions, all-screen phone usability, classroom capacity nor an
+uninterrupted ten-minute/classroom demonstration.
 
 The five-capability target is user-approved, not lecturer-confirmed. Full AC-01
 through AC-07 acceptance is not established; see [test evidence](testing.md).
@@ -66,20 +68,20 @@ The handout does not prescribe a programming language. Python for the server
 and AI processing is approved by the user (D-02); no conflicting language rule
 was found in the handout. This is not separate lecturer confirmation.
 D-23/D-26 select Django/Templates and SQLite for initial development.
-Local turbo/Qwen adapters serve video and English polls; homework engine selection, hosting and classroom readiness remain open. English project documents and Hebrew user-facing project
+Local turbo/Qwen adapters serve video and English polls; D-56 also enables experimental local English homework review/comparison. Hosting, classroom readiness and reliable model conclusions remain open. English project documents and Hebrew user-facing project
 discussion follow D-03. Video-summary language targets follow D-12: Hebrew
 and English, with output in the recording's spoken language and no translation.
 Hebrew lectures with English technical terms are included in planned checks;
 sustained language switching is outside the current commitment (D-15).
 Homework pasted-input targets are also Hebrew and English (D-20), without
-claiming tested support. Application-interface language remains open; D-50 fixes feedback language per assignment, with real-output language availability unaccepted. Poll output language is lecturer-selected Hebrew/English under D-31; tested fixtures do not establish real-model language quality.
+claiming tested support. Application-interface language remains open; D-50 fixes feedback language per assignment, with English generation enabled experimentally under D-56 and Hebrew unavailable. D-57 makes automatic Hebrew a future target, not a current-demo blocker. Poll output language is lecturer-selected Hebrew/English under D-31; tested fixtures do not establish real-model language quality.
 
 ## 3. Actors and System Boundary
 
 | Actor | Intended responsibilities | Unresolved boundary |
 |-------|---------------------------|---------------------|
 | Student | Participate in attendance, send meeting comments/suggestions, respond to polls, and request/view review of their own homework. | Visibility follows D-10/D-18/D-21; initial identity/access follows D-24; feature-specific checks, resources and operational parameters remain open. |
-| Lecturer | Obtain attendance, view all meeting requests, create polls, request video summaries, and request review of any assignment submission while viewing all submissions/feedback. | Course/membership data is prepared under D-25; current website features enforce course access; homework review operations remain open; approved visibility/request rights are not reopened. |
+| Lecturer | Obtain attendance, view all meeting requests, create polls, request video summaries, and request review of any assignment submission while viewing all submissions/feedback. | Course/membership data is prepared under D-25; current website features enforce course access; experimental English homework review operations are implemented under D-56; conclusion quality remains open and approved visibility/request rights are not reopened. |
 
 AI processing supports application behavior; it is not an additional user role.
 No integration with Moodle, Zoom, or the university personal-information
@@ -265,12 +267,12 @@ new text. Source/rubric changes and stale edits must be detected before publicat
 
 The **assignment/submission foundation is implemented** (D-53): meeting-linked
 assignment creation, instructions/criteria, exact-text versions and authorized
-reading. Request/draft/publication control flow below is now implemented under D-55 with
-test-only provider evidence. Real AI production and quality remain unavailable. Hebrew and English remain quality-test
-targets: a language becomes available only after actual output for this workflow
-has been reviewed successfully. Existing failed trials do not enable either.
-Length/workload and processing bounds require measurement, not a cap inferred
-from three demo works. No grades, plagiarism determinations or code execution.
+reading. D-55 introduced deterministic request/draft/publication controls; D-56
+now enables the actual local English provider experimentally. D-57 retains
+Hebrew as a future target, not a current-demo blocker. Source/processing bounds
+are implemented and documented in [the operating envelope](local-homework-review.md#operating-envelope-and-failure-semantics).
+Functional workflow evidence does not establish correctness of model conclusions.
+No grades, plagiarism determinations or code execution.
 Only synthetic works are approved for the demo. Keep versions/feedback through
 the demo and submission checking, then provide intentional cleanup; do not reuse
 the video's seven-day policy. Real student-work policy is separate.
@@ -438,7 +440,7 @@ See [operating envelope and evidence rules](local-homework-review.md).
 2. A Student pastes a synthetic work and submits it as a new immutable version.
    This is implemented: show save confirmation, numbered history and Submitted
    status, not a pending/generated review claim. Steps 3-7 now have software workflow
-coverage under D-55, but normal generation is gated off; step 8 cleanup remains planned.
+coverage under D-55/D-56 and experimental English generation is enabled; step 8 intentional cleanup remains planned.
 3. The owner requests review, or the course Lecturer requests review for that
    version. Check current membership/role and target ownership. Atomically save
    target/version, instructions/criteria/language and latest-other-owner peer
@@ -501,7 +503,7 @@ questions; peer selection/revisions/language placement/demo retention are decide
 |----|-------------------|---------------------------------|-----------------|
 | NFR-01 | Assignment requirement: AS-07 | Provide a simple smartphone web application suitable for student participation. | Supported devices/browsers, interface language, and observable usability criteria; Q-06. |
 | NFR-02 | Assignment requirement: AS-06 | Work in the actual class rather than only as a disconnected mockup. | Class size, concurrent activity, connectivity, deployment/access, and acceptable response times; Q-06. |
-| NFR-03 | Assignment guidance AS-08; approved D-02 | Keep design implementable, consider reuse, and use Python as the main server/AI language. | Django/Templates and development SQLite follow D-23/D-26; Local video/English-poll adapters are selected; homework AI, production hosting and classroom suitability remain open. |
+| NFR-03 | Assignment guidance AS-08; approved D-02 | Keep design implementable, consider reuse, and use Python as the main server/AI language. | Django/Templates and development SQLite follow D-23/D-26; Local video/English-poll and experimental English homework adapters are selected; model quality, production hosting and classroom suitability remain open. |
 | NFR-04 | Approved attendance/poll controls D-05/D-09/D-11, separate comments stages D-17/D-18, and truthful no-peer behavior D-21 | Distinguish pending, successful, partial, and failed operations; avoid duplicate records or false success after errors. Attendance deduplication, final poll responses, and poll generation-error/retry behavior follow approved decisions. Creation/submission is not confirmed storage; individual homework feedback is not peer comparison. | Detailed persistence/recovery policies remain open. Attendance timing and additional-window behavior follow D-27/D-28; current local video/poll adapters have no automatic generation retry; broader recovery policies remain open. |
 | NFR-05 | Approved visibility D-10/D-18/D-21 and sample-only homework demo D-22; enforcement/lifecycle remain Q-07 | Preserve poll disclosure rules, student-own comments, lecturer-meeting comments, student-own homework feedback/comparison without peer identities/full works, and lecturer access to all assignment submissions/feedback. Disclose external data processing. | Initial identity/access follows D-24; consent, retention/deletion, production safeguards and permitted integrated AI processing remain open. No external service, paid use, or real-homework demo data is authorized by visibility approval. |
 | NFR-06 | Approved planning target D-01; assignment AS-09; open P-09 | Plan a roughly ten-minute demo with actual functioning capabilities; disclose sample inputs, earlier results, limitations, and failures. | Live-completion expectations, acceptable AI latency/quality, and any approved use of earlier outputs; Q-09. |
@@ -559,8 +561,9 @@ The register remains authoritative for open items. In particular, resolve:
    including Hebrew with English technical terms, same-language output without
    translation, and audio-only processing/disclosure are approved (D-12 through
    D-16). Sustained language switching is outside the commitment. D-34 through D-43 fix current limits, worker/privacy/retention and local video engines; disabled engines describe the historical infrastructure stage.
-5. Homework numeric/runtime limits, per-language quality readiness and
-   processing/retry controls (Q-05); D-52 resolves personal-only publication after
+5. Homework quality readiness, future Hebrew generation and larger-workload
+   acceptance (Q-05); D-56 implements initial numeric/runtime/processing controls,
+   with no automatic retries, while D-57 excludes automatic Hebrew from the current demo; D-52 resolves personal-only publication after
    comparison failure and explicit publication of a later comparison. Theoretical
    Hebrew/English pasted work, lecturer criteria, review/comparison behavior,
    visibility, no-peer handling, exclusions, and sample-only demo are approved
@@ -635,11 +638,13 @@ drafts; Hebrew editing/publication/voting remain supported, but Hebrew automatic
 generation is unavailable. New MP4 jobs validate/extract audio, transcribe with the
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
-unchanged. Homework review/comparison has an approved **planning baseline** (D-46 through
-D-52). The assignment/submission foundation is implemented under D-53;
-real AI feedback/comparison remains unavailable; deterministic request/draft/publication
-mechanics are implemented with test-only provider evidence. Functional operation does not establish reliable AI accuracy,
-phone usability, classroom capacity or a completed in-class demonstration.
+unchanged. Homework source/version and review/publication mechanics are implemented
+under D-53/D-55, with experimental local English generation and a recorded rubric
+under D-56. D-57 retains automatic Hebrew as future work. The [user-reported guided
+walkthrough](testing.md#user-reported-guided-rehearsal---2026-11-17) exercised the five
+paths with pauses and manual comparison correction. This establishes neither
+reliable AI conclusions, all-screen phone usability, classroom capacity nor an
+uninterrupted ten-minute/classroom demonstration.
 
 Unit A supplied the shared foundation; Unit B added attendance/comments; the
 initial Unit C used disabled generation plus labeled demo fixtures; Unit D
@@ -657,9 +662,9 @@ are separated in the [testing strategy](testing.md#current-component-to-test-str
 See [current components and diagrams](architecture.md) and the
 [tools report](local-ai-feasibility.md#current-tools-and-evidence-index).
 
-## UC-05 implemented submission slice
+## Historical UC-05 implemented submission slice
 
-The UC-05 submission foundation is implemented: Lecturers create meeting-linked
+At the D-53 foundation milestone, Lecturers could create meeting-linked
 assignments with instructions and one criterion per line; enrolled Students submit
 text as append-only numbered versions. Owners see their history; current course
 Lecturers can read all submitted versions. The status is **Submitted**, not reviewed
@@ -672,8 +677,9 @@ from changing scope. Direct URLs resolve course -> meeting -> assignment ->
 version; Students are filtered to their own versions and Lecturers require current
 course membership. Read-only version URLs reject POST. Invalid or failed saves
 never confirm success. Blank work/instructions/criteria are rejected; no numeric
-homework text/workload limit is introduced here beyond existing HTTP transport
-limits. Title metadata uses the existing site's 160-character convention.
+homework text/workload limit was introduced at that foundation milestone beyond
+HTTP transport limits; D-56 now bounds generation requests without changing the
+append-only submission contract. Title metadata uses the existing site's 160-character convention.
 
 Resubmission computes the next owner/assignment version under a short SQLite
 IMMEDIATE transaction; uniqueness prevents duplicate numbering. Submitted text

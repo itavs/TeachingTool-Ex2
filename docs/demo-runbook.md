@@ -2,8 +2,8 @@
 
 ## Status, scope and evidence boundaries
 
-This is a proposed rehearsal schedule, not a completed classroom demonstration
-or a measured ten-minute pass. Use the approved current scope in
+The schedule below remains a ten-minute target. The user subsequently reported
+a guided walkthrough with pauses; the [central manual record](testing.md#user-reported-guided-rehearsal---2026-11-17) contains the results. It was not an uninterrupted timed run or a classroom demonstration. Use the approved current scope in
 [D-57](decisions-and-assumptions.md#d-57---approved-current-demo-boundary): existing
 rotating QR, English automatic polls, manual Hebrew poll workflows, and experimental
 English homework feedback/comparison with Lecturer review/edit/separate publication.
@@ -149,3 +149,89 @@ review/edit/publish the already generated homework draft. Viewing/editing/voting
 does not require another model call. If an earlier model operation has not ended,
 use a labeled previous result for the next AI segment instead of competing for
 the lock. No model download/provider switch or new infrastructure is needed.
+
+
+## Preparation executed - 2026-11-17 (not a timed rehearsal)
+
+Historical state before the user-reported guided walkthrough; local IDs and
+draft/publication states below describe preparation, not an inferred current state.
+
+The server/workers were initially stopped. The agent started the existing
+loopback server and the previously approved exact-IP temporary LAN server at
+10.0.0.17:8000 (Private home network), plus one video coordinator and one homework
+coordinator. No wildcard, firewall change, driver change, model download,
+implementation change or limit change. Each coordinator has a launcher and a
+Python child; this is not two independent workers. Shared decoder access was
+free before work and at the final readiness check.
+
+Normal authenticated HTTP forms with CSRF and existing locally stored demo
+credentials were used, without printing passwords. All three demo accounts
+(lecturer_alpha, student_alex, student_casey) logged in. This is HTTP preparation
+and access verification, not browser automation, an iPhone retest or a classroom
+network check. Saved browser-tool denial was not bypassed to claim a UI test.
+
+### Local preparation inventory
+
+- Main meeting: **Timed rehearsal - 17 Nov 2026**, DEMO-CS101, local ID 8.
+  No attendance records/windows, comments or active poll were created there;
+  these remain live actions. Synthetic assignment 3 contains Alex Version 1 and
+  Casey Version 1 with different valid registration approaches. Live submission
+  can create Alex Version 2 without altering the originals.
+- Backup meeting: **Prepared AI backups - 17 Nov 2026**, local ID 9.
+- Fresh SHORT upload: **8735f327-767e-4984-9622-06e49843f2e4**, summary and full
+  transcript available to lecturer_alpha, detected English, 56.75 seconds of
+  source video, 14,645,300 uploaded bytes. Processing 33.400 seconds, transcription
+  4.650 seconds, summary 9.536 seconds. Temporary audio was deleted. Text expiry
+  remains the normal seven-day policy: 2026-11-24 at approximately 09:06
+  Asia/Jerusalem. Recheck on rehearsal day; do not extend it manually.
+- English comprehension backup: actual local AI draft **poll 9**, generated in
+  7.634 seconds from the runbook's stack/queue text. Question: 'Which data
+  structure removes items in the order they were added?' Options: A stack,
+  A queue, A list, A tree; designated answer A queue. The explanation refers to
+  the input. It is unpublished, requires Lecturer review and was not seeded or
+  presented as newly generated during rehearsal. Student access returned 404.
+- Homework backup: actual local AI private draft **review 5**, Alex Version 1,
+  generated in 33.172 seconds with the fixed rubric and Casey's frozen version.
+  Exact evidence check passed for the supplied quotes, but the model again said
+  no_difference despite conditional-update versus locked-recheck approaches.
+  Lecturer must correct comparison narrative/outcome before separate publication.
+  No publication was made during preparation; Student review access returned 403
+  and their own submission page showed no published feedback for that version.
+- Synthetic inputs are in versioned classroom/demo_homework.json. Convenient
+  copy/paste material and a manifest are local-only under
+  `.local/rehearsal-prep-20261117/inputs.md` and `manifest.json`. They contain no
+  passwords; no site submissions, media or raw transcripts were added to Git.
+
+### Preparation failure and process-only correction
+
+The first regular upload (df596f47-0bc7-4110-8581-66f3d527e298) failed with
+asr_failed and remains recorded as failed. An isolated same-model diagnostic
+identified RuntimeError: cublas64_12.dll could not be found/loaded, even though
+that DLL exists in the installed Ollama CUDA directory. The video worker was
+restarted with `.ai-lab/ollama/lib/ollama/cuda_v12` prepended to **that process's
+PATH only**; no permanent environment/driver/code changes occurred. A new normal
+multipart upload then completed transcription and summary; the failed task was
+not rewritten as success. Diagnostic temporary audio was removed.
+
+If restarting the video worker later, reproduce the same process-local DLL PATH.
+The [versioned process-local startup instructions](local-transcription.md#process-local-cuda-startup) reproduce this setup without a private helper. A local-only convenience helper is available at
+`.local/rehearsal-prep-20261117/start_video_worker.ps1`; do not start a second
+worker while the current one owns its coordinator lock. The model/checkpoint and
+options remain the existing tested turbo/Qwen configuration. This setup detail
+must be included in the rehearsal preflight after a terminal/reboot change.
+
+### Short link list (local database only)
+
+Use the same origin in Lecturer and Student sessions so QR links inherit it.
+
+- Main meeting: http://10.0.0.17:8000/courses/1/meetings/8/
+- Assignment and submit/new-version page: http://10.0.0.17:8000/courses/1/meetings/8/homework/3/
+- Prepared video result: http://10.0.0.17:8000/courses/1/meetings/9/videos/8735f327-767e-4984-9622-06e49843f2e4/
+- Prepared full transcript: http://10.0.0.17:8000/courses/1/meetings/9/videos/8735f327-767e-4984-9622-06e49843f2e4/transcript/
+- Prepared poll draft (Lecturer only): http://10.0.0.17:8000/courses/1/meetings/9/polls/9/
+- Prepared homework draft (Lecturer only): http://10.0.0.17:8000/courses/1/meetings/8/homework/reviews/5/
+
+The IDs and the LAN address describe this local preparation, not fresh-checkout
+fixtures or a guarantee the address will remain unchanged. Login credentials
+remain in their existing ignored file. Rehearsal actions/timings, human semantic
+review and classroom network operation have not been completed by this setup.

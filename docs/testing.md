@@ -31,8 +31,10 @@ prove that the quote supports the assessment.
 | Transcriber / LocalWhisperTranscriber / checkpoint helper | No fallback/download; valid metadata/text; one deadline; failure cleanup | [Transcription tests](../classroom/test_transcription.py): test_unavailable_turbo_fails_clearly_without_fallback, test_loaded_model_identity_is_retained_if_inference_fails, test_total_deadline_is_not_reset_at_transcription_start, test_adapter_protocol_keeps_text_off_stdout_and_forces_offline_environment, test_checkpoint_verification_rejects_missing_or_changed_files | Real medium/turbo on full SHORT/STATIC and new turbo uploads. No human-reference word accuracy; Hebrew code terms/negation remain uncertain. |
 | Summarizer / LocalQwenSummarizer / summary contract | Save transcript first; invalid language/model/format; failed summary preserves transcript | [Summary tests](../classroom/test_summaries.py): test_full_lifecycle_stores_transcript_first_then_summary_with_shared_expiry, test_summary_failure_keeps_saved_transcript_accessible, test_hebrew_summary_accepts_english_code_terms_without_rewriting, test_format_language_and_wrong_model_are_rejected | SHORT real upload success; STATIC saved-input success but uploaded summary_language failure. Structural tests cannot certify source grounding. |
 | video_jobs.owned_job/transcript_available/summary_available/purge_expired_transcripts | Owner/current role on direct URL; exact expiry; summary never outlives transcript | [Transcription tests](../classroom/test_transcription.py): test_demotion_revocation_and_mismatched_parent_block_saved_link, test_expiry_blocks_at_exact_deadline_even_before_cleanup; [summary tests](../classroom/test_summaries.py): test_expiry_hides_summary_on_direct_job_url_and_cleanup_clears_both | Actual owner pages opened; seven-day passage is tested with controlled time, not a seven-day live wait. Physical cleanup requires running maintenance. |
-| ProcessTree / exclusive_lock | Orphan compute and competing video/poll AI | [Summary tests](../classroom/test_summaries.py): test_windows_process_tree_close_terminates_owned_descendant; [video tests](../classroom/test_videos.py): test_single_worker_lock_and_fifo; generation adapter protocol test above | Owned-descendant test uses ordinary Python, not a real GPU hard-crash. Real sample services exited; classroom contention unmeasured. |
+| ProcessTree / exclusive_lock | Orphan compute and competing video/poll/homework AI | [Summary tests](../classroom/test_summaries.py): test_windows_process_tree_close_terminates_owned_descendant; [video tests](../classroom/test_videos.py): test_single_worker_lock_and_fifo; generation adapter protocol test above | Owned-descendant test uses ordinary Python, not a real GPU hard-crash. Real sample services exited; classroom contention unmeasured. |
 | transcript_display.reading_paragraphs / Templates / browser scripts | Reordering/rewriting, RTL-LTR, escaping, hidden-page polling and double reload | [Display tests](../classroom/test_transcription.py): test_pause_boundaries_preserve_words_and_isolate_new_car, test_unmatched_legacy_segments_do_not_replace_text; [JS video tests](../tests_js/videos.test.cjs), [poll tests](../tests_js/polls.test.cjs), [participation tests](../tests_js/participation.test.cjs) | User opened STATIC transcript and SHORT summary/link. Actual-phone layout and full keyboard/browser matrix remain open. |
+| HomeworkAssignment / ReviewJob / homework_review | Frozen rubric/target/latest-other-owner versions, roles, private drafts and immutable version-bound publication | [Workflow tests](../classroom/test_homework_review.py): test_lecturer_request_excludes_all_target_owner_versions_and_freezes_latest_peers; [local integration tests](../classroom/test_local_homework.py): test_rubric_edit_frozen_in_existing_job_and_course_authorized, test_lecturer_can_correct_false_no_difference_outcome_without_rewriting_raw_result | Real English and user-reported guided publication are recorded below; automatic comparison still made substantive errors. |
+| LocalHomeworkReviewer / homework_evidence / FeedbackDraft | Owned deadline cleanup, quote matched to correct source, unmatched evidence blocks publish, peer text privacy | [Local integration tests](../classroom/test_local_homework.py): test_provider_timeout_terminates_owned_tree_and_removes_private_ipc, test_peer_quote_checked_against_referenced_peer_not_target, test_privacy_guard_blocks_peer_passage_and_identity_even_after_lecturer_edit | No test guarantees semantic entailment or indirect anonymity. Real workflow success is separate from model content accuracy. |
 | Personal-review audit helper (experiment only, not website class) | Fabricated quote versus unsupported conclusion | [Quote-audit tests](../experiments/local_ai/test_personal_review_probe.py), now published with synthetic fixtures | [Personal probe](homework-personal-review-feasibility.md) reports 15/15 exact quotes, but technical false positives/negatives persist. No homework acceptance. |
 
 ### Evidence boundaries and outstanding acceptance
@@ -152,7 +154,7 @@ not browser interaction or a real model-quality result.
 |---|---|
 | AssignmentForm / DisabledHomeworkReviewer / request_review | English/Hebrew assignment language stored; unsupported choice rejected. Normal factory refuses both languages, including a fictitious settings flag; preflight explains unavailability and forged POST creates no ReviewJob. |
 | ReviewJob snapshot selection | Lecturer-triggered request excludes every target-owner version, includes only latest other-owner versions for the same assignment, and freezes sources/criteria against later submissions or rubric changes. Repeated active requests reuse the original job. |
-| homework_worker / validation | Correct source/criterion shape and exact quote validation; invalid individual output creates no draft. Invalid comparison evidence/failure retains successful personal draft with comparison failed. A real factory processing a queued fixture fails unavailable without fake fallback. Worker restart marks interrupted work failed, not indefinitely ready/successful. |
+| homework_worker / validation | Historical D-55 checks: invalid individual shape/quotes failed and the normal factory was disabled. D-56 supersedes availability and quote handling: source mismatches remain private/unverified and publication-blocking; invalid shape/source indexes fail the affected stage. Worker-restart behavior is retained. |
 | Draft edit / publish / public projection | Separate publication, stale edit/version rejection and immutable published snapshots; other Student/nonmember/wrong-course/direct parent routes denied; role revocation before processing/publication blocked. HTML escaped and private peer snapshots/model metadata absent from Student output. Login, POST-only and CSRF checks included. |
 | D-52 partial success and later comparison | Private draft before publication. Explicit individual_only action publishes personal content with the exact comparison-failed notice; complete publication in that state is rejected. No peers, failed comparison and completed no_difference remain distinct. Later comparison stays hidden until another explicit publication, preserving prior publication history. |
 
@@ -197,27 +199,28 @@ review is still an action. No independent lecture review is claimed.
 
 ## Planned UC-05 acceptance strategy
 
-**Full review acceptance is not executed.** D-46 through D-52 define the review
-planning baseline; D-53 foundation checks are executed separately above. This section does not modify the historical homework experiment records
-below. The assignment/submission subset is now implemented under D-53 (see the
-[executed foundation checks](#uc-05-submission-foundation)). Feedback request/draft/publication controls are now implemented under D-55 with
-test-only provider evidence; real-model generation/comparison quality remains open. Separate deterministic website acceptance from
-actual-model conclusion quality. Test fixtures can validate control flow, not
-claim real feedback generation or an accepted language.
+**Full model-quality acceptance is not established.** D-53/D-55 source/version
+and review/publication software controls are implemented. D-56 adds real local
+English generation plus rubric snapshots/evidence/outcome editing, with software,
+actual-model and [user-reported guided evidence](#user-reported-guided-rehearsal---2026-11-17)
+kept separate. D-57 keeps automatic Hebrew a future nonblocking demo target.
+The retained section anchor describes acceptance responsibilities, not a claim
+that these components are still unimplemented. Historical experiments below
+remain unchanged; exact quotes and successful publication do not certify meaning.
 
 ### Planned website correctness checks
 
 | Planned responsibility | Risk / acceptance check | Evidence status |
 |---|---|---|
-| HomeworkReviewService + existing Membership | Student requests only own work, course Lecturer may request a course submission. Reject forged owner/course/version, direct cross-user/cross-course HTML/JSON and revoked membership at request/save/publication/read. | Workflow controls tested under D-55 with test-only provider; no real-model acceptance. |
-| SubmissionVersion | Resubmission preserves exact earlier text and version; old published feedback stays associated with that version. Concurrent submissions cannot overwrite a version. | Source/version/concurrency checks implemented under D-53 in test_homework.py; feedback association remains planned. |
+| homework_review module + existing Membership | Student requests only own work, course Lecturer may request a course submission. Reject forged owner/course/version, direct cross-user/cross-course HTML/JSON and revoked membership at request/save/publication/read. | Workflow controls tested under D-55 with test-only provider; no real-model acceptance. |
+| SubmissionVersion | Resubmission preserves exact earlier text and version; old published feedback stays associated with that version. Concurrent submissions cannot overwrite a version. | Source/version/concurrency checks implemented under D-53 in test_homework.py; D-55/D-56 tests and user-reported publication checks verify version-specific feedback association. |
 | ReviewJob source selection | Save latest version per other owner in the same assignment at request creation; exclude all target-owner versions, not merely requester versions. **Lecturer initiates review of A, where A has multiple versions: none of A's versions may appear as a peer.** Include latest B/C only, exclude foreign assignments, and preserve the chosen snapshots after later resubmission. | D-55 snapshot and Lecturer-request tests passed. |
-| ReviewJob provenance | Save actual target/peer IDs, instructions, criteria, assignment revision/language, actual model identity and failure stage. Editing source/rubric/language does not rewrite prior request inputs. | D-55 frozen-source tests passed. |
+| ReviewJob provenance | Save actual target/peer IDs, instructions, criteria, assignment revision/language, rubric text, actual model identity and failure stage. Editing source/rubric/language does not rewrite prior request inputs. | D-55 frozen-source tests passed. |
 | FeedbackDraft + review service | Student cannot discover draft text/evidence via list/detail/JSON. Lecturer can review/edit; only separate CSRF Publish exposes version-bound public content. Original generated text is distinguishable from edits. Stale or concurrent edit/publication and changed-source-as-current attempts are rejected or explicitly flagged, never silently relabeled. | D-55 draft privacy/stale version/publication tests passed; classroom concurrency remains unmeasured. |
 | Student output projection | Only own published feedback; no peer identities, IDs, stable labels, full works or private comparison quotes/evidence. Lecturer can inspect permitted sources. Test accidental provider identity fields and escaping. | D-55 direct-access/rendering tests passed; semantic text privacy still needs Lecturer review. |
 | Comparison state | Empty eligible set produces system-controlled no-other-submissions notice and permits personal publication. Nonempty set plus failure retains personal draft with a separate comparison-failed state, never no peers or no difference. Completed no-supported-difference is distinct from completed differences. D-52 permits personal-only publication only after successful personal generation, Lecturer review and explicit selection; keep comparison failed. Personal generation failure has no draft/publication. | D-55 test-only partial/no-peer/no-difference/publication cases passed; policy resolved by D-52. |
-| Language gate | Assignment stores selected language; unsupported/unaccepted language fails before inference. A generation language can be enabled only with recorded reviewed real output for this workflow. Existing failed Hebrew/English probes do not enable either language. | D-55 language/preflight gate tests passed; no real language is accepted. |
-| Worker / HomeworkReviewer / validator | Unavailable/invalid/timeout/interrupt/busy reports a real failure without prepared fallback or automatic publication. Verify shared-compute integration without changing video processing. Numeric control bounds/retries require a later measured decision. | D-55 injected-provider/disabled-factory/restart tests passed, not real model quality. |
+| Language gate | Assignment stores selected language; unsupported/unaccepted language fails before inference. A generation language can be enabled only with recorded reviewed real output for this workflow. D-56 enables English experimentally after later real-output review; D-57 keeps automatic Hebrew unavailable and outside this demo. | Existing preflight tests and real English route are recorded separately; neither establishes general feedback quality. |
+| Worker / HomeworkReviewer / validator | Unavailable/invalid/timeout/interrupt/busy reports a real failure without prepared fallback or automatic publication. Verify shared-compute integration without changing video processing. D-56 sets initial source/peer limits and a 180-second deadline, with no automatic retries. | test_local_homework.py covers source matching, snapshot privacy and owned timeout cleanup; normal English inference is recorded separately, not model-quality acceptance. |
 | Explicit synthetic-data cleanup | Keep versions/feedback through demo and submission checking. Then an intentional authorized cleanup removes linked demo content consistently without deleting unrelated course data. No inherited seven-day expiry or automatic deletion; real-work policy remains separate. | Planned lifecycle tests, no cleanup executed. |
 
 ### Planned partial-publication regression (D-52)
@@ -1136,3 +1139,74 @@ a missing model, VRAM exhaustion or a confirmed provider-specific cause.
 [Updated rehearsal plan](demo-runbook.md) serializes model stages and avoids
 repeated requests while busy. No new AI call or software test was run for this
 documentation closure.
+
+
+## Rehearsal preparation - 2026-11-17
+
+Actual preparation, not timed rehearsal/classroom evidence: existing servers and
+single video/homework workers started; shared decoder lock checked free. Existing
+demo credentials used for real HTTP login, CSRF form meeting/assignment creation,
+synthetic submissions and regular multipart SHORT-EXPLAIN upload. No browser
+check or new phone pass is claimed. First upload failed asr_failed; local
+same-model diagnostic identified cublas64_12.dll loading failure. Restarting only
+the video worker with the existing CUDA directory in process-local PATH enabled
+a fresh upload to complete: 33.400 seconds processing, 4.650 transcription,
+9.536 summary, English, turbo + Qwen. No driver, system PATH, code, checkpoint or
+processing-limit changes. The failed first task remains a failure. Lecturer HTTP
+summary/full-transcript pages returned 200, Student requests returned 403,
+transcript/summary availability and ordinary expiry were checked; temporary WAV
+was absent. These are access/pipeline results, not word-level/summary-quality
+acceptance or a classroom result.
+
+A real English AI comprehension draft (7.634 s) and a real private homework draft
+(33.172 s) were prepared sequentially after video completion. They remain
+unpublished. Student poll access returned 404 and Student own feedback page
+exposed no unpublished draft. The homework comparison falsely reports no
+supported difference despite different valid approaches; exact quotes do not
+validate that conclusion. Lecturer review/correction remains mandatory. Main
+meeting has no attendance/comment/active-poll prefilled success. Model decoder
+lock was free and no review remained queued/running after preparation.
+
+[Preparation inventory, links, setup detail and limits](demo-runbook.md#preparation-executed---2026-11-17-not-a-timed-rehearsal).
+No full software suite, timed rehearsal, AI research round, browser workaround,
+new capability, commit or push was performed in this preparation stage.
+
+
+## User-reported guided rehearsal - 2026-11-17
+
+**Source:** the user's manual report, not checks performed or observed by the
+agent. This was a guided walkthrough with pauses, **not** an uninterrupted
+ten-minute run and **not** an in-class demonstration. No total/segment times
+were supplied. Preparation measurements above must not be used as rehearsal times.
+
+| Capability / step | User-reported observation | What this establishes and does not establish |
+|---|---|---|
+| Versioned submission / request | A new version was submitted and feedback requested. | Reported use of the version-bound request flow; no new automatic correctness or timing claim. |
+| Attendance and comments | Attendance was registered using QR; a comment was sent and appeared to the Lecturer. | Reported functional paths, not physical-presence proof or new expiry/concurrency/permission coverage. |
+| Comprehension poll | A comprehension question was generated, a vote was cast from the phone, and results were shown after closure. | Reported generation/voting/results path; the earlier Safari disclosure check remains separate evidence. No new device/browser details or general poll-content accuracy are inferred. |
+| Lecturer-reviewed feedback | The draft was edited and published; Alex saw feedback on the relevant submission version. The comparison was manually corrected from no_difference to the distinction between conditional update and locking with recheck. | Reported review/edit/separate-publication/version association. **The comparison correction was human work, not successful automatic comparison.** It does not establish general feedback quality. |
+| Video | The video uploaded during the walkthrough completed processing; its summary and full transcript were opened. | Reported upload-to-text viewing path; not word-level transcription verification, summary-accuracy acceptance or proof of ten-minute completion. |
+
+The five approved demo paths now have a user-reported guided walkthrough record.
+Experimental English scope, mandatory Lecturer review and known comparison errors
+remain unchanged. Classroom demonstration and a short final results account are
+still outstanding. A continuous timed rehearsal remains a readiness check, not a
+new handout deliverable. No additional implementation, software/browser testing,
+AI experiment, commit or push was performed by the agent while documenting this
+report. [Runbook and preparation history](demo-runbook.md).
+
+
+## Final documentation review - 2026-11-17
+
+Current SRS, tools index, source/use-case status, homework class/sequence diagrams
+and component-test responsibility names were aligned with the existing code.
+Disabled-provider milestones are historical; D-56 English integration and D-57
+demo scope are current. The class/member names and sequence controls were checked
+against source; no application change or AI run was made. A new visual Mermaid
+render was not performed: no existing project/bundled Mermaid renderer was found,
+and no renderer/browser-test infrastructure was installed. Do not treat source
+review as a new visual-render or browser pass. Guided-walkthrough evidence remains
+a user report, not uninterrupted ten-minute/classroom evidence. Known comparison
+errors, local-only artifacts and the incomplete intentional cleanup/real-data
+policy remain explicit. Submission deadline/packaging (Q-08) and classroom live-
+processing expectations/acceptable quality (Q-09) are not invented by this review.
