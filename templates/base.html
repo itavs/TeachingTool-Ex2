@@ -2,17 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
   <title>{% block title %}Teaching Tool{% endblock %}</title>
   <script src="{% static 'js/theme.js' %}"></script>
-  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}?v=20261118-brand-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="header-inner">
-      <a class="brand" href="{% url 'course-list' %}"><span class="brand-icon" aria-hidden="true">T</span> Teaching Tool</a>
+      <a class="brand" href="{% url 'course-list' %}">
+        <span class="brand-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 5.5q4.5-2 9 0 4.5-2 9 0v14q-4.5-2-9 0-4.5-2-9 0Z"/><path d="M12 5.5v14M6 9h3M6 12h3M15 9h3M15 12h3"/></svg></span>
+        <span class="brand-name">Teaching <span class="brand-name-accent">Tool</span></span>
+      </a>
       <div class="header-controls">
       <div class="theme-control">
         <label for="theme-preference">Appearance</label>

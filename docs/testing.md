@@ -1423,3 +1423,90 @@ rerunning the software/AI suites. Validation relies on the recorded 69 relevant
 tests after form fixes, the preceding full 177-test audit, 17 JavaScript tests and
 authenticated HTTP checks. Visual browser/mobile verification remains limited
 by the saved browser permission; no new visual or AI success is claimed.
+
+## iPhone login heading and safe-area correction - 2026-11-18
+
+The user reported joined words in the login heading and possible overlap between
+the header branding and the iPhone status area. The heading had `start<br>to`
+without a space, and the narrow-screen CSS hid that break. It is now plain text,
+`A clear start to every class.`, with natural wrapping; the obsolete break-hiding
+rule was removed. No font, palette or business-flow change was made.
+
+The header is in normal flow, not fixed/absolute. The viewport now uses
+`viewport-fit=cover`; the header reserves `safe-area-inset-top`, and page sides/
+bottom plus the focused skip link respect their safe-area insets. Insets fall
+back to zero, so no constant desktop top spacer was added. This addresses the
+CSS safe-area boundary; the reported Safari overlap has not been visually
+reproduced or confirmed resolved by the agent.
+
+**24 foundation tests passed** (8.581 seconds), including login/access checks.
+HTTP checks confirmed the exact heading, no forced heading break and the updated
+viewport. The existing LAN server needed a restart to discard its cached old
+templates; network/firewall settings and workers were unchanged. Browser access
+remains blocked. User verification is pending in iPhone Safari, portrait and
+landscape, after refreshing the login page; check branding against the status
+area and heading wrapping in Light/Dark. No commit or push was performed.
+
+## My courses vertical card list - 2026-11-18
+
+The course list is now a single column at desktop and mobile widths. Desktop
+cards place a reusable local learning SVG on the left, title/description in the
+middle and the existing role plus Open course action on the right. At 640px and
+below these areas stack, with a full-width action. Styles are scoped to the
+course list; the existing theme tokens provide charcoal surfaces/white primary
+actions in Dark and the Light palette. No new data, progress indicators,
+permission rules or sorting were introduced. The view still orders current-user
+memberships by course code. Existing empty-state and missing-description text
+remain. Decorative art is hidden from assistive technology, and each Open action
+has a course-specific accessible name.
+
+**24 foundation tests passed** (8.293 seconds). Additional template checks used
+three synthetic courses, including a long title/description, mixed-language text,
+HTML-like content and an empty description; order, escaping, unique IDs, label
+targets, illustration markup and the no-course state passed. The generic SVG
+parsed as XML. These are markup/server checks, not visual rendering. Browser
+access remains blocked: desktop alignment, narrow-screen overflow, focus and
+Light/Dark presentation require user review. Previous login/safe-area changes
+were preserved. No AI request, commit or push was performed.
+
+### Desktop screenshot follow-up
+
+The user's screenshot showed two columns and oversized SVG art instead of the
+intended horizontal rows. Both servers returned the updated CSS on direct HTTP
+inspection, but its URL had no version marker and no Cache-Control response
+header. A stale browser stylesheet is consistent with the screenshot; the
+client cache could not be inspected directly. A version query was added to the
+stylesheet URL. The list no longer carries the legacy two-column `course-grid`
+class and explicitly defines a single-column grid. Illustration size is reduced
+to 128 by 80 pixels, with intrinsic SVG dimensions as a fallback, smaller artwork
+panels, and more compact card spacing/title sizing. Desktop row content still has
+three areas; the course list itself always has one column.
+
+**24 foundation tests passed** (8.459 seconds). Server/markup checks confirmed
+the new versioned asset URL, current stylesheet, removed legacy grid class and
+bounded SVG dimensions for both roles. Synthetic course/empty-state checks remain
+valid. Browser access is still blocked; the corrected desktop/mobile appearance
+awaits user review, and is not certified by these checks. No commit or push.
+
+### Header wordmark refinement
+
+The Teaching Tool link retains its text and destination, with a small decorative
+local open-book SVG replacing the letter T. Subtle word-weight/color differences
+use existing Light/Dark tokens. The SVG has explicit dimensions and is hidden
+from assistive technology; the brand target is at least 44px tall and retains
+keyboard focus styling. The stylesheet version was updated to refresh cached
+styles. Django system check and authenticated HTTP name/SVG/destination checks
+passed for both roles. Visual browser/phone confirmation remains pending because
+browser access is blocked. No external assets, new behavior, commit or push.
+
+### User-reported visual review and approval - 2026-11-18
+
+The user reported reviewing the current presentation, said that it looks very
+good, and approved saving the changes. This is user-reported visual acceptance
+of the presentation they viewed, not an agent-performed browser test. No explicit
+device/browser, viewport, additional page or Light/Dark coverage was supplied;
+do not infer those checks or a separate confirmation of the iPhone safe-area
+issue from this report. Earlier pending-review notes describe their respective
+stages. The header/login corrections, wordmark and course-card layout are now
+approved for a focused commit. Validation relies on the checks already recorded;
+no additional design, software test or AI experiment was performed for this save.
