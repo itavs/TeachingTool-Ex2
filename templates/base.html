@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <title>{% block title %}Teaching Tool{% endblock %}</title>
+  <script src="{% static 'js/theme.js' %}"></script>
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
 <body>
@@ -12,12 +13,22 @@
   <header class="site-header">
     <div class="header-inner">
       <a class="brand" href="{% url 'course-list' %}"><span class="brand-icon" aria-hidden="true">T</span> Teaching Tool</a>
+      <div class="header-controls">
+      <div class="theme-control">
+        <label for="theme-preference">Appearance</label>
+        <select id="theme-preference" name="theme-preference">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
       {% if user.is_authenticated %}
       <nav aria-label="Main navigation"><a href="{% url 'course-list' %}">My courses</a>
         <span class="account">{{ user.username }}</span>
         <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="button secondary compact" type="submit">Sign out</button></form>
       </nav>
       {% endif %}
+      </div>
     </div>
   </header>
   <main id="main" class="container">

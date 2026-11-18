@@ -1,11 +1,59 @@
 {% extends 'base.html' %}
 {% block title %}{{ meeting.title }} · Teaching Tool{% endblock %}
 {% block content %}
-<a class="back-link" href="{% url 'course-detail' course.pk %}">← {{ course.title }}</a>
-<div class="page-heading"><div><p class="eyebrow">{{ course.code }} · Meeting</p><h1>{{ meeting.title }}</h1><p class="lead">{{ course.title }}</p></div>{% if membership.role == 'lecturer' %}<a class="button secondary" href="{% url 'meeting-edit' course.pk meeting.pk %}">Edit meeting</a>{% endif %}</div>
-<section class="panel detail-panel"><h2>Meeting details</h2><dl><dt>Date and time</dt><dd><time datetime="{{ meeting.starts_at|date:'c' }}">{{ meeting.starts_at|date:'l, j F Y · H:i' }}</time><span class="muted timezone-label">Asia/Jerusalem</span></dd><dt>Your role in this course</dt><dd>{{ membership.get_role_display }}</dd></dl>{% if meeting.description %}<div class="description">{{ meeting.description|linebreaks }}</div>{% else %}<p class="muted">No additional details have been added.</p>{% endif %}</section>
-<section class="panel"><h2>Participation</h2>{% if attendance_record %}<p>Your attendance: {{ attendance_record.registration_label }} · {{ attendance_record.registered_at|date:'j F Y H:i:s' }} (Asia/Jerusalem)</p>{% endif %}<div class="actions">
-{% if membership.role == 'lecturer' %}<a class="button" href="{% url 'attendance' course.pk meeting.pk %}">Attendance and QR</a>{% else %}<p>Scan the current classroom QR to register attendance. If asked to sign in, return to the scan afterwards.</p>{% endif %}
-<a class="button secondary" href="{% url 'meeting-requests' course.pk meeting.pk %}">Comments and suggestions</a><a class="button secondary" href="{% url 'poll-list' course.pk meeting.pk %}">Polls</a>{% if membership.role == 'lecturer' %}<a class="button secondary" href="{% url 'video-list' course.pk meeting.pk %}">Video processing</a>{% endif %}</div></section>
-<section class="panel"><h2>Homework</h2><a class="button secondary" href="{% url 'homework-list' course.pk meeting.pk %}">Assignments and submissions</a></section>
+<nav class="meeting-breadcrumbs" aria-label="Breadcrumb">
+  <a href="{% url 'course-list' %}">My courses</a><span aria-hidden="true">/</span>
+  <a href="{% url 'course-detail' course.pk %}">{{ course.code }}</a><span aria-hidden="true">/</span>
+  <span aria-current="page">Meeting</span>
+</nav>
+<header class="page-heading meeting-heading">
+  <div><p class="eyebrow">{{ course.code }} · Meeting</p><h1>{{ meeting.title }}</h1><p class="lead">{{ course.title }}</p></div>
+  {% if membership.role == 'lecturer' %}<a class="button secondary" href="{% url 'meeting-edit' course.pk meeting.pk %}">Edit meeting</a>{% endif %}
+</header>
+<section class="meeting-tools" aria-labelledby="meeting-tools-title">
+  <div class="section-heading"><div><h2 id="meeting-tools-title">Learning activities</h2><p class="muted">Take part, share ideas and explore the lesson.</p></div></div>
+  {% if attendance_record %}<p class="notice">Your attendance: {{ attendance_record.registration_label }} · {{ attendance_record.registered_at|date:'j F Y H:i:s' }} (Asia/Jerusalem)</p>{% endif %}
+  <div class="meeting-tool-grid">
+    {% if membership.role == 'lecturer' %}
+    <a class="meeting-tool-card tool-attendance" href="{% url 'attendance' course.pk meeting.pk %}" aria-labelledby="tool-attendance-title">
+      <span class="activity-art tool-attendance">{% include "classroom/tool_icon.html" with name="attendance" %}</span><h3 id="tool-attendance-title">Attendance and QR</h3>
+      <p>Display the classroom QR and see who has registered.</p><span class="tool-action">Open attendance</span>
+    </a>
+    {% else %}
+    <div class="meeting-tool-card meeting-tool-guidance tool-attendance">
+      <span class="activity-art tool-attendance">{% include "classroom/tool_icon.html" with name="attendance" %}</span><h3>Attendance and QR</h3>
+      <p>Scan the classroom QR to register your attendance. Sign in if prompted.</p>
+    </div>
+    {% endif %}
+    <a class="meeting-tool-card tool-comments" href="{% url 'meeting-requests' course.pk meeting.pk %}" aria-labelledby="tool-comments-title">
+      <span class="activity-art tool-comments">{% include "classroom/tool_icon.html" with name="comments" %}</span><h3 id="tool-comments-title">Comments and suggestions</h3>
+      <p>{% if membership.role == 'lecturer' %}Read the ideas, comments and suggestions shared for this lesson.{% else %}Share a comment or suggestion and revisit your own messages.{% endif %}</p>
+      <span class="tool-action">Open comments</span>
+    </a>
+    <a class="meeting-tool-card tool-polls" href="{% url 'poll-list' course.pk meeting.pk %}" aria-labelledby="tool-polls-title">
+      <span class="activity-art tool-polls">{% include "classroom/tool_icon.html" with name="polls" %}</span><h3 id="tool-polls-title">Polls</h3>
+      <p>{% if membership.role == 'lecturer' %}Review a question, invite students to vote and explore the results.{% else %}Share your answer and explore the results after voting closes.{% endif %}</p>
+      <span class="tool-action">Open polls</span>
+    </a>
+    {% if membership.role == 'lecturer' %}
+    <a class="meeting-tool-card tool-video" href="{% url 'video-list' course.pk meeting.pk %}" aria-labelledby="tool-video-title">
+      <span class="activity-art tool-video">{% include "classroom/tool_icon.html" with name="video" %}</span><h3 id="tool-video-title">Video processing</h3>
+      <p>Upload a lecture recording to view its transcript and summary.</p><span class="tool-action">Open videos</span>
+    </a>
+    {% endif %}
+    <a class="meeting-tool-card tool-homework" href="{% url 'homework-list' course.pk meeting.pk %}" aria-labelledby="tool-homework-title">
+      <span class="activity-art tool-homework">{% include "classroom/tool_icon.html" with name="homework" %}</span><h3 id="tool-homework-title">Assignments and submissions</h3>
+      <p>{% if membership.role == 'lecturer' %}Read students' work, review feedback drafts and publish your edits.{% else %}Submit your work, revisit its versions and read published feedback.{% endif %}</p>
+      <span class="tool-action">Open homework</span>
+    </a>
+  </div>
+</section>
+<section class="panel meeting-details" aria-labelledby="meeting-details-title">
+  <h2 id="meeting-details-title">Meeting details</h2>
+  <dl class="meeting-meta">
+    <div><dt>Date and time</dt><dd><time datetime="{{ meeting.starts_at|date:'c' }}">{{ meeting.starts_at|date:'l, j F Y · H:i' }}</time><span class="muted timezone-label">Asia/Jerusalem</span></dd></div>
+    <div><dt>Your role in this course</dt><dd><span class="role-badge {{ membership.role }}">{{ membership.get_role_display }}</span></dd></div>
+  </dl>
+  {% if meeting.description %}<div class="description">{{ meeting.description|linebreaks }}</div>{% else %}<p class="muted meeting-no-description">No additional details have been added.</p>{% endif %}
+</section>
 {% endblock %}

@@ -112,7 +112,7 @@ def review_detail(request,meeting,membership,job_id):
     evidence_rows=annotated_evidence(job,draft.evidence) if draft else []
     return render(request,'classroom/homework_review.html',{**context(meeting,membership),'job':job,'draft':draft,'form':form,
         'evidence_forms':evidence_forms,'evidence_pairs':list(zip(evidence_forms,evidence_rows)),
-        'newer_version':newer,'failure_reason':failure_reason,'publish_form':FeedbackPublishForm(initial={'version':draft.version}) if draft else None})
+        'newer_version':newer,'failure_reason':failure_reason,'publish_form':FeedbackPublishForm(initial={'version':draft.version},auto_id='publish_%s') if draft else None})
 
 
 @scoped(Membership.Role.LECTURER,methods=('POST',))

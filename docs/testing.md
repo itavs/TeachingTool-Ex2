@@ -1231,3 +1231,195 @@ is complete for existing implementation, experiments and user-reported guided
 observations. It explicitly preserves the false automatic-comparison finding and
 manual Lecturer correction. No application tests, AI experiments, implementation
 changes, commit or push were performed in this documentation/rendering round.
+
+## Shared UI and meeting navigation review - 2026-11-17
+
+Stage 1 changes shared CSS typography, spacing, buttons, text fields, status
+badges and keyboard-focus styling. The meeting page groups the existing tools
+into responsive navigation cards, with breadcrumbs and clearer meeting metadata.
+Lecturers retain five tool links; students retain comments, polls and homework
+links plus QR registration guidance. Lecturer-only attendance management, video
+processing and meeting editing remain hidden from students. No view, permission,
+AI provider, URL, form submission or workflow logic changed. Feature-specific
+poll, video and feedback templates were not redesigned.
+
+Verification performed:
+
+- Django system check passed. The existing `classroom.tests`,
+  `classroom.test_homework`, `classroom.test_participation` and
+  `classroom.test_polls` suites passed: **91 tests**, 42.269 seconds.
+- Authenticated HTTP checks against the active server confirmed the updated
+  meeting template and stylesheet, five lecturer tool cards and three student
+  links, with no student edit/video links. All rendered `aria-labelledby`
+  references resolved. The existing web server processes were restarted at their
+  previous loopback/LAN addresses to clear cached templates; network settings,
+  firewall and workers were unchanged.
+- Calculated palette contrast ratios: body text/background 12.57:1, secondary
+  text/white 6.13:1, primary button text/background 6.27:1, field border/white
+  3.52:1 and focus outline/white 6.72:1. This is a color calculation, not a full
+  accessibility audit. Existing field labels are retained.
+- `git diff --check` passed for the UI files.
+
+The saved browser-access policy blocks automation of the local site. No browser
+workaround was attempted, so no before/after screenshots or visual browser pass
+were produced. CSS includes desktop, two-column and narrow single-column meeting
+layouts, but actual wrapping, keyboard focus and touch behavior still require
+manual review. Earlier iPhone reports do not verify this new styling. Review the
+meeting page as both roles at desktop width and about 390px wide; use Tab to check
+focus and confirm each tool link opens its existing destination. Refresh cached
+styles before comparing. UI changes remain uncommitted for user review.
+
+## Shared light/dark appearance and meeting cards - 2026-11-17
+
+This follow-up supersedes the stage-1 palette. Shared surfaces, text, links,
+buttons, inputs/selects/file controls, tables, notices, errors, status labels,
+selected poll choices and keyboard outlines use semantic CSS variables. Meeting
+cards have consistent decorative inline SVG icons and restrained feature accents.
+Their destinations and role conditions are unchanged. Poll, video and feedback
+templates retain their existing structure. QR images always have a white
+background and white border, including in dark mode.
+
+The labelled native Appearance selector offers System (default), Light and Dark.
+`static/js/theme.js` runs before the stylesheet, applies a saved preference from
+`localStorage`, tracks system appearance when System is selected, and synchronizes
+changes between tabs. Storage failures do not prevent in-page selection. CSS
+also follows the system without JavaScript; the manual selector requires it.
+This reduces initial light-theme flashing but is not a browser-verified guarantee.
+
+Checks performed in this round:
+
+- **111 existing Django tests passed** in 47.504 seconds: foundation, homework,
+  participation, polls and videos. Django system check passed.
+- **17 JavaScript tests passed**, including five new appearance tests covering
+  early system selection/OS changes, explicit selection and reload, blocked
+  storage, invalid stored values and cross-tab synchronization. These run in the
+  existing Node VM harness, not a real browser.
+- Authenticated HTTP checks passed for **16 page responses**: meeting, poll list
+  and detail, homework list and assignment for both roles, plus lecturer video
+  list/detail, attendance, feedback review and both roles' submission-version
+  pages. The selector and early script were present; meeting icon/link counts,
+  unique IDs and `aria-labelledby` targets were checked. The theme asset returned
+  HTTP 200. Existing web servers were restarted at the same addresses to clear
+  cached templates; no network/firewall/worker settings changed.
+- Palette calculations passed: tested text pairs were at least 4.94:1 in light
+  mode and 7.18:1 in dark mode; field borders against surfaces were 3.56:1 / 4.95:1.
+  Feature icon foreground/background pairs also passed 4.5:1. No undefined CSS
+  variable references were found. This is not a visual/accessibility audit.
+
+The saved local-site browser permission remains blocked; it was not bypassed.
+No new visual, screenshot, real-keyboard or phone pass is claimed. Existing phone
+evidence applies to the previous presentation. Manual review still required on
+desktop and phone: select Light/Dark, refresh and follow a link to confirm saved
+appearance; select System and change OS appearance; inspect meeting cards and
+navigation wrapping; Tab through the selector and links; inspect poll selection,
+tables, video/feedback text, form controls and QR white background in both modes.
+No AI request or business/permission change was made. Changes remain uncommitted
+for review.
+
+## Charcoal learning-activity presentation - 2026-11-17
+
+The current palette supersedes the green-brand appearance above: dark mode uses
+charcoal page/card surfaces, white primary actions with dark text, and transparent
+secondary actions with light text. Hover, keyboard focus and disabled states have
+distinct styling. Light mode remains available; Appearance behavior is unchanged.
+Green is retained for the shared informational notice treatment rather than the
+brand. Meeting activities now precede secondary metadata. Five decorative local
+SVG scenes use consistent strokes and sky/lilac/peach accents; they are hidden
+from assistive technology and do not represent real progress, scores or outcomes.
+Each existing role-appropriate destination retains a full-card link and a short
+description. Student QR guidance remains noninteractive; video management remains
+lecturer-only. The actual QR image retains its white background/border.
+
+Verification: **111 existing Django tests passed** (48.174 seconds), including the
+system check; **17 existing JavaScript tests passed**, including Appearance logic.
+Authenticated HTTP checks passed for the same 16 meeting/poll/video/homework and
+feedback page responses described above. Checks confirmed role-specific links,
+decorative SVG counts, accessible label targets and activities before metadata.
+All five rendered SVG variants parsed as XML. CSS variable references resolved.
+Calculated primary-button text contrast is 14.57:1 (dark) and 12.25:1 (light);
+hover is 11.23:1 / 17.03:1, and disabled text is 5.02:1 / 4.78:1. Tested text
+pairs meet 4.5:1 and field borders meet 3:1. An initially weaker light disabled
+color was corrected before the final calculation. Protected Gemini/PDF file hashes
+were unchanged. Diff whitespace checks passed.
+
+Browser automation remains blocked by the saved local-site permission. These
+checks do **not** establish visual quality, keyboard usability or phone layout.
+Manual review remains necessary in Light and Dark: inspect illustration sizing,
+full-card focus/hover, title hierarchy, metadata, white primary/outlined secondary
+buttons and wrapping at phone width. No browser workaround, screenshot, AI run,
+business/permission change, commit or push was performed in this round.
+
+## Meeting action-arrow encoding correction - 2026-11-17
+
+The meeting template contained actual mojibake in five arrow strings and four
+middle-dot separators. It still decoded as valid UTF-8: the corrupt characters
+had already been saved as text. Earlier UI-edit scripts used implicit text-file
+encoding; the local default is cp1255. Only the identified broken strings were
+corrected, with explicit UTF-8 reads/writes. No whole-project conversion or Hebrew
+content rewrite was performed. CSS had no generated `content` declaration causing
+the issue. Five text arrows were replaced by the shared local
+`templates/classroom/action_arrow.html` SVG, with `aria-hidden="true"`,
+`focusable="false"` and `stroke="currentColor"`. Link labels, destinations and
+keyboard focus rules remain unchanged. The arrow inherits the action text color
+in both themes, without a separate fixed-color background.
+
+All seven prior UI/doc/test files scanned decoded strictly as UTF-8; no remaining
+replacement characters or inspected mojibake signatures were found. The valid
+middle dot in the base footer was preserved. **24 foundation tests passed**
+(8.267 seconds). Authenticated HTTP responses declared UTF-8 and contained five
+SVG action arrows for the lecturer and three for the student, with no corrupt
+template strings and with accessible link-label references retained. Diff
+whitespace checks passed. Browser access remains blocked: currentColor/focus
+source checks are not a visual Light/Dark or real-keyboard verification. No
+commit or push was performed.
+
+Following user review, the decorative Open-link arrows were removed from all five
+activity cards, together with their unused SVG partial and CSS rule. Link text,
+full-card destinations and keyboard-focus styling remain intact. The encoding
+corrections above remain; the current design has no action arrow.
+
+## Site markup audit and three corrections - 2026-11-17
+
+The read-only site audit found stale disabled-provider wording on the poll index,
+missing help-text targets in assignment/submission/review forms, and duplicate
+`id_version` values in the lecturer's separate edit/publication forms. The poll
+index now describes local English draft generation and explicit lecturer review.
+Manually rendered help text has the IDs referenced by Django's `aria-describedby`.
+The publication form uses `auto_id='publish_%s'`, preserving its existing POST
+field names, version checks and publication behavior.
+
+Four new regressions in `classroom/test_ui_integrity.py` cover unbound/invalid
+forms, help/label references and unique IDs, the unchanged version publication
+payload and student visibility, and the corrected lecturer-only poll wording
+without invoking a model. **69 relevant tests passed** (2.356 seconds), including
+these four, homework submission/review, polls and generation-contract tests.
+The worker test runtime was isolated from the live worker lock. The preceding
+site-wide audit had passed 177 Django tests and 17 JavaScript tests; those counts
+are historical, not a new full-suite run after these corrections.
+
+After restarting only the existing web servers to refresh cached templates,
+the authenticated HTTP audit again visited 119 lecturer and 48 student pages:
+**zero findings** for the inspected ID/reference, label, CSRF, heading/landmark,
+encoding and visible-link checks. All linked static assets returned 200. Six
+lecturer-only direct URLs returned 403 to the student; anonymous meeting access
+redirected to login. Source UTF-8 and diff-whitespace checks passed. Protected
+Gemini/PDF hashes were unchanged. No real AI request was made.
+
+The saved browser permission remains blocked. These are server/markup checks,
+not a visual, screen-reader, keyboard or real-phone verification. The optional
+video-copy, side-by-side feedback layout and cross-page visual refinements from
+the audit remain suggestions. No commit or push was performed.
+
+## UI commit review - 2026-11-18
+
+The earlier "uncommitted" notes describe their respective review stages. The
+approved UI change set includes the final charcoal/light palettes, Appearance
+selection, local activity illustrations, corrected encoding and final arrow-free
+cards, poll wording, form accessibility fixes and their regression tests.
+Pre-commit source review also corrected three malformed shadow declarations
+(`var(...)` followed by hexadecimal suffixes) to use the existing `--shadow`
+token. Variable references and the corrected declarations were checked without
+rerunning the software/AI suites. Validation relies on the recorded 69 relevant
+tests after form fixes, the preceding full 177-test audit, 17 JavaScript tests and
+authenticated HTTP checks. Visual browser/mobile verification remains limited
+by the saved browser permission; no new visual or AI success is claimed.
