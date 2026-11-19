@@ -1,0 +1,146 @@
+{
+  "scope": "Synthetic demonstration-group acceptance; unedited model output, not a site submission export",
+  "source_alias": "alex",
+  "source_fixture": "inputs.json",
+  "expected_fixture_excluded_from_prompt": "expected.json",
+  "model": "qwen3:8b Q4_K_M",
+  "runtime": "Ollama 0.40.14",
+  "context_tokens": 8192,
+  "processing_wall_seconds": 47.57521,
+  "individual": {
+    "findings": [
+      {
+        "what_student_wrote": "I handle two different students competing for the final course seat. I put the seat-count change and the enrollment insert in one database transaction. I use a conditional update: UPDATE courses SET remaining = remaining - 1 WHERE course_id = ? AND remaining > 0. Only one affected row means that this request reserved a seat. Zero affected rows means no seat was reserved, so I reject the request. I then insert enrollment and commit the two changes together. If the insert or either operation fails, I roll back every change in this transaction, including the reserved seat. I do not use an explicit SELECT FOR UPDATE lock; the successful conditional write protects the shared capacity. Cached availability makes browsing faster but can be stale. Cached values never authorize enrollment: the database conditional update is the final authority.",
+        "quotes": [
+          "I put the seat-count change and the enrollment insert in one database transaction.",
+          "If the insert or either operation fails, I roll back every change in this transaction, including the reserved seat."
+        ],
+        "status": "correct",
+        "reasoning": "The student correctly describes using a single transaction to ensure atomicity and rollback, which aligns with the rubric's requirement for an all-or-nothing operation with explicit failure reversal.",
+        "suggested_correction": "",
+        "criterion_index": 0
+      },
+      {
+        "what_student_wrote": "I handle two different students competing for the final course seat. I put the seat-count change and the enrollment insert in one database transaction. I use a conditional update: UPDATE courses SET remaining = remaining - 1 WHERE course_id = ? AND remaining > 0. Only one affected row means that this request reserved a seat. Zero affected rows means no seat was reserved, so I reject the request. I then insert enrollment and commit the two changes together. If the insert or either operation fails, I roll back every change in this transaction, including the reserved seat. I do not use an explicit SELECT FOR UPDATE lock; the successful conditional write protects the shared capacity. Cached availability makes browsing faster but can be stale. Cached values never authorize enrollment: the database conditional update is the final authority.",
+        "quotes": [
+          "I handle two different students competing for the final course seat.",
+          "Cached values never authorize enrollment: the database conditional update is the final authority."
+        ],
+        "status": "correct",
+        "reasoning": "The student correctly distinguishes between duplicate enrollment and capacity concurrency by explicitly noting that cached values do not authorize enrollment and that the database conditional update is the final authority, which aligns with the rubric's requirement to differentiate between these two concepts.",
+        "suggested_correction": "",
+        "criterion_index": 1
+      },
+      {
+        "what_student_wrote": "I handle two different students competing for the final course seat. I put the seat-count change and the enrollment insert in one database transaction. I use a conditional update: UPDATE courses SET remaining = remaining - 1 WHERE course_id = ? AND remaining > 0. Only one affected row means that this request reserved a seat. Zero affected rows means no seat was reserved, so I reject the request. I then insert enrollment and commit the two changes together. If the insert or either operation fails, I roll back every change in this transaction, including the reserved seat. I do not use an explicit SELECT FOR UPDATE lock; the successful conditional write protects the shared capacity. Cached availability makes browsing faster but can be stale. Cached values never authorize enrollment: the database conditional update is the final authority.",
+        "quotes": [
+          "I use a conditional update: UPDATE courses SET remaining = remaining - 1 WHERE course_id = ? AND remaining > 0. Only one affected row means that this request reserved a seat. Zero affected than rows means no seat was reserved, so I reject the request.",
+          "If the insert or either operation fails, I roll back every change in this transaction, including the reserved seat."
+        ],
+        "status": "correct",
+        "reasoning": "The student correctly describes a conditional update that atomically checks and consumes shared capacity, and explains rollback on failure, which satisfies the criterion for concrete protection against overbooking.",
+        "suggested_correction": "",
+        "criterion_index": 2
+      },
+      {
+        "what_student_wrote": "Cached availability makes browsing faster but can be stale. Cached values never authorize enrollment: the database conditional update is the final authority.",
+        "quotes": [
+          "Cached availability makes browsing faster but can be stale.",
+          "Cached values never authorize enrollment: the database conditional update is the final authority."
+        ],
+        "status": "correct",
+        "reasoning": "The student correctly explains the trade-off between cache latency and staleness, and emphasizes that cached values do not authorize enrollment, which aligns with the rubric's requirement for a final database validation.",
+        "suggested_correction": "",
+        "criterion_index": 3
+      }
+    ]
+  },
+  "comparison": {
+    "outcome": "no_difference",
+    "text": "Both submissions correctly address transaction atomicity, duplicate prevention, and caching trade-offs. They both describe a conditional update to reserve a seat and use database validation as the final authority for enrollment decisions. Both emphasize that caching improves read performance but does not replace the need for authoritative database checks. The approaches are conceptually equivalent in their handling of concurrency and rollback mechanisms.",
+    "evidence": [
+      {
+        "source": "target",
+        "peer_index": 0,
+        "quote": "I use a conditional update: UPDATE courses SET remaining = remaining - 1 WHERE course_id = ? AND remaining > 0. Only one affected row means that this request reserved a seat."
+      },
+      {
+        "source": "peer",
+        "peer_index": 0,
+        "quote": "My capacity mechanism is the exclusive row lock followed by a fresh check, rather than a conditional UPDATE WHERE remaining > 0."
+      }
+    ]
+  },
+  "quote_audit": [
+    {
+      "stage": "individual",
+      "criterion_index": 0,
+      "quote": "I put the seat-count change and the enrollment insert in one database transaction.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 0,
+      "quote": "If the insert or either operation fails, I roll back every change in this transaction, including the reserved seat.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 1,
+      "quote": "I handle two different students competing for the final course seat.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 1,
+      "quote": "Cached values never authorize enrollment: the database conditional update is the final authority.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 2,
+      "quote": "I use a conditional update: UPDATE courses SET remaining = remaining - 1 WHERE course_id = ? AND remaining > 0. Only one affected row means that this request reserved a seat. Zero affected than rows means no seat was reserved, so I reject the request.",
+      "source": "target",
+      "exact_match": false
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 2,
+      "quote": "If the insert or either operation fails, I roll back every change in this transaction, including the reserved seat.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 3,
+      "quote": "Cached availability makes browsing faster but can be stale.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 3,
+      "quote": "Cached values never authorize enrollment: the database conditional update is the final authority.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "comparison",
+      "source": "target",
+      "peer_index": 0,
+      "quote": "I use a conditional update: UPDATE courses SET remaining = remaining - 1 WHERE course_id = ? AND remaining > 0. Only one affected row means that this request reserved a seat.",
+      "exact_match": true
+    },
+    {
+      "stage": "comparison",
+      "source": "peer",
+      "peer_index": 0,
+      "quote": "My capacity mechanism is the exclusive row lock followed by a fresh check, rather than a conditional UPDATE WHERE remaining > 0.",
+      "exact_match": true
+    }
+  ]
+}

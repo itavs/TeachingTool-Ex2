@@ -63,10 +63,10 @@
       "ordinal": 5,
       "name": "Homework class model",
       "source": "../architecture.md#planned-homework-class-diagram",
-      "source_block_sha256": "98cad54d4a46e690710a79aa293d47465c2597d834215966456365b4d8c12ee6",
+      "source_block_sha256": "446ca9ff89210c408fb702e0b9ebd954b8dd932ce1cc3380f9eb4e03917aa33d",
       "svg": "05-homework-classes.svg",
-      "svg_sha256": "ba434015a0c44d8eec00a94c4af8b12018fece12db5ba92a508e1144662fd95a",
-      "visual_review": "overview and detail reviewed; no observed clipped labels or overlapping message text; long diagrams require full-size viewing/zoom"
+      "svg_sha256": "d3ad37b4bf867a1f254c2dfa38504dde69c137f3220fe6d7fb0251a86c3d89e4",
+      "visual_review": "2026-11-18 selected-group extension rendered and inspected: ReviewBatch, coordinator, reservations and associations; full-size SVG recommended for dense labels"
     },
     {
       "ordinal": 6,

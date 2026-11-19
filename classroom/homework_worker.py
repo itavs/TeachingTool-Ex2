@@ -1,6 +1,8 @@
 """Version-bound experimental local processing; fake providers are test injection only."""
 from django.db import transaction
 from django.utils import timezone
+from datetime import timedelta
+from .homework_contract import PROCESS_SECONDS
 from .attendance import CourseAccessError
 from .models import ReviewJob, FeedbackDraft, Membership
 from .homework_review import check_requester
@@ -64,14 +66,59 @@ def access_valid(job):
     check_requester(job.submission,job.requester)
     if not Membership.objects.filter(user_id=job.submission.student_id,course_id=job.submission.assignment.meeting.course_id,role='student').exists():
         raise CourseAccessError(403)
+    if job.batch_id:
+        for source in job.batch.sources_snapshot:
+            if not Membership.objects.filter(user_id=source['student_id'], user__is_active=True,
+                    course_id=job.submission.assignment.meeting.course_id, role='student').exists():
+                raise CourseAccessError(403)
 
 
 def process_review_job(job_id, *, reviewer=None):
+    if ReviewJob.objects.filter(pk=job_id, batch__isnull=False).exists():
+        return process_batch_job(job_id, reviewer=reviewer)
+    return _process_review_job(job_id, reviewer=reviewer)
+
+
+def process_batch_job(job_id, *, reviewer=None):
+    from .homework_batches import expire_batch_jobs
+    from .process_lock import WorkerBusy
+    job = ReviewJob.objects.select_related('batch','submission__assignment__meeting','submission__student','requester').get(pk=job_id)
+    expire_batch_jobs(batch_id=job.batch_id)
+    job.refresh_from_db()
+    if job.status != 'queued':
+        return
+    try:
+        access_valid(job)
+        provider = reviewer if reviewer is not None else get_homework_reviewer()
+        if not provider.available(job.language) or not hasattr(provider, 'reserve_resource'):
+            ReviewJob.objects.filter(pk=job_id, status='queued').update(status='failed', error_code='provider_unavailable',
+                waiting_for_resource=False, finished_at=timezone.now())
+            return
+        # No model server/inference or DB writer lock is held while waiting.
+        with provider.reserve_resource():
+            return _process_review_job(job_id, reviewer=provider)
+    except WorkerBusy:
+        expire_batch_jobs(batch_id=job.batch_id)
+        ReviewJob.objects.filter(pk=job_id, status='queued').update(waiting_for_resource=True)
+        return 'waiting'
+    except Exception as error:
+        ReviewJob.objects.filter(pk=job_id, status='queued').update(status='failed',
+            error_code='access_changed' if isinstance(error, CourseAccessError) else 'provider_unavailable',
+            waiting_for_resource=False, finished_at=timezone.now())
+
+
+def _process_review_job(job_id, *, reviewer=None):
     with transaction.atomic():
-        job=ReviewJob.objects.select_for_update().select_related('submission__assignment__meeting','submission__student','requester').get(pk=job_id)
+        job=ReviewJob.objects.select_for_update().select_related('batch','submission__assignment__meeting','submission__student','requester').get(pk=job_id)
         if job.status != 'queued':
             return
-        job.status='running';job.started_at=timezone.now();job.save(update_fields=['status','started_at'])
+        if job.batch_id and timezone.now() >= job.batch.queue_expires_at:
+            job.status='failed';job.error_code='queue_timeout';job.finished_at=timezone.now()
+            job.waiting_for_resource=False
+            job.save(update_fields=['status','error_code','finished_at','waiting_for_resource'])
+            return
+        job.status='running';job.started_at=timezone.now();job.waiting_for_resource=False
+        job.save(update_fields=['status','started_at','waiting_for_resource'])
     stage='individual_failed'
     try:
         access_valid(job)
@@ -102,6 +149,8 @@ def process_review_job(job_id, *, reviewer=None):
         with transaction.atomic():
             # Refresh access before persisting any draft after processing.
             job=ReviewJob.objects.select_for_update().select_related('submission__assignment__meeting','submission__student','requester').get(pk=job_id)
+            if job.batch_id and (job.status != 'running' or timezone.now() >= job.started_at + timedelta(seconds=PROCESS_SECONDS)):
+                raise ValueError('Group processing deadline expired before saving a draft')
             access_valid(job)
             from .homework_evidence import collect_evidence
             FeedbackDraft.objects.create(job=job,individual_text=individual_text,comparison_text=comparison_text,
@@ -115,5 +164,11 @@ def process_review_job(job_id, *, reviewer=None):
         metadata = dict(getattr(locals().get('provider'),'metadata',{}))
         metadata['failure_type'] = type(error).__name__
         if isinstance(error,ValueError): metadata['validation_error'] = str(error)[:100]
-        ReviewJob.objects.filter(pk=job_id).update(status='failed',error_code=stage,
-            model_metadata=metadata,finished_at=timezone.now())
+        target = ReviewJob.objects.filter(pk=job_id)
+        if job.batch_id:
+            target = target.filter(status='running')
+            if timezone.now() >= job.started_at + timedelta(seconds=PROCESS_SECONDS):
+                stage = 'processing_timeout'
+            elif isinstance(error, CourseAccessError):
+                stage = 'access_changed'
+        target.update(status='failed',error_code=stage,model_metadata=metadata,finished_at=timezone.now())

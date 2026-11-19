@@ -1,7 +1,7 @@
 """Course-scoped sources, experimental review requests and Lecturer publication."""
 from django.contrib import messages
 from django.shortcuts import redirect, render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.forms import formset_factory
 from .attendance import CourseAccessError
 from .models import Membership
@@ -11,6 +11,10 @@ from . import homework_services as services
 from . import homework_review as reviews
 from .homework_evidence import annotated_evidence
 from .homework_forms import RubricForm
+from .homework_forms import DemoGroupForm
+from . import homework_batches as batches
+from .models import ReviewBatch
+from django.urls import reverse
 
 
 @scoped()
@@ -50,7 +54,8 @@ def assignment_detail(request, meeting, membership, assignment_id):
     if is_student:
         versions = versions.filter(student=request.user)
     return render(request, "classroom/homework_detail.html", {**context(meeting, membership),
-                  "assignment": assignment, "form": form, "versions": versions,'rubric_form':rubric_form})
+                  "assignment": assignment, "form": form, "versions": versions,'rubric_form':rubric_form,
+                  'review_batches':assignment.review_batches.all() if not is_student else []})
 
 
 @scoped()
@@ -108,6 +113,9 @@ def review_detail(request,meeting,membership,job_id):
     failure_reason={'provider_unavailable':'No accepted feedback provider is active for this language.',
                     'individual_failed':'Individual feedback could not be generated or validated within the experimental processing limits. No draft can be published. You may explicitly request another review.',
                     'comparison_failed':'The comparison could not be completed. Individual feedback is available for your review.',
+                    'queue_timeout':batches.ERRORS['queue_timeout'],
+                    'processing_timeout':batches.ERRORS['processing_timeout'],
+                    'access_changed':batches.ERRORS['access_changed'],
                     'interrupted':'The feedback request was interrupted. No new feedback was published.'}.get(job.error_code,'')
     evidence_rows=annotated_evidence(job,draft.evidence) if draft else []
     return render(request,'classroom/homework_review.html',{**context(meeting,membership),'job':job,'draft':draft,'form':form,
@@ -123,3 +131,52 @@ def review_publish(request,meeting,membership,job_id):
     except reviews.ReviewError as error:return render(request,'classroom/participation_error.html',{**context(meeting,membership),'error':str(error)},status=409)
     messages.success(request,'Feedback published for its recorded submission version.')
     return redirect('homework-review',course_id=meeting.course_id,meeting_id=meeting.pk,job_id=job_id)
+
+
+@scoped(Membership.Role.LECTURER, methods=('GET','POST'))
+def batch_create(request, meeting, membership, assignment_id):
+    assignment = services.assignment_for(meeting, assignment_id)
+    choices = [(source.student_id, f'{source.student.username} · Version {source.version_number}')
+               for source in batches.latest_sources(assignment).values()]
+    form = DemoGroupForm(request.POST if request.method=='POST' else None, choices=choices)
+    snapshot = token = None
+    status = 200
+    if request.method=='POST':
+        try:
+            if request.POST.get('action')=='confirm':
+                batch = batches.confirm_group(meeting, assignment.pk, request.user, request.POST.get('preview_token',''))
+                return redirect('homework-batch-detail', course_id=meeting.course_id, meeting_id=meeting.pk,
+                                assignment_id=assignment.pk, batch_id=batch.pk)
+            if form.is_valid():
+                snapshot, token = batches.prepare_preview(meeting, assignment.pk, request.user, form.cleaned_data['owners'])
+            else:
+                status = 400
+        except batches.BatchError as error:
+            status = error.status
+            if isinstance(error, batches.SourcesChanged):
+                form = DemoGroupForm({'owners':error.owner_ids}, choices=choices)
+            form.add_error(None, str(error))
+    return render(request, 'classroom/homework_batch_create.html', {**context(meeting,membership),
+        'assignment':assignment, 'form':form, 'snapshot':snapshot, 'preview_token':token}, status=status)
+
+
+def _batch(meeting, assignment_id, batch_id):
+    batch = ReviewBatch.objects.select_related('assignment').filter(pk=batch_id, assignment_id=assignment_id,
+                                                                  assignment__meeting=meeting).first()
+    if batch is None:
+        raise CourseAccessError(404)
+    return batch
+
+
+@scoped(Membership.Role.LECTURER)
+def batch_detail(request, meeting, membership, assignment_id, batch_id):
+    batch = _batch(meeting, assignment_id, batch_id)
+    state = batches.batch_state(batch)
+    return render(request, 'classroom/homework_batch_detail.html', {**context(meeting,membership),
+        'assignment':batch.assignment, 'batch':batch, 'state':state,
+        'state_url':reverse('homework-batch-state',args=[meeting.course_id,meeting.pk,assignment_id,batch_id])})
+
+
+@scoped(Membership.Role.LECTURER)
+def batch_state(request, meeting, membership, assignment_id, batch_id):
+    return JsonResponse(batches.batch_state(_batch(meeting, assignment_id, batch_id)))

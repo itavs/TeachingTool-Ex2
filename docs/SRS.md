@@ -282,7 +282,7 @@ the video's seven-day policy. Real student-work policy is separate.
 **Assignment requirement:** AS-05 includes comparison with other Students' work.
 **Approved design:** D-21 and D-47 through D-49. An isolated review is insufficient.
 
-At request creation select the latest submitted version of each **other owner**
+For a single-submission request, select the latest submitted version of each **other owner**
 in the same assignment. Exclude all versions of the target owner even when the
 requester is a Lecturer. Persist the exact selected IDs plus instructions/criteria
 snapshots; later resubmissions do not mutate this job's sources. Actual peer texts
@@ -298,9 +298,16 @@ source evidence needed to check the draft. Internal peer IDs are not Student out
 | Actual comparison, no supported difference | Explicitly say no supported difference was found in the processed snapshot. This is a substantive result requiring source review, not a fallback for errors or empty inputs. |
 | Actual comparison with supported differences | Describe concrete coverage/approach differences grounded in the selected works, with private evidence for Lecturer review and an anonymous Student-facing account. |
 
+D-58 additionally permits an explicitly selected 2–4-owner demonstration group.
+Its shared confirmation snapshot replaces the all-eligible-peer set only for
+those group jobs; all sources/limits and the selected-group scope are disclosed.
+
 The UI/publication gate must distinguish these outcomes. Similarity is not a
 plagiarism judgment. Comparison quality and privacy remain unverified; no new
-comparison experiment or implementation is claimed by this planning baseline.
+comparison experiment or implementation was claimed by that historical planning
+baseline. Current implementation and failed-quality real-model group evidence are
+recorded in [group acceptance](homework-group-acceptance.md); human-reviewed
+publication does not establish model accuracy.
 
 ## 5. Main Use Cases
 
@@ -423,6 +430,29 @@ direction from implementation or completed checks.
   Q-04/Q-09. Transcript editing/export and link import are not approved.
 
 ### UC-05 - Submit Homework, Review a Draft, and Publish Feedback
+
+**Selected demonstration-group extension (D-58):** A course Lecturer selects 2–4
+distinct owners from this assignment and previews their latest submitted versions
+and input limits. A signed preview binds the assignment/requester and expires in
+10 minutes. Confirmation rechecks versions, instructions, criteria, rubric and
+language; any change requires a fresh preview/confirmation. A short transaction
+creates the source/context snapshot and every private child job atomically.
+Each target is compared only with other selected owners, never its own versions.
+The selected-group scope is explicit to the Lecturer and in published feedback.
+The original individual route still uses all eligible peers and explains the
+group alternative on overflow. No limits are increased and no source is omitted.
+
+An idempotent confirmation token and the existing active-version constraint prevent
+duplicates/conflicting jobs. The worker processes jobs sequentially; shared-resource
+waiting occurs before inference, outside HTTP handlers and DB writer transactions.
+Group queue wait expires 15 minutes after confirmation and survives restart without
+extension. The existing 180-second processing budget starts after resource
+reservation. Interrupted running work fails without replay. Expiry/display/late-save
+guards prevent indefinite active states. The group page shows actual per-work
+waiting, processing, ready-private, partial comparison failure and failure states.
+One work's failure never cancels other results. There is no group publication:
+the existing separate edit/publication, privacy and comparison-failure rules apply.
+Software process acceptance is separate from experimental model quality.
 
 D-57 fixes the current demo at experimental English generation with Lecturer
 review/editing and separate publication; automatic Hebrew is a future test

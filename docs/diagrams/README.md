@@ -38,3 +38,12 @@ hashes, renderer versions and layout settings. PNG previews used for inspection
 are local-only; SVGs provide the portable review artifacts. Regenerate if a
 Mermaid source block changes. Structural/application test results and model
 quality evidence remain in [testing.md](../testing.md), separately from this review.
+
+### Selected-group extension - 2026-11-18
+
+Diagram 5 was regenerated with the existing offline renderer and visually
+inspected after adding ReviewBatch, the homework_batches coordinator, resource
+reservation and batch-job responsibility. Its source/SVG hashes are updated in
+the manifest. Other diagrams retain their existing scope; the individual review
+sequences still apply inside each group's per-feedback publication workflow.
+This is not an application browser pass or model-quality evidence.

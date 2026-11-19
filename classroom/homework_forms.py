@@ -62,3 +62,18 @@ class EvidenceEditForm(forms.Form):
 
 class RubricForm(forms.Form):
     professional_rubric = AssignmentForm.base_fields['professional_rubric']
+
+
+class DemoGroupForm(forms.Form):
+    owners = forms.MultipleChoiceField(label='Students in the demonstration group',
+        widget=forms.CheckboxSelectMultiple, help_text='Select 2–4 different students. The preview uses their latest submitted versions.')
+
+    def __init__(self, *args, choices, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['owners'].choices = choices
+
+    def clean_owners(self):
+        owners = self.cleaned_data['owners']
+        if not 2 <= len(owners) <= 4 or len(set(owners)) != len(owners):
+            raise forms.ValidationError('Select 2–4 different students.')
+        return [int(value) for value in owners]

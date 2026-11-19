@@ -19,12 +19,29 @@ technical prescriptions by the lecturer. Review the relevant lecture section; no
 claim of independent lecture review is made here.
 D-17 comments timing is resolved and is not part of that pending set.
 
+## Selected demonstration-group coordinator (D-58)
+
+`ReviewBatch` records one Lecturer confirmation, immutable selected sources/context,
+an idempotency key and queue expiry. `homework_batches.prepare_preview` signs source/
+context hashes; `confirm_group` rechecks them under the meeting write lock and
+atomically creates the batch plus its existing `ReviewJob` children. Group/status
+routes are lecturer-only. `homework_groups.js` makes visible-page status reads only.
+
+For group jobs, `LocalHomeworkReviewer.reserve_resource` holds the existing shared
+decoder lock in the parent across both stages. Owned homework runners receive
+`--resource-reserved` instead of reacquiring the same lock. Busy waiting performs
+no inference and holds no HTTP/DB writer transaction. Queue expiry is confirmation
++15 minutes; processing starts after reservation and keeps the 180-second budget.
+Restart fails interrupted work without replay and retains pending deadlines.
+Worker/status/display guards expire overdue work; late results cannot create drafts.
+The existing single-review, poll and video compute paths remain unchanged.
+
 ## Current components
 
 | Source component | Actual responsibility and boundary |
 |---|---|
 | `teachingtool/settings.py`, Django middleware/auth, `classroom/views.py` | Django 5.2.19 Templates/session/CSRF and meeting management; fresh course-membership authorization, SQLite development database. No public account/course administration. |
-| `models.py` | Course/Membership/Meeting, AttendanceWindow/AttendanceRecord/MeetingRequest, Poll/PollVote, VideoJob, HomeworkAssignment/SubmissionVersion and ReviewJob/FeedbackDraft persistence/constraints. |
+| `models.py` | Course/Membership/Meeting, AttendanceWindow/AttendanceRecord/MeetingRequest, Poll/PollVote, VideoJob, HomeworkAssignment/SubmissionVersion and ReviewBatch/ReviewJob/FeedbackDraft persistence/constraints. |
 | `attendance.py`, `participation_views.py`, `request_forms.py` | Rotating signed QR, POST registration/deduplication, XLSX snapshot, private comments/history and visible-page updates. |
 | `poll_views.py`, `poll_forms.py`, `poll_services.py` | Generation form, draft edit/version checks, publication, final vote, close and disclosure-safe payload. No inference inside a database write transaction. |
 | `poll_generation.py`, `local_poll_generator.py`, `poll_contract.py`, `local_poll_runner.py` | Replaceable PollGenerator contract, local Qwen3 8B English adapter, generated-output validation and isolated runtime. Fake providers are test-only; seed_demo_polls is a separate labeled local fixture command. |
@@ -34,6 +51,7 @@ D-17 comments timing is resolved and is not part of that pending set.
 | `local_summarizer.py`, `local_summary_runner.py`, `summary_contract.py` | Summarizer implementation, pinned Qwen3 8B/structured paragraph plus 3-5 points, language/identity checks; no semantic-accuracy guarantee. |
 | `homework_views.py`, `homework_review.py`, `homework_worker.py`, `homework_evidence.py` | Version-bound request/source snapshots, private narratives/evidence, exact quote verification, guarded editing/outcome correction and separate immutable publication. |
 | `local_homework_reviewer.py`, `local_homework_runner.py`, `homework_contract.py` | Pinned experimental English Qwen individual/comparison stages, rubric prompts, source limits, owned process deadline/cleanup and measured metadata. |
+| `homework_batches.py`, group routes and `homework_groups.js` | Signed preview, atomic selected-source groups, idempotency, expiry and lecturer-only status reads; no inference in HTTP handlers. |
 | `process_tree.py`, `process_lock.py` | Owned Windows process-tree lifetime and exclusive local compute access. Poll generation, video AI and homework AI do not overlap on the shared compute lock. |
 | `transcript_display.py`, Templates, `static/js` | Word-preserving paragraphs/RTL-LTR isolation, escaped server-rendered results, visible-page polling and form interactions. |
 
@@ -411,8 +429,31 @@ classDiagram
         text
         submitted_at
     }
+    class homework_batches {
+        <<module>>
+        prepare_preview()
+        confirm_group()
+        expire_batch_jobs()
+        batch_state()
+    }
+    class ReviewBatch {
+        <<implemented D58>>
+        assignment_id
+        requester_id
+        request_key
+        preview_digest
+        sources_snapshot
+        instructions_snapshot
+        criteria_snapshot
+        rubric_snapshot
+        language
+        created_at
+        queue_expires_at
+    }
     class ReviewJob {
         <<implemented>>
+        batch_id
+        waiting_for_resource
         submission_id
         requester_id
         target_text
@@ -455,6 +496,7 @@ classDiagram
     }
     class LocalHomeworkReviewer {
         <<experimental English>>
+        reserve_resource()
         available(language)
         configure(job)
         assess_submission()
@@ -463,6 +505,7 @@ classDiagram
     class homework_worker {
         <<module>>
         process_review_job()
+        process_batch_job()
         validate_individual()
         validate_comparison()
     }
@@ -489,6 +532,11 @@ classDiagram
     }
     Meeting "1" --> "0..*" HomeworkAssignment
     HomeworkAssignment "1" --> "0..*" SubmissionVersion
+    HomeworkAssignment "1" --> "0..*" ReviewBatch
+    ReviewBatch "0..1" --> "2..4" ReviewJob : selected group
+    homework_batches ..> ReviewBatch
+    homework_batches ..> ReviewJob
+    homework_batches ..> Membership
     User "1" --> "0..*" SubmissionVersion : owner
     SubmissionVersion "1" --> "0..*" ReviewJob : target
     ReviewJob ..> SubmissionVersion : frozen peer IDs
@@ -517,8 +565,9 @@ semantic model acceptance. Original findings may be wrong even when quotes match
 Lecturer edits/outcome correction and separate publication are essential. Fake
 providers remain test injection only. Failed stages cannot become public feedback
 by following a success branch; unmatched quotes remain private and block publication
-until corrected/removed. Shared nonblocking GPU access can report busy rather
-than enqueue behind a different feature.
+until corrected/removed. This sequence describes the single-version path, whose
+nonblocking GPU access may report busy. D-58 group coordination adds selected
+sources and bounded pre-inference waiting without changing per-feedback publication.
 
 ```mermaid
 sequenceDiagram
@@ -642,8 +691,10 @@ cover course, meeting and assignment; the version queryset filters Student owner
 Private pages use the shared never-cache guard. Templates escape text, preserve
 line breaks and use dir=auto. Four new Templates and a small CSS rule reuse the
 existing layout; actual-phone rendering remains unverified. Database migration
-0007_homework_submissions adds only the two foundation models. No feedback model,
-review request action, worker task, language setting or publication route exists.
+0007_homework_submissions added only the two foundation models at that historical
+milestone. Migrations 0008–0010 subsequently added the feedback workflow and local
+English integration. Migration 0011 adds ReviewBatch and resource-wait state; the
+old foundation milestone is not the current absence of feedback components.
 
 ## UC-05 feedback control flow
 

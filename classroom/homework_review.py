@@ -39,6 +39,8 @@ def request_review(submission, user):
         raise ReviewError(reason)
     if not Membership.objects.filter(course_id=meeting.course_id, user=submission.student, role='student').exists():
         raise ReviewError('The submission owner is no longer a Student in this course.')
+    from .homework_batches import expire_batch_jobs
+    expire_batch_jobs(submission_ids=[submission.pk])
     active = submission.review_jobs.filter(status__in=['queued','running']).first()
     if active:
         return active
@@ -52,7 +54,8 @@ def request_review(submission, user):
     error = capacity_error(assignment.instructions,assignment.criteria,assignment.professional_rubric,
                            submission.text,[p['text'] for p in peers])
     if error:
-        raise ReviewError(error)
+        raise ReviewError(error + ' Single-submission requests include all eligible other students in this assignment. '
+                          'A course lecturer can choose a smaller demonstration group from the assignment page.')
     return ReviewJob.objects.create(submission=submission, requester=user, instructions_snapshot=assignment.instructions,
         criteria_snapshot=assignment.criteria, rubric_snapshot=assignment.professional_rubric,
         target_text=submission.text, peer_snapshots=peers, language=assignment.feedback_language)
@@ -135,6 +138,7 @@ def published_feedback(submission):
     result = []
     for draft in FeedbackDraft.objects.filter(job__submission=submission, published_at__isnull=False).order_by('-published_at','-pk'):
         result.append({'individual':draft.published_individual, 'comparison':draft.published_comparison,
+            'scope_notice':'This feedback compares your submission with a selected demonstration group, not the whole class.' if draft.job.batch_id else '',
             'notice':{'no_peers':NO_PEERS,'failed':COMPARISON_FAILED,'no_difference':NO_DIFFERENCE}.get(draft.published_comparison_status,''),
             'comparison_status':draft.published_comparison_status, 'published_at':draft.published_at,
             'requested_at':draft.job.created_at})

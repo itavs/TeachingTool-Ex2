@@ -1,0 +1,45 @@
+{
+  "created_before_inference": "2026-11-18T09:32:28.408351+00:00",
+  "excluded_from_model_input": true,
+  "student_alex": {
+    "criterion_statuses": [
+      "correct",
+      "missing",
+      "correct",
+      "correct"
+    ],
+    "known_omission": "No duplicate-enrollment protection or distinction between same-student duplicates and shared-capacity concurrency is described. This is missing explanation, not an explicitly wrong guarantee.",
+    "explicit_coverage": [
+      "Both writes grouped in a transaction, commit together and rollback on either failure.",
+      "Conditional update checks positive capacity and affected-row success. No explicit SELECT FOR UPDATE lock is required for this valid approach.",
+      "Cache improves browsing, may be stale and cannot authorize final enrollment."
+    ]
+  },
+  "student_casey": {
+    "criterion_statuses": [
+      "correct",
+      "correct",
+      "correct",
+      "correct"
+    ],
+    "explicit_coverage": [
+      "Both writes grouped with rollback.",
+      "UNIQUE on student/course protects same-student duplicates only.",
+      "Exclusive shared-row lock, fresh capacity recheck, decrement/insert and commit.",
+      "Cache benefits/staleness, final authoritative locked DB check."
+    ]
+  },
+  "comparison_expected": [
+    "Alex uses conditional capacity update; Casey uses explicit row lock and recheck. Both are valid different approaches.",
+    "Only Casey explicitly covers duplicate enrollment; Alex omits it.",
+    "Atomic grouping/rollback and authoritative DB versus stale cache are shared coverage, not missing topics."
+  ],
+  "errors_to_watch": [
+    "False no_difference conclusion.",
+    "Demanding a row lock from Alex despite the valid conditional update.",
+    "Invented missing rollback/capacity check/cache policy.",
+    "Attributing UNIQUE or row-lock evidence to Alex.",
+    "Treating an omitted explanation as a proven implementation defect.",
+    "Exposing peer identities or full source passages in public narrative."
+  ]
+}

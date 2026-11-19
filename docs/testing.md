@@ -1510,3 +1510,89 @@ issue from this report. Earlier pending-review notes describe their respective
 stages. The header/login corrections, wordmark and course-card layout are now
 approved for a focused commit. Validation relies on the checks already recorded;
 no additional design, software test or AI experiment was performed for this save.
+
+## Selected demonstration-group workflow - 2026-11-18
+
+User-approved D-58 extends UC-05 only. The software now previews 2–4 latest-owner
+versions, confirms one frozen source/context snapshot, and atomically creates a
+ReviewBatch plus all private child ReviewJobs. The selected-group scope is explicit;
+it does not replace the individual route's all-eligible-peer rule. Each draft still
+requires separate Lecturer editing/publication. There is no group-wide publish.
+
+**206 server tests passed** in 55.941 seconds with file-backed SQLite and isolated
+test runtime, no skips. **20 JavaScript tests passed**, including three new group
+status-polling cases. Of the server suite, **25 new group tests** cover:
+
+| Component / responsibility | Risk and software evidence |
+|---|---|
+| homework_batches.prepare_preview / confirm_group | Changed version/instructions/criteria/rubric/language; expired or wrong-requester token; invalid group or input limits; active-version conflict; rollback after a simulated second-child insert failure. |
+| ReviewBatch / ReviewJob constraints | Duplicate and concurrent same-token confirmation; conflicting independent groups; one active review per version; all children or no group. |
+| Frozen selected sources | Latest version per selected owner only, no self-version comparisons or unselected owners; later resubmission/rubric change cannot alter frozen jobs. |
+| homework_worker.process_batch_job / LocalHomeworkReviewer.reserve_resource | Busy resource invokes no inference and starts no processing clock; bounded queue expiry; reservation before the 180-second clock; expiry recheck after reservation; interrupted restart without replay; access revocation; late result rejection. |
+| Resource handoff / local adapter | A real temporary OS lock spans both mocked child calls; group children receive the reservation flag; single-review calls do not, retaining their own child lock. No actual model or child inference process is started. |
+| Partial results and publication | Individual failure does not cancel another job; comparison failure retains only a private personal draft; explicit individual-only publication; other feedback stays unpublished; Students see only matching published content and the selected-group scope notice. |
+| Group routes/state API | Login/course/role/parent binding and CSRF; no raw work/rubric snapshots in status JSON. |
+| homework_groups.js | Safe text nodes, real counts, visible-page five-second reads, stopping after completion/access loss; no generation request. |
+
+Two initial test corrections were made transparently: the busy-label assertion
+selected a different job because default job order differs from table order; it
+now checks the matching job ID. A test-method placement error introduced while
+adding reservation coverage was corrected. Final counts above are the successful
+runs. Existing individual-feedback, poll, video and other website suites remained
+green; no real AI experiment or new comparison-quality measurement was performed.
+
+Queue deadlines are confirmation +15 minutes and survive restart. Pending expired
+jobs become failed on worker or authorized group/status reads; overdue display
+guards prevent indefinite waiting even when the worker stays stopped. Processing
+starts only after reservation and keeps the existing 180-second limit. Interrupted
+running work fails on restart, and stale running group work expires on status
+reads. No automatic inference retry occurs. Review/publication remains private and
+separate; known real-model false comparisons and human corrections still apply.
+
+Migration 0011 was applied to the local development DB after an ignored backup.
+No live group/review request was created and no AI worker was started by the
+implementation checks. The homework class diagram was updated and rendered with
+the existing offline renderer; this is document inspection, not website browser
+validation. Browser access remains blocked, so the new group UI awaits user review.
+Other proposals (manual polls, comment export, lecturer video insights and load
+testing) were not implemented. No commit or push was performed.
+
+### Real-model group follow-up — 2026-11-19
+
+After the user confirmed group 1, two sequential normal worker invocations
+produced private drafts for Alex Version 1 (47.575 seconds) and Casey Version 1
+(34.458 seconds). Authenticated HTTP checks verified frozen sources, ownership,
+private drafts and denied peer access. They did not perform visual browser
+acceptance or publication. Neither draft was edited/published by those checks. See the
+[full process/content assessment](homework-group-acceptance.md) for preserved
+preserved evidence, model configuration and the subsequent manual publication
+check. The earlier no-real-model statements describe the implementation milestone.
+
+Quality did not pass: both comparisons returned `no_difference`, missing the
+known conditional-update versus row-lock difference and Alex's duplicate-topic
+omission. Alex's personal feedback falsely credited that topic. Quote matching
+passed 21/22 overall and 6/6 comparison quotes, demonstrating that exact quotes
+can still accompany unsupported conclusions. Casey's individual findings matched
+the expected coverage in this sample. No additional software suite, inference
+retry or prompt revision was run for this follow-up.
+
+Final focused checks after status-count wording and state-helper expiry refinement:
+**55 homework/group/UI regression tests passed** in 2.561 seconds, no skips, plus
+all three group JavaScript tests. The earlier 206/20 suite result remains the
+broader regression record. Live authenticated HTTP GET checks opened the existing
+synthetic assignment and new selection form as the Lecturer at loopback and LAN
+addresses, verified unique IDs/label targets and denied Student access. DB counts
+confirmed no live ReviewBatch/ReviewJob was created. No worker or real AI request
+was started. The offline diagram source/SVG manifest hashes and local document
+file targets were checked; poll/video/attendance/style files and protected Gemini/
+PDF hashes remained unchanged. Visual website acceptance remains pending.
+
+### User-reported separate group publication — 2026-11-19
+
+The user reported manually verifying that Alex sees the corrected feedback and
+Casey remains an unpublished draft. This confirms the reported separate-
+publication workflow, not automatic comparison correctness. The supplied review
+corrections addressed missing duplicate-topic coverage, the actual approach
+difference and the malformed quote. Corrected publication is human-reviewed
+content; original model findings remain preserved separately. No additional
+browser/device scenarios or agent-performed visual check are inferred.

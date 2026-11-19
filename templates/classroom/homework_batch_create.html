@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Review demonstration group · {{ assignment.title }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'homework-detail' course.pk meeting.pk assignment.pk %}">Back to assignment</a>
+<h1>Review demonstration group</h1>
+<p class="notice">Experimental English AI drafts for a selected demonstration group, not the whole class. Synthetic work only. Every draft requires lecturer review and separate publication.</p>
+<section class="panel"><h2>Before you start</h2>
+<p>Select 2–4 different students. Each work is compared only with the other selected owners. No sources are silently shortened or omitted.</p>
+<p>Limits: 1–4 criteria (250 characters each); instructions 2,000 characters; rubric 4,000; each work 4,000; all selected works combined 8,000. English and a professional rubric are required.</p>
+<p>Queue limit: 15 minutes from confirmation, including resource/worker wait. Processing: 180 seconds per work after the shared AI resource is reserved. Work is processed sequentially. There are no automatic inference retries.</p>
+</section>
+{% if snapshot %}
+<section class="panel"><h2>Confirm the source versions</h2>
+<p>Confirmation freezes these versions, instructions, criteria, rubric and language. Later resubmissions do not change the group. If anything changes before confirmation, preview again.</p>
+<ul>{% for source in snapshot.sources %}<li>{{ source.username }} · Version {{ source.version }} · {{ source.text|length }} characters <a href="{% url 'homework-submission' course.pk meeting.pk assignment.pk source.id %}">Read submitted version</a></li>{% endfor %}</ul>
+<details><summary>Instructions, criteria and professional rubric to be recorded</summary><div class="submission-text" dir="auto">{{ snapshot.instructions }}</div><ol>{% for criterion in snapshot.criteria %}<li>{{ criterion }}</li>{% endfor %}</ol><div class="submission-text" dir="auto">{{ snapshot.rubric }}</div><p>Language: {{ snapshot.language }}</p></details>
+<form method="post">{% csrf_token %}<input type="hidden" name="action" value="confirm"><input type="hidden" name="preview_token" value="{{ preview_token }}"><button class="button" type="submit">Confirm and queue all drafts</button></form>
+</section>
+{% else %}
+<section class="panel"><h2>Select submitted work</h2><form method="post">{% csrf_token %}{{ form.as_p }}<input type="hidden" name="action" value="preview"><button class="button" type="submit">Preview group</button></form></section>
+{% endif %}
+{% endblock %}

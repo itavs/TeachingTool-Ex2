@@ -111,6 +111,15 @@ must not silently stand in for a required action. Demo input examples may be
 prepared and clearly labeled. Any use of previously computed results needs
 explicit disclosure and agreement on what must complete live (P-09).
 
+A Lecturer can also use **Review demonstration group** from an assignment to
+preview and confirm 2–4 latest-owner submissions. Sources/context freeze together;
+all child requests are created atomically. Comparisons use only the selected
+other owners and are labelled selected-group, not whole-class. The existing worker
+processes them sequentially, with a 15-minute queue limit and the existing
+180-second processing limit after resource reservation. Drafts remain private;
+each feedback is reviewed/edited/published separately. This establishes workflow,
+not reliable comparison quality. [Group operation and limits](docs/local-homework-review.md#selected-demonstration-groups-d-58).
+
 ## Confirmed Decisions and Remaining Technology Boundaries
 
 - Python remains the main server/AI language (D-02).
@@ -121,7 +130,7 @@ explicit disclosure and agreement on what must complete live (P-09).
   Roles belong to course memberships, not global account flags (D-24).
 - Lecturers create/edit meetings in their courses; students view only (D-25).
 - Local turbo transcription and Qwen3 8B summary/English poll adapters are integrated.
-  Homework engine selection, production database/hosting and classroom capacity remain open.
+  Production homework engine selection, database/hosting and classroom capacity remain open.
 - Documents are English. Current UI copy is English as a reversible implementation
   choice; the final interface language remains open (Q-06).
 

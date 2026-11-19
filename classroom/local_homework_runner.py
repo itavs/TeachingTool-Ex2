@@ -2,6 +2,7 @@
 import argparse,json,os,socket,subprocess,sys,threading,time
 from pathlib import Path
 import urllib.request
+from contextlib import nullcontext
 
 
 def emit(**value):print(json.dumps(value),flush=True)
@@ -12,6 +13,8 @@ def main():
     for key in ['input','output','ollama','models']:parser.add_argument('--'+key,required=True)
     parser.add_argument('--deadline',type=float,required=True)
     parser.add_argument('--parent-pid',type=int,required=True)
+    parser.add_argument('--resource-reserved', action='store_true',
+                        help='The parent group worker holds the decoder lock for both stages.')
     args=parser.parse_args();sys.path.insert(0,str(Path(__file__).resolve().parent.parent))
     import psutil
     from classroom.summary_contract import MODEL,verify_local_model
@@ -37,7 +40,7 @@ def main():
         identity=verify_local_model(args.models)
         data=json.loads(Path(args.input).read_text(encoding='utf-8'))
         lock=Path(__file__).resolve().parent.parent/'.local/videos/.decoder.lock'
-        with exclusive_lock(lock):
+        with (nullcontext() if args.resource_reserved else exclusive_lock(lock)):
             with socket.socket() as reservation:
                 reservation.bind(('127.0.0.1',0));port=reservation.getsockname()[1]
             host=f'127.0.0.1:{port}'

@@ -1,0 +1,170 @@
+{
+  "scope": "Synthetic demonstration-group acceptance; unedited model output, not a site submission export",
+  "source_alias": "casey",
+  "source_fixture": "inputs.json",
+  "expected_fixture_excluded_from_prompt": "expected.json",
+  "model": "qwen3:8b Q4_K_M",
+  "runtime": "Ollama 0.40.14",
+  "context_tokens": 8192,
+  "processing_wall_seconds": 34.457588,
+  "individual": {
+    "findings": [
+      {
+        "what_student_wrote": "I start a transaction and acquire an exclusive lock on the shared course-capacity row using SELECT FOR UPDATE. After acquiring that lock, I recheck remaining seats. If no seats remain, I reject enrollment and roll back. Otherwise I decrement the seat count and insert enrollment while holding the lock, then commit both writes together. If either write fails, I roll back all changes in that transaction.",
+        "quotes": [
+          "I start a transaction and acquire an exclusive lock on the shared course-capacity row using SELECT FOR UPDATE.",
+          "If either write fails, I roll back all changes in that transaction."
+        ],
+        "status": "correct",
+        "reasoning": "The student correctly describes a transaction that groups both the seat count update and enrollment write as an atomic unit, with rollback on failure, fulfilling the criterion for correct atomicity and rollback.",
+        "suggested_correction": "",
+        "criterion_index": 0
+      },
+      {
+        "what_student_wrote": "Separately, a UNIQUE constraint on (student_id, course_id) rejects repeated enrollment by the same student in the same course. Different students have different pairs, so this UNIQUE constraint does not protect the last shared seat; the row lock does.",
+        "quotes": [
+          "Separately, a UNIQUE constraint on (student_id, course_id) rejects repeated enrollment by the same student in the same course.",
+          "Different students have different pairs, so this UNIQUE constraint does not protect the last shared seat; the row lock does."
+        ],
+        "status": "correct",
+        "reasoning": "The student correctly distinguishes between duplicate enrollment (handled by the UNIQUE constraint) and capacity concurrency (handled by the row lock), explaining that the UNIQUE constraint does not prevent multiple students from taking the last seat.",
+        "suggested_correction": "",
+        "criterion_index": 1
+      },
+      {
+        "what_student_wrote": "I start a transaction and acquire an exclusive lock on the shared course-capacity row using SELECT FOR UPDATE. After acquiring that lock, I recheck remaining seats. If no seats remain, I reject enrollment and roll back. Otherwise I decrement the seat count and insert enrollment while holding the lock, then commit both writes together. If either write fails, I roll back all changes in that transaction. A second student waits for the lock and then reads the updated capacity; if the first student took the last seat, the second sees zero and is rejected. My capacity mechanism is the exclusive row lock followed by a fresh check, rather than a conditional UPDATE WHERE remaining > 0. Separately, a UNIQUE constraint on (student_id, course_id) rejects repeated enrollment by the same student in the same course. Different students have different pairs, so this UNIQUE constraint does not protect the last shared seat; the row lock does. Cached counts make browsing faster but may be stale. Final enrollment uses the fresh locked database check, never cached availability.",
+        "quotes": [
+          "I start a transaction and acquire an exclusive lock on the shared course-capacity row using SELECT FOR UPDATE.",
+          "If either write fails, I roll back all changes in that transaction."
+        ],
+        "status": "correct",
+        "reasoning": "The student correctly describes using an exclusive lock to protect shared capacity and ensures atomicity through rollback on failure, which satisfies the criterion for concrete protection against overbooking.",
+        "suggested_correction": "",
+        "criterion_index": 2
+      },
+      {
+        "what_student_wrote": "Cached counts make browsing faster but may be stale. Final enrollment uses the fresh locked database check, never cached availability.",
+        "quotes": [
+          "Cached counts make browsing faster but may be stale.",
+          "Final enrollment uses the fresh locked database check, never cached availability."
+        ],
+        "status": "correct",
+        "reasoning": "The student correctly explains the trade-off between cache latency and staleness by acknowledging that cached counts can be stale and that final enrollment decisions rely on a fresh database check.",
+        "suggested_correction": "",
+        "criterion_index": 3
+      }
+    ]
+  },
+  "comparison": {
+    "outcome": "no_difference",
+    "text": "Both submissions correctly address transaction atomicity, duplicate prevention, and the cache latency/staleness trade-off. They both describe using a transaction to group seat-count updates and enrollment inserts, with rollback on failure. Both distinguish between duplicate enrollment (via UNIQUE constraints) and capacity concurrency (via row locks or conditional updates). Neither submission introduces unsupported claims or omits required coverage. The approaches are conceptually equivalent in their handling of concurrency, rollback, and cache use.",
+    "evidence": [
+      {
+        "source": "target",
+        "peer_index": 0,
+        "quote": "I start a transaction and acquire an exclusive lock on the shared course-capacity row using SELECT FOR UPDATE."
+      },
+      {
+        "source": "peer",
+        "peer_index": 0,
+        "quote": "I put the seat-count change and the enrollment insert in one database transaction."
+      },
+      {
+        "source": "target",
+        "peer_index": 0,
+        "quote": "A second student waits for the lock and then reads the updated capacity; if the first student took the last seat, the second sees zero and is rejected."
+      },
+      {
+        "source": "peer",
+        "peer_index": 0,
+        "quote": "I use a conditional update: UPDATE courses SET remaining = remaining - 1 WHERE course_id = ? AND remaining > 0."
+      }
+    ]
+  },
+  "quote_audit": [
+    {
+      "stage": "individual",
+      "criterion_index": 0,
+      "quote": "I start a transaction and acquire an exclusive lock on the shared course-capacity row using SELECT FOR UPDATE.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 0,
+      "quote": "If either write fails, I roll back all changes in that transaction.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 1,
+      "quote": "Separately, a UNIQUE constraint on (student_id, course_id) rejects repeated enrollment by the same student in the same course.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 1,
+      "quote": "Different students have different pairs, so this UNIQUE constraint does not protect the last shared seat; the row lock does.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 2,
+      "quote": "I start a transaction and acquire an exclusive lock on the shared course-capacity row using SELECT FOR UPDATE.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 2,
+      "quote": "If either write fails, I roll back all changes in that transaction.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 3,
+      "quote": "Cached counts make browsing faster but may be stale.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "individual",
+      "criterion_index": 3,
+      "quote": "Final enrollment uses the fresh locked database check, never cached availability.",
+      "source": "target",
+      "exact_match": true
+    },
+    {
+      "stage": "comparison",
+      "source": "target",
+      "peer_index": 0,
+      "quote": "I start a transaction and acquire an exclusive lock on the shared course-capacity row using SELECT FOR UPDATE.",
+      "exact_match": true
+    },
+    {
+      "stage": "comparison",
+      "source": "peer",
+      "peer_index": 0,
+      "quote": "I put the seat-count change and the enrollment insert in one database transaction.",
+      "exact_match": true
+    },
+    {
+      "stage": "comparison",
+      "source": "target",
+      "peer_index": 0,
+      "quote": "A second student waits for the lock and then reads the updated capacity; if the first student took the last seat, the second sees zero and is rejected.",
+      "exact_match": true
+    },
+    {
+      "stage": "comparison",
+      "source": "peer",
+      "peer_index": 0,
+      "quote": "I use a conditional update: UPDATE courses SET remaining = remaining - 1 WHERE course_id = ? AND remaining > 0.",
+      "exact_match": true
+    }
+  ]
+}

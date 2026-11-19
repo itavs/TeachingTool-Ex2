@@ -306,3 +306,14 @@ post-demo cleanup remain open. [Operational limits and setup](local-homework-rev
 and [executed evidence](testing.md#experimental-local-homework-integration)
 separate site correctness from model mistakes. These are project choices under
 the approved scope, not new handout requirements.
+
+## Selected demonstration-group extension (D-58)
+
+The approved UC-05 extension adds Lecturer selection of 2–4 latest-owner versions,
+a revalidated preview/atomic frozen group, sequential existing-worker processing,
+bounded pre-inference resource waiting and per-work independent results. Existing
+model limits, English/synthetic scope, private draft editing and separate
+publication remain. Group success establishes software workflow, not comparison
+quality or whole-class analysis. [Operation and limits](local-homework-review.md#selected-demonstration-groups-d-58),
+[software evidence](testing.md#selected-demonstration-group-workflow---2026-11-18).
+No other proposed capability was added in this stage.

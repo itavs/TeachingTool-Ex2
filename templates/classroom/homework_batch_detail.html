@@ -1,0 +1,17 @@
+{% extends 'base.html' %}{% load static %}
+{% block title %}Demonstration group {{ batch.pk }} · {{ assignment.title }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'homework-detail' course.pk meeting.pk assignment.pk %}">Back to assignment</a>
+<h1>Demonstration group {{ batch.pk }}</h1>
+<p class="notice">Selected demonstration group only, not the whole class. These are experimental AI drafts, not verified conclusions. Edit and publish each feedback separately.</p>
+<p>Confirmed {{ batch.created_at|date:'j F Y H:i:s' }} · Queue deadline {{ batch.queue_expires_at|date:'j F Y H:i:s' }} (Asia/Jerusalem). Processing limit: 180 seconds per work, excluding queue wait.</p>
+<p id="group-progress" role="status">{{ state.finished }} / {{ state.total }} processed. {{ state.ready }} drafts produced, including {{ state.partial }} with failed comparison. {{ state.failed }} failed.</p>
+<p id="group-refresh" class="muted">Updates every 5 seconds while this page is visible. A worker is required; this page never starts generation.</p>
+<section class="panel"><h2>Frozen source versions and results</h2><div class="table-scroll"><table><thead><tr><th scope="col">Student / source</th><th scope="col">State</th><th scope="col">Comparison</th><th scope="col">Details</th></tr></thead><tbody>
+{% for row in state.rows %}<tr><td>{{ row.student }} · Version {{ row.version }}</td><td id="group-status-{{ row.id }}">{{ row.label }}</td><td id="group-comparison-{{ row.id }}">{{ row.comparison }}</td><td><p id="group-reason-{{ row.id }}">{{ row.reason }}</p><p><span id="group-elapsed-{{ row.id }}">{{ row.elapsed }}</span> seconds processing</p><a href="{% url 'homework-review' course.pk meeting.pk row.id %}">Open review · Version {{ row.version }}</a></td></tr>{% endfor %}
+</tbody></table></div></section>
+<p>Queued items keep their original 15-minute deadline after a restart. Interrupted processing fails without an automatic retry. A queue-expired item has no draft. Completed drafts and existing publications are preserved.</p>
+<noscript><p>Refresh this page to see the latest status.</p></noscript>
+<div id="group-config" data-url="{{ state_url }}" data-pending="{{ state.pending|yesno:'true,false' }}"></div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/homework_groups.js' %}"></script>{% endblock %}

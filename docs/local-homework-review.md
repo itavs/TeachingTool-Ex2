@@ -21,8 +21,8 @@ local GPU/runtime assets:
 .\.venv\Scripts\python.exe manage.py run_homework_worker
 ```
 
-Run the development server in another terminal as usual. `--once` processes one
-queued request and exits. A single-worker lock prevents duplicate coordinators.
+Run the development server in another terminal as usual. `--once` attempts one
+queued request and exits; a busy group item stays queued without inference. A single-worker lock prevents duplicate coordinators.
 The worker creates/cleans its own loopback-only Ollama server and acquires the
 shared decoder lock, so it does not require a manually started experiment server.
 Missing/mismatched assets fail clearly; they are never downloaded/substituted.
@@ -62,6 +62,44 @@ even when it also appears in the target; rephrase the public narrative.
 
 ## Operating envelope and failure semantics
 
+### Selected demonstration groups (D-58)
+
+From the assignment use **Review demonstration group**, select 2–4 students, preview
+and confirm. The preview lists exact latest source versions and recorded context.
+It is valid for 10 minutes and contains signed IDs/hashes, never source texts.
+Changed versions, instructions, criteria, rubric or language require a new preview.
+Confirmation freezes the selected set and creates all child jobs in one transaction.
+Repeated confirmation returns the same group. An active request on any selected
+version blocks a conflicting group; existing requests are not silently repurposed.
+
+Each work is compared only with the other selected owners. Unselected classmates
+and every version of the target owner are excluded. Existing limits below remain
+unchanged. Single-review requests still include all eligible peers and explain the
+group alternative on overflow. This is selected demonstration-group analysis,
+not silent sampling or a whole-class report.
+
+The existing worker handles jobs one at a time. Group queue wait is limited to
+**15 minutes from confirmation**, including stopped-worker/resource wait. Busy
+checks do not run inference. After parent resource reservation the existing
+**180-second** processing deadline spans both stages; its owned runners share that
+reservation. Poll, video and single-review locking behavior is unchanged.
+The group/status page refreshes every five seconds while visible but never starts
+AI. It shows real per-work states/counts, not model correctness. Each draft remains
+private until separate Lecturer review/edit/publication, including explicit
+individual-only publication after comparison failure. No group publish exists.
+
+Queued jobs keep their deadline after restart. Interrupted running work fails,
+without automatic inference retry. Worker/status expiry and display guards also
+handle a worker that stays stopped; overdue results cannot create a late draft.
+Failures do not cancel other jobs/results. Expiry failures have no new draft.
+
+Apply migration 0011 with `python manage.py migrate`, then restart an old homework
+worker to load the new code. Initial implementation validation used injected
+providers and mocked subprocesses only. The subsequent
+[real-model group check](homework-group-acceptance.md) produced both drafts but
+failed comparison quality; known wrong comparisons and human corrections remain
+limitations.
+
 These are initial engineering limits, not assignment requirements or proven
 classroom capacity. Small examples completed in about 35 seconds; the 180-second
 processing deadline provides headroom without allowing indefinite generation.
@@ -99,6 +137,14 @@ and errors remain private. Synthetic versions/feedback follow demo retention;
 intentional cleanup and real-student-work policy remain separate open work.
 
 ## Implementation and evidence
+
+The first selected-group real-model check is recorded in
+[group acceptance](homework-group-acceptance.md): both private drafts were
+produced, but both comparisons missed a known approach/coverage difference.
+Original findings and synthetic reproduction inputs are preserved in the linked
+report/fixture. The user subsequently confirmed Alex's corrected publication and
+Casey's unpublished draft; human corrections are not model-quality success.
+This supplements the earlier software-only implementation milestone below.
 
 `LocalHomeworkReviewer` implements the existing provider contract and configures
 the recorded rubric/deadline. `local_homework_runner` owns the pinned service,

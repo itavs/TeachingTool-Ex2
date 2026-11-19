@@ -84,7 +84,27 @@ class SubmissionVersion(models.Model):
         return "Submitted"
 
 
+class ReviewBatch(models.Model):
+    """One explicit lecturer confirmation; immutable selected-source audit record."""
+    assignment = models.ForeignKey(HomeworkAssignment, on_delete=models.PROTECT, related_name='review_batches')
+    requester = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    request_key = models.UUIDField(unique=True)
+    preview_digest = models.CharField(max_length=64)
+    sources_snapshot = models.JSONField()
+    instructions_snapshot = models.TextField()
+    criteria_snapshot = models.JSONField()
+    rubric_snapshot = models.TextField()
+    language = models.CharField(max_length=2)
+    created_at = models.DateTimeField()
+    queue_expires_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ['-created_at', '-pk']
+
+
 class ReviewJob(models.Model):
+    batch = models.ForeignKey(ReviewBatch, on_delete=models.PROTECT, related_name='jobs', null=True, blank=True)
+    waiting_for_resource = models.BooleanField(default=False)
     submission = models.ForeignKey(SubmissionVersion, on_delete=models.PROTECT, related_name='review_jobs')
     requester = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     instructions_snapshot = models.TextField()
@@ -109,6 +129,18 @@ class ReviewJob(models.Model):
 
     @property
     def display_status(self):
+        if self.batch_id and self.status == 'running' and self.started_at:
+            from django.utils import timezone
+            from datetime import timedelta
+            from .homework_contract import PROCESS_SECONDS
+            if timezone.now() >= self.started_at + timedelta(seconds=PROCESS_SECONDS):
+                return 'Processing time limit exceeded'
+        if self.batch_id and self.status == 'queued':
+            from django.utils import timezone
+            if timezone.now() >= self.batch.queue_expires_at:
+                return 'Queue wait expired'
+            if self.waiting_for_resource:
+                return 'Waiting for shared AI resource'
         draft = getattr(self, 'draft', None) if self.status == 'ready' else None
         if draft and draft.published_at:
             return 'Published'

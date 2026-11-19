@@ -5,19 +5,32 @@ from pathlib import Path
 import subprocess
 import tempfile
 import time
+from contextlib import contextmanager
 from django.conf import settings
 from django.utils import timezone
 from .homework_provider import ReviewUnavailable
 from .homework_contract import PROCESS_SECONDS, capacity_error
 from .process_tree import ProcessTree
 from .summary_contract import MODEL, WEIGHTS, MANIFEST_SHA256, verify_local_model
+from .process_lock import exclusive_lock
 
 
 class LocalHomeworkReviewer:
     def __init__(self):
         self.rubric = ''
         self.deadline = None
+        self.resource_reserved = False
         self.metadata = {'provider': 'experimental-local-qwen', 'stages': {}}
+
+    @contextmanager
+    def reserve_resource(self):
+        """Group-only reservation spanning individual and comparison stages."""
+        with exclusive_lock(settings.BASE_DIR / '.local/videos/.decoder.lock'):
+            self.resource_reserved = True
+            try:
+                yield
+            finally:
+                self.resource_reserved = False
 
     def available(self, language):
         if language != 'en':
@@ -58,6 +71,8 @@ class LocalHomeworkReviewer:
                     '--input',str(source),'--output',str(output),'--ollama',str(settings.LOCAL_SUMMARY_OLLAMA),
                     '--models',str(settings.LOCAL_SUMMARY_MODELS),'--deadline',str(self.deadline),
                     '--parent-pid',str(os.getpid())]
+                if self.resource_reserved:
+                    command.append('--resource-reserved')
                 process = subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,
                     text=True,encoding='utf-8',creationflags=subprocess.CREATE_NO_WINDOW)
                 tree.attach(process.pid)

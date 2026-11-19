@@ -14,7 +14,7 @@ generation is unavailable. New MP4 jobs validate/extract audio, transcribe with 
 pinned local large-v3-turbo CUDA checkpoint, then summarize with local Qwen3 8B.
 A failed summary retains an available saved transcript; legacy completed jobs are
 unchanged. Homework assignment/submission and authorized reading are implemented under D-53;
-AI review/comparison remains feasibility/planning only, not a website feature. Functional operation does not establish reliable AI accuracy,
+Experimental English review/comparison is implemented under D-56; D-58 adds selected demonstration groups. Functional operation does not establish reliable AI accuracy,
 phone usability, classroom capacity or a completed in-class demonstration.
 
 Current evidence: [tools](local-ai-feasibility.md#current-tools-and-evidence-index),
@@ -424,3 +424,40 @@ certified. The original bilingual direction (D-31 and D-50) is retained as a
 future target; automatic Hebrew generation is not a blocker for the current
 user-approved demo. This is a project demo-scope decision, not a new assignment
 requirement or a claim of completed Hebrew generation.
+
+## D-58 - Selected demonstration-group review
+
+User-approved UC-05 extension: a Lecturer selects 2–4 distinct students from one
+assignment and previews their latest versions and existing model limits. A signed
+preview expires after 10 minutes. Confirmation rechecks versions, instructions,
+criteria, rubric and language under the meeting write lock. Changes require a new
+preview/confirmation. The group and all child jobs are created atomically or not
+at all. A repeated valid confirmation returns the same group; any active request
+on a selected version rejects a conflicting group without reusing incompatible
+sources. No source or text is silently omitted.
+
+Each target's peers are exactly the other selected owners; all of its own versions
+are excluded. Source IDs/texts, instructions, criteria, rubric and language freeze
+at confirmation. The individual route keeps all-eligible-peer selection and now
+explains the selected-group alternative on overflow. English, synthetic work and
+existing limits remain: up to 4 criteria (250 characters each), instructions 2,000,
+rubric 4,000, each work 4,000, combined works 8,000, at most 3 peers per target.
+
+Group queue wait is bounded at 15 minutes from confirmation, including stopped
+worker/resource wait, without resetting on restart. The existing single worker
+processes jobs sequentially. It reserves the shared decoder before starting the
+existing 180-second processing budget and holds it across both stages. Busy checks
+perform no inference/model loading and do not block HTTP requests. No automatic
+inference retry occurs. Interrupted processing fails on restart; overdue group
+jobs also expire on authorized status reads, with overdue display guards and a
+late-result save check. Single-review, poll and video resource behavior is unchanged.
+
+Failures are independent per work. Drafts remain private and every feedback needs
+separate Lecturer review/edit/publication. Successful individual feedback after
+comparison failure retains the explicit individual-only publication gate. Published
+group feedback carries a system selected-group/not-whole-class notice. Process
+checks with injected providers do not certify comparison meaning. The subsequent
+[two-work real-model check](homework-group-acceptance.md) completed operationally
+but failed the known-difference quality test. The user reported Alex's corrected
+publication and Casey's private draft; corrections are human work, not automatic
+comparison success. Other proposed enhancements remain outside this stage.
