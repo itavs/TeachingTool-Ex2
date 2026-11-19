@@ -11,7 +11,7 @@ from .models import VideoJob, Membership
 from .video_storage import job_path, remove_file
 from .asr_checkpoint import REPO, REVISION
 
-ACTIVE = ['validating', 'extracting', 'loading_asr', 'transcribing', 'loading_sum', 'summarizing']
+ACTIVE = ['validating', 'extracting', 'loading_asr', 'transcribing', 'loading_sum', 'summarizing', 'reviewing']
 TERMINAL = ['extracted', 'transcribed', 'summarized', 'failed']
 HEARTBEAT_GRACE_SECONDS = 30
 ERRORS = {
@@ -59,7 +59,7 @@ def save_upload(meeting_id, user, upload):
         raise ValidationError('The upload exceeds 200 MB.')
     now = timezone.now()
     job = VideoJob.objects.create(meeting_id=meeting_id, owner=user, original_name=name[:255],
-        created_at=now, source_expires_at=now+timedelta(hours=24),transcription_requested=True,summary_requested=True,
+        created_at=now, source_expires_at=now+timedelta(hours=24),transcription_requested=True,summary_requested=True,lecturer_review_requested=True,
         asr_metadata={'requested_model':{'repo':REPO,'revision':REVISION}})
     try:
         target = job_path(job.pk,'input.mp4')
@@ -91,6 +91,11 @@ def fail_job(job_id, code, stage=None):
         if job.status in TERMINAL:
             return job
         now = timezone.now()
+        if job.status == 'reviewing' and job.summary_paragraph:
+            job.status='summarized';job.lecturer_review_status='failed';job.lecturer_review_error=code
+            job.finished_at=now;job.processing_seconds=max(0,(now-job.started_at).total_seconds())
+            job.save()
+            return job
         job.failed_stage = stage or job.status
         job.status = 'failed'; job.error_code = code; job.finished_at = now
         if job.started_at:
@@ -107,9 +112,9 @@ def fail_job(job_id, code, stage=None):
 def purge_expired_transcripts(now=None):
     now=now or timezone.now()
     VideoJob.objects.filter(summary_expires_at__lte=now,summary_deleted_at__isnull=True).update(
-        summary_paragraph='',summary_points=[],summary_deleted_at=now)
+        summary_paragraph='',summary_points=[],summary_deleted_at=now,lecturer_review_points=[])
     return VideoJob.objects.filter(transcript_expires_at__lte=now,transcript_deleted_at__isnull=True).update(
-        transcript='',transcript_segments=[],transcript_deleted_at=now)
+        transcript='',transcript_segments=[],transcript_deleted_at=now,lecturer_review_points=[])
 
 
 def transcript_available(job,now=None):
@@ -204,6 +209,7 @@ def payload(job, now=None):
         'source_removed':job.source_deleted_at is not None,
         'audio_removed':job.audio_removed_at is not None or (not job.transcription_requested and job.status=='extracted'),
         'transcription_requested':job.transcription_requested,'transcript_available':transcript_available(job,now),
+        'lecturer_review_status':job.lecturer_review_status,
         'summary_requested':job.summary_requested,'summary_available':summary_available(job,now),
         'summary_expired':bool(job.summary_expires_at and (job.summary_expires_at<=now or job.summary_deleted_at)),
         'transcript_expired':bool(job.transcript_expires_at and (job.transcript_expires_at<=now or job.transcript_deleted_at)),

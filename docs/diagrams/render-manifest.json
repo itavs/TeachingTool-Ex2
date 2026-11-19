@@ -27,37 +27,37 @@
       "ordinal": 1,
       "name": "Domain model",
       "source": "../architecture.md#class-and-interface-diagrams",
-      "source_block_sha256": "068297c0d0547d1e5fd0938b6405aa33b63356685f17c6c90da82bd5ed5ec8c2",
+      "source_block_sha256": "1a1ef5ec6016daab175a1ee38be06652398e3b3e4fa7dda84bf45c0c6defa870",
       "svg": "01-domain-model.svg",
-      "svg_sha256": "b7cd07f4abe48ce707c89f1122a2e3f60917052c8c24490b6db0199f7a85a2e7",
-      "visual_review": "overview and detail reviewed; no observed clipped labels or overlapping message text; long diagrams require full-size viewing/zoom"
+      "svg_sha256": "2b24f6c2cb95262d15723c6fbef0f43ab44c133e4253a28b980ac96d71e24b55",
+      "visual_review": "2026-11-19 closure: offline SVG/PNG rendered and overview/detail reviewed; manual poll entry and optional lecturer review stage; zoom dense sequence diagrams."
     },
     {
       "ordinal": 2,
       "name": "Video and poll interfaces",
       "source": "../architecture.md#class-and-interface-diagrams",
-      "source_block_sha256": "aab00078c999ed3c190d6fb84e996de76d4654e9906e2ab8892896a0310b04c1",
+      "source_block_sha256": "64fb8f11cfefd1062f2fd01622bac5f02e34d909a824bdf722aadefa739e18f2",
       "svg": "02-video-poll-interfaces.svg",
-      "svg_sha256": "f1580335093be41d40293ebd2dbd5eb007c1ad1a9db618ca67305d06f3e50deb",
-      "visual_review": "overview and detail reviewed; no observed clipped labels or overlapping message text; long diagrams require full-size viewing/zoom"
+      "svg_sha256": "515f1e06c875d3407bb4e6ebabeb1e2dbec5b5aa79345d11735387fcafb7e1f1",
+      "visual_review": "2026-11-19 closure: offline SVG/PNG rendered and overview/detail reviewed; manual poll entry and optional lecturer review stage; zoom dense sequence diagrams."
     },
     {
       "ordinal": 3,
       "name": "Video processing sequence",
       "source": "../architecture.md#video-sequence",
-      "source_block_sha256": "2d66a6f576be2e6ca4f6e51dc490a1b819b6b204f30e6d57a825fc53fc9e4e60",
+      "source_block_sha256": "64a7bba1fa5379e058702baeac5f226b80652a7e6dfd1e6abab8adf542a40b2b",
       "svg": "03-video-sequence.svg",
-      "svg_sha256": "f2888f33c9e4a0622089fe834c987c78fbc0f2c98502dc96299b19c1f8d7a747",
-      "visual_review": "overview and detail reviewed; no observed clipped labels or overlapping message text; long diagrams require full-size viewing/zoom"
+      "svg_sha256": "7f0944e166a10edbee33a9933457dafb016e2e845a0fe24982342809571f18e2",
+      "visual_review": "2026-11-19 closure: offline SVG/PNG rendered and overview/detail reviewed; manual poll entry and optional lecturer review stage; zoom dense sequence diagrams."
     },
     {
       "ordinal": 4,
       "name": "Poll generation/publication sequence",
       "source": "../architecture.md#poll-generation-and-publication-sequence",
-      "source_block_sha256": "204021601f98089bd55f63bf5d5160ad6f4b2cb13f4fb0c5686a04ce87e4ac9c",
+      "source_block_sha256": "72375cfded25957af8d0218eadc18fcd46356047c65fd66cc859b9687864fbbf",
       "svg": "04-poll-sequence.svg",
-      "svg_sha256": "f46bed8910058bb17921f08d62accc474bc9488a20ad840db5c656449e3ead5d",
-      "visual_review": "overview and detail reviewed; no observed clipped labels or overlapping message text; long diagrams require full-size viewing/zoom"
+      "svg_sha256": "c8a87472c10b2450d2a2d6d4ea10c95b4cd7ee049a2b544e44c6b079cfedf58f",
+      "visual_review": "2026-11-19 closure: offline SVG/PNG rendered and overview/detail reviewed; manual poll entry and optional lecturer review stage; zoom dense sequence diagrams."
     },
     {
       "ordinal": 5,

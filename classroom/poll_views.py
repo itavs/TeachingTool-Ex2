@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from .models import Membership, Poll
 from .participation_views import scoped, context
-from .poll_forms import GenerationForm, DraftForm, VoteForm, VersionForm
+from .poll_forms import GenerationForm, DraftForm, ManualPollForm, VoteForm, VersionForm
 from .poll_generation import GenerationUnavailable
 from . import poll_services as rules
 
@@ -40,6 +40,19 @@ def poll_create(request, meeting, membership):
             except ValidationError:
                 form.add_error(None,'The generated response was invalid. No usable draft was saved. You may retry explicitly.')
     return render(request,'classroom/poll_create.html',{**context(meeting,membership),'form':form},status=status)
+
+
+@scoped(Membership.Role.LECTURER, ('GET','POST'))
+def poll_manual(request, meeting, membership):
+    form = ManualPollForm(request.POST if request.method == 'POST' else None,
+                          kind=request.GET.get('kind','comprehension'))
+    if request.method == 'POST' and form.is_valid():
+        poll = rules.create_manual_draft(meeting.pk, request.user, form.cleaned_data['kind'],
+                                        form.cleaned_data['language'], form.content())
+        messages.success(request, 'Manual draft saved. Review before publishing separately.')
+        return redirect('poll-edit', course_id=meeting.course_id, meeting_id=meeting.pk, poll_id=poll.pk)
+    return render(request, 'classroom/poll_manual.html', {**context(meeting,membership), 'form':form},
+                  status=400 if request.method == 'POST' else 200)
 
 
 @scoped()

@@ -64,6 +64,21 @@ class DraftForm(forms.Form):
         return data
 
 
+class ManualPollForm(DraftForm):
+    kind = forms.ChoiceField(choices=Poll.Kind.choices, label='Poll type')
+    language = forms.ChoiceField(choices=Poll.Language.choices, label='Poll language', initial='en')
+
+    def __init__(self, *args, **kwargs):
+        data = args[0] if args else kwargs.get('data')
+        initial_kind = kwargs.pop('kind', 'comprehension')
+        kind = data.get('kind', 'comprehension') if data else initial_kind
+        poll = Poll(kind=kind, language='en', question='', options=['']*4, version=1)
+        super().__init__(*args, poll=poll, **kwargs)
+        del self.fields['version']
+        self.fields['kind'].initial = kind
+        self.fields['kind'].widget = forms.HiddenInput()
+
+
 class VoteForm(forms.Form):
     option_index = forms.TypedChoiceField(coerce=int, widget=forms.RadioSelect(attrs={'class':'poll-choice-input'}), choices=[])
 

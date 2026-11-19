@@ -57,7 +57,7 @@ class TranscriptionTests(ParticipationFixture,TransactionTestCase):
 
     def new_job(self):
         job=save_upload(self.meeting.pk,self.teacher,SimpleUploadedFile('test.mp4',self.media))
-        VideoJob.objects.filter(pk=job.pk).update(summary_requested=False)
+        VideoJob.objects.filter(pk=job.pk).update(summary_requested=False,lecturer_review_requested=False)
         job.refresh_from_db();return job
 
     def finish(self):

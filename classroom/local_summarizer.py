@@ -13,8 +13,8 @@ from .process_tree import ProcessTree
 
 
 class SummaryFailure(Exception):
-    def __init__(self, code):
-        super().__init__(code); self.code = code
+    def __init__(self, code, diagnostic=''):
+        super().__init__(code); self.code = code; self.diagnostic = diagnostic
 
 
 def validate_result(result, language):
@@ -35,7 +35,10 @@ def validate_result(result, language):
 
 
 class LocalQwenSummarizer:
-    def summarize(self, transcript, language, *, work_dir, deadline, on_event, on_tick):
+    def summarize(self, transcript, language, **kwargs):
+        return self._run({'text':transcript,'language':language}, language, **kwargs)
+
+    def _run(self, source_data, language, *, work_dir, deadline, on_event, on_tick, review=False):
         runtime = Path(settings.LOCAL_ASR_PYTHON)
         binary = Path(settings.LOCAL_SUMMARY_OLLAMA)
         if not runtime.is_file() or not binary.is_file(): raise SummaryFailure('summary_runtime')
@@ -44,11 +47,12 @@ class LocalQwenSummarizer:
         command = [str(runtime), '-u', str(settings.BASE_DIR/'classroom/local_summary_runner.py'),
             '--input', str(source), '--output', str(target), '--ollama', str(binary),
             '--models', str(settings.LOCAL_SUMMARY_MODELS), '--deadline', str(deadline), '--parent-pid', str(os.getpid())]
+        if review: command.append('--lecturer-review')
         process = None
         tree = None
         try:
             target.unlink(missing_ok=True)
-            source.write_text(json.dumps({'text':transcript, 'language':language}, ensure_ascii=False), encoding='utf-8')
+            source.write_text(json.dumps(source_data, ensure_ascii=False), encoding='utf-8')
             tree = ProcessTree()
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                 text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
@@ -69,17 +73,28 @@ class LocalQwenSummarizer:
                 except queue.Empty: continue
                 if line is None: break
                 event = json.loads(line)
-                if event.get('result') == 'failed': raise SummaryFailure(event.get('code', 'summary_failed'))
+                if event.get('result') == 'failed': raise SummaryFailure(event.get('code', 'summary_failed'),event.get('diagnostic',''))
                 if event.get('result') == 'ok': success = True
                 else: on_event(event)
             process.wait(timeout=max(.1, deadline-time.monotonic()))
             if not success or process.returncode:
                 raise SummaryFailure('timeout' if time.monotonic()>=deadline else 'summary_failed')
             if not target.is_file() or target.stat().st_size > 20000: raise SummaryFailure('summary_output')
-            return validate_result(json.loads(target.read_text(encoding='utf-8')), language)
+            result = json.loads(target.read_text(encoding='utf-8'))
+            if review:
+                from .lecturer_review_contract import validate_review, PROMPT_VERSION as REVIEW_VERSION
+                if result['metadata'].get('prompt_version') != REVIEW_VERSION: raise SummaryFailure('summary_output')
+                result['points'] = validate_review({'points':result['points']},source_data['segments'],language)
+                return result
+            return validate_result(result, language)
         finally:
             if tree is not None: tree.close()
             if process is not None:
                 if process.poll() is None: process.kill()
                 process.wait(timeout=3); process.stdout.close()
             source.unlink(missing_ok=True); target.unlink(missing_ok=True)
+
+
+class LocalQwenLecturerReviewer(LocalQwenSummarizer):
+    def review(self, segments, language, **kwargs):
+        return self._run({'segments':segments,'language':language},language,review=True,**kwargs)

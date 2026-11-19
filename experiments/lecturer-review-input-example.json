@@ -1,0 +1,15 @@
+{
+  "language": "en",
+  "segments": [
+    {
+      "start": 0,
+      "end": 5,
+      "text": "A stack removes the item that was added most recently."
+    },
+    {
+      "start": 5,
+      "end": 10,
+      "text": "A stack of plates illustrates this last-in, first-out order."
+    }
+  ]
+}

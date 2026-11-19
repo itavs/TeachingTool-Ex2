@@ -21,6 +21,7 @@ def main():
         parser.add_argument('--'+key, required=True)
     parser.add_argument('--deadline', type=float, required=True)
     parser.add_argument('--parent-pid', type=int, required=True)
+    parser.add_argument('--lecturer-review',action='store_true')
     args = parser.parse_args()
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     import psutil
@@ -59,7 +60,14 @@ def main():
         if not Path(args.ollama).is_file():
             emit(result='failed', code='summary_runtime'); return 1
         source = json.loads(Path(args.input).read_text(encoding='utf-8'))
-        prompt = summary_prompt(source['text'], source['language'])
+        schema = SCHEMA
+        if args.lecturer_review:
+            from classroom.lecturer_review_contract import review_prompt, validate_review, SCHEMA as REVIEW_SCHEMA, PROMPT_VERSION as REVIEW_VERSION
+            prompt = review_prompt(source['segments'],source['language'])
+            schema = REVIEW_SCHEMA
+            metadata['prompt_version'] = REVIEW_VERSION
+        else:
+            prompt = summary_prompt(source['text'], source['language'])
         with exclusive_lock(Path(args.input).parent.parent/'.decoder.lock'):
             # Never reuse a desktop/cloud-enabled Ollama service or accept a URL.
             with socket.socket() as reservation:
@@ -84,12 +92,13 @@ def main():
                 except (OSError, ValueError): time.sleep(.1)
             if version != '0.40.14':
                 emit(result='failed', code='summary_runtime'); return 1
+            output_limit = 1536 if args.lecturer_review else 768
             metadata.update(ollama_version=version, thinking=False, temperature=.1, seed=42,
-                            num_ctx=8192, num_predict=768)
+                            num_ctx=8192, num_predict=output_limit)
             request = urllib.request.Request(base+'/api/generate', data=json.dumps({
-                'model': MODEL, 'prompt': prompt, 'think': False, 'format': SCHEMA,
+                'model': MODEL, 'prompt': prompt, 'think': False, 'format': schema,
                 'stream': True, 'keep_alive': 0, 'options': {'temperature': .1, 'seed': 42,
-                    'num_ctx': 8192, 'num_predict': 768}}).encode('utf-8'),
+                    'num_ctx': 8192, 'num_predict': output_limit}}).encode('utf-8'),
                 headers={'Content-Type': 'application/json'})
             started = time.perf_counter()
             fragments = []
@@ -106,8 +115,14 @@ def main():
                         emit(result='failed', code='summary_output'); return 1
                     if event.get('done'): final = event
             if not final or final.get('done_reason') != 'stop':
-                emit(result='failed', code='summary_output'); return 1
-            value = validate_summary(json.loads(''.join(fragments)), source['language'])
+                emit(result='failed', code='summary_output',diagnostic='incomplete_generation'); return 1
+            value = json.loads(''.join(fragments))
+            if args.lecturer_review:
+                # Pending file is private/untrusted until success; parent always removes it.
+                Path(args.output).write_text(json.dumps(value,ensure_ascii=False),encoding='utf-8')
+                validate_review(value,source['segments'],source['language'])
+            else:
+                validate_summary(value,source['language'])
             metadata.update(load_seconds=final.get('load_duration', 0)/1e9,
                             generation_seconds=final.get('eval_duration', 0)/1e9)
             result = {**value, 'metadata': metadata, 'summary_seconds': time.perf_counter()-started}
@@ -116,7 +131,7 @@ def main():
     except SummaryLanguageError:
         emit(result='failed', code='summary_language'); return 1
     except (FileNotFoundError, ValueError, KeyError) as error:
-        emit(result='failed', code='summary_model' if stage=='loading_sum' else 'summary_output', error_class=type(error).__name__)
+        emit(result='failed', code='summary_model' if stage=='loading_sum' else 'summary_output', error_class=type(error).__name__,diagnostic=str(error) if str(error) in {'Invalid review structure','Invalid point fields','Unknown segment','Invalid review text','Unverified quote','Invalid segment time'} else 'invalid_structured_output')
         return 1
     except Exception as error:
         emit(result='failed', code='summary_failed', error_class=type(error).__name__)

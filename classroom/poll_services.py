@@ -70,6 +70,18 @@ def create_generated_draft(meeting_id, user, kind, language, material):
             origin='ai', created_at=timezone.now())
 
 
+@transaction.atomic
+def create_manual_draft(meeting_id, user, kind, language, data):
+    lock_and_authorize(meeting_id, user, Membership.Role.LECTURER)
+    if kind not in Poll.Kind.values or language not in Poll.Language.values:
+        raise ValidationError('Choose a supported poll type and language.')
+    validate_content(kind, data)
+    return Poll.objects.create(meeting_id=meeting_id, kind=kind, language=language,
+        material='', question=data['question'].strip(), options=[x.strip() for x in data['options']],
+        correct_index=data.get('correct_index'), explanation=data.get('explanation','').strip(),
+        origin='manual', created_at=timezone.now())
+
+
 def get_poll(meeting_id, poll_id, user):
     meeting, membership = authorize(meeting_id, user)
     poll = Poll.objects.filter(pk=poll_id, meeting=meeting).first()
@@ -111,7 +123,8 @@ def edit_draft(meeting_id, poll_id, user, version, data):
 def publish(meeting_id, poll_id, user, version):
     poll = locked_poll(meeting_id, poll_id, user, Membership.Role.LECTURER)
     require_draft(poll, version)
-    validate_input(poll.kind, poll.language, poll.material)
+    if poll.origin != 'manual':
+        validate_input(poll.kind, poll.language, poll.material)
     validate_content(poll.kind, content_of(poll))
     if Poll.objects.filter(meeting_id=meeting_id, status=Poll.Status.ACTIVE).exists():
         raise PollError('This meeting already has an active poll. Close it before publishing another.')
@@ -152,7 +165,7 @@ def vote(meeting_id, poll_id, user, option_index):
 
 def origin_label_for(poll, membership):
     """Draft review guidance is actionable only for a Lecturer reviewing a draft."""
-    if poll.origin == 'demo':
+    if poll.origin in ('demo', 'manual'):
         return poll.origin_label
     if membership.role == Membership.Role.LECTURER and poll.status == Poll.Status.DRAFT:
         return poll.origin_label

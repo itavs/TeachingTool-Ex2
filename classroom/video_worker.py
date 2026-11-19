@@ -29,7 +29,7 @@ def claim_job():
     return job
 
 
-def process_job(job, stop_requested=lambda:False, *, timeout_seconds=None, child_target=media_child,transcriber=None,summarizer=None):
+def process_job(job, stop_requested=lambda:False, *, timeout_seconds=None, child_target=media_child,transcriber=None,summarizer=None,lecturer_reviewer=None):
     """Must run under coordinator lock. Test injection never comes from user input."""
     if job.status not in ACTIVE: return
     source, output = job_path(job.pk,'input.mp4'),job_path(job.pk,'audio.wav')
@@ -139,6 +139,32 @@ def process_job(job, stop_requested=lambda:False, *, timeout_seconds=None, child
                                 summary_metadata=generated['metadata'],summary_seconds=generated['summary_seconds'],
                                 summary_created_at=now,summary_expires_at=min(now+timedelta(days=FUTURE_TEXT_RETENTION_DAYS),current.transcript_expires_at),
                                 finished_at=now,heartbeat_at=now,processing_seconds=max(0,(now-job.started_at).total_seconds()))
+                        if job.lecturer_review_requested:
+                            from .local_summarizer import LocalQwenLecturerReviewer
+                            from .lecturer_review_contract import validate_review
+                            VideoJob.objects.filter(pk=job.pk,status='summarized').update(
+                                status='reviewing',lecturer_review_status='running',finished_at=None)
+                            review_start=time.monotonic()
+                            try:
+                                check_control()
+                                reviewer=lecturer_reviewer if lecturer_reviewer is not None else LocalQwenLecturerReviewer()
+                                review=reviewer.review(transcript['segments'],transcript['language'],
+                                    work_dir=output.parent,deadline=deadline,on_event=lambda event:None,on_tick=check_control)
+                                check_control()
+                                # Provider timestamps are never trusted; bind exact quotes to stored segments.
+                                raw={'points':[{k:p[k] for k in ['quote','suggestion']} for p in review['points']]}
+                                points=validate_review(raw,transcript['segments'],transcript['language'])
+                                VideoJob.objects.filter(pk=job.pk,status='reviewing').update(
+                                    status='summarized',lecturer_review_status='completed',lecturer_review_points=points,
+                                    lecturer_review_metadata=review.get('metadata',{}),lecturer_review_seconds=time.monotonic()-review_start,
+                                    finished_at=timezone.now(),processing_seconds=max(0,(timezone.now()-job.started_at).total_seconds()))
+                            except Exception as error:
+                                code=error.code if isinstance(error,(SummaryFailure,TranscriptionFailure)) else 'review_output'
+                                VideoJob.objects.filter(pk=job.pk,status='reviewing').update(
+                                    status='summarized',lecturer_review_status='failed',lecturer_review_error=code,
+                                    lecturer_review_seconds=time.monotonic()-review_start,finished_at=timezone.now(),
+                                    processing_seconds=max(0,(timezone.now()-job.started_at).total_seconds()))
+
             else:
                 fail_job(job.pk,result.get('code','processing_error'),result.get('stage'))
     except (TranscriptionFailure, SummaryFailure) as error:

@@ -1596,3 +1596,36 @@ corrections addressed missing duplicate-topic coverage, the actual approach
 difference and the malformed quote. Corrected publication is human-reviewed
 content; original model findings remain preserved separately. No additional
 browser/device scenarios or agent-performed visual check are inferred.
+
+
+## Submission closure validation - 2026-11-19
+
+Final file-backed isolated Django suite: **215 passed**, 21.100 seconds, no skips.
+Final JavaScript suite: **21 passed**, about 0.151 seconds. No real AI is invoked
+by either suite. Initial focused checks passed; the later full run supersedes
+that count after cross-segment and cleanup coverage. Migration dry-run reported
+no changes. Clean source-only install/migrations/seeding/login/server startup
+passed as recorded in [operations](operations.md). No demo data was deleted.
+
+| Component / responsibility | Risk | Existing/new evidence |
+|---|---|---|
+| ManualPollForm / create_manual_draft / Poll origin | Accidental AI dependency, forged answer metadata, duplicate options, role leak | ManualExportTests: both types, model factory must not run, manual provenance, Hebrew, existing publication/vote/disclosure, draft Student 404 and role 403 |
+| participation_views.requests_export | Cross-user export, spreadsheet formula execution, source mutation | ManualExportTests: Lecturer-only exact meeting, Student/outsider denial, literal `= + - @` and Hebrew round-trip; database text unchanged |
+| lecturer_review_contract | Unmatched/repeated quote, wrong generated time, segment cutoff | ReviewContractTests: exact quotes, zero/max points, rejection, cross-segment time binding. Writing-system checks reuse summary validation; no semantic certification |
+| video_worker / LocalQwenLecturerReviewer | Optional failure discards completed work, interruption, expired private text | OptionalReviewTests: success/zero points, invalid quote/failure, summary/transcript preserved, restart/interruption, owner role and direct access, expiry clears points |
+| videos.js | Completed optional stage never becomes visible or loses transcript link | New JS regression: one reload and retained transcript link; earlier summary/polling tests retained |
+| cleanup_demo | Unintended deletion or unknown scope | Preview test proves no mutation; --apply requires explicit seeded course. No apply was executed outside isolated software tests |
+| Attendance / PollVote HTTP + SQLite | Burst write contention, duplicates, count corruption | Versioned load probe: 80 then 100 users, true loopback HTTP/session/CSRF, expected duplicate handling, exact counts and latency conditions passed |
+
+The optional review stage used a real installed Qwen model on the saved SHORT
+transcript. Initial failures and unsupported criticisms, the final unedited
+suggestions/timings, and the narrow usefulness assessment are in
+[closure results](submission-closure.md#real-local-lecturer-review-output). This is
+adapter evidence, not a fresh full MP4/phone/browser test or broad semantic quality
+pass. No feedback/comparison experiment was repeated. The prior group model failure
+and user-reported corrected Alex publication/private Casey remain separate evidence.
+
+Browser observation of loopback was denied by saved permission again. No workaround
+was used. New HTML is server-tested; Light/Dark/narrow visual acceptance for the
+new manual form and optional report remains manual. Prior Safari/iPhone and guided
+rehearsal reports retain their stated scope. Item 10 remains not performed.

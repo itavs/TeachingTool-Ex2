@@ -50,3 +50,16 @@ WAV, transcript.pending.json and both summary IPC files were absent after both t
 ## User-reported interface acceptance
 
 The user signed in as lecturer_alpha and reviewed SHORT task dd68e11b-2d34-40ae-9fb5-9bca05e14c7b: summary/points were readable and the link opened the full transcript of the same video. This is a user-reported interface/navigation result, not recording-grounded accuracy, phone acceptance or a replacement for server authorization tests. STATIC retains its distinct saved-transcript success versus MP4 summary-language failure with a preserved transcript. A language regression test explicitly permits Hebrew with static and Car alongside the unexpected-script rejection test.
+
+
+## Optional Points for lecturer review (D-59)
+
+New jobs now continue after the safely stored summary to zero–two exact transcript
+quotes with server-derived time ranges and cautious check suggestions. The final
+contract has no automatic verdict/defect-observation field: real tests found
+unsupported missing-explanation claims. Unmatched/ambiguous quotes fail; valid
+cross-segment quotes are supported without rewriting words. Optional failure,
+interruption or timeout retains summary/transcript, and all text shares source
+expiry. Old jobs are not reprocessed. [Actual results and limits](submission-closure.md#real-local-lecturer-review-output),
+[installation and reproduction](operations.md). This is not image/audio-quality or
+student-understanding analysis, and exact quotes are not semantic proof.

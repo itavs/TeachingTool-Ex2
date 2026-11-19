@@ -1,6 +1,6 @@
 # Software Requirements Specification
 
-## Teaching Tool - Initial Draft
+## Teaching Tool - Current submission baseline
 
 ## 1. Purpose and Status
 
@@ -15,7 +15,7 @@ D-17 comments during/outside class is already resolved. See the
 
 This document defines the intended behavior of a web-based classroom teaching
 tool for Exercise 2. It supports scope decisions, later design, implementation,
-and verification. It is a draft, not a fully approved requirements baseline.
+and verification. This is the current submission baseline; explicit open acceptance items remain, rather than a claim of full completion.
 
 The website implements Django/Templates authentication and course-membership roles,
 meeting management, attendance/QR/XLSX, connected comments during or outside class,
@@ -360,6 +360,7 @@ direction from implementation or completed checks.
   not be described as confirmed storage. Recovery behavior is undecided;
   no persistent local draft, automatic queue, disconnected synchronization,
   or automatic replay is required. Outside-class connected submission is an approved D-17 acceptance case.
+- **Lecturer export (D-59):** Download a meeting-scoped XLSX snapshot with literal-text cells; no source mutation or import back. Students and nonmembers cannot export.
 - **Dependencies:** FR-03; D-17 through D-19; P-04 history and Q-06/Q-07 for capacity and operational/data policy; D-17 resolves comments timing.
 
 ### UC-03 - Generate, Publish, and Answer a Poll
@@ -367,6 +368,8 @@ direction from implementation or completed checks.
 - **Actors/preconditions:** A current course Lecturer selects comprehension or
   opinion and pastes 1-6,000 Unicode characters. The approved language target is
   Hebrew/English; current automatic generation is **English only** (D-44).
+  A separate manual entry creates English/Hebrew drafts from Lecturer-authored
+  question/options without a model, with explicit manual provenance (D-59).
   Existing Hebrew drafts remain editable, publishable and answerable. The
   single-active-poll check applies to publication, not model execution.
 - **Current steps:** The CSRF POST calls `create_generated_draft` and the local
@@ -410,7 +413,12 @@ direction from implementation or completed checks.
 - **Progress/result:** Show actual stage, separate queue/processing elapsed
   times, automatic-result warnings and an owner-only full-transcript link.
   One 600-second budget starts when the worker claims the job and includes
-  decoding, loading, transcription and summarization; it excludes queue wait.
+  decoding, loading, transcription, summarization and optional review points; it excludes queue wait.
+- **Lecturer review points (D-59):** After saving the summary, attempt zero–two
+  short inspection suggestions with exact transcript quotes and server-derived
+  segment time ranges. These are checks, not claims of a defect. Optional failure
+  leaves the saved summary/transcript available; no inference about images,
+  audio quality or student understanding is permitted.
 - **Partial failure:** If summarization fails after transcript persistence,
   show the failed stage/reason and retain the full transcript for authorized
   access until expiry. Do not display a rejected summary or claim summary
@@ -745,3 +753,34 @@ that owned version; job snapshots/private comparison evidence are Lecturer-only.
 A single worker lock and shared compute lock serialize processing; no inference
 is held inside a database transaction. Interrupted running jobs are marked failed
 on worker restart, without automatic retry. The local adapter enforces a 180-second total processing deadline with owned-process cleanup, explicit source/peer bounds and recorded timings. Three-peer throughput, classroom capacity, hard-stop automatic supervision and intentional demo cleanup remain open. See [operating envelope](local-homework-review.md).
+
+
+## Submission closure additions (D-59)
+
+These are user-approved project completions, not additional handout mandates.
+Manual Lecturer-authored English/Hebrew polls now enter the existing validated
+private draft/edit/publication lifecycle without a model, preserving provenance.
+Lecturers can export one meeting's comments/suggestions as an XLSX snapshot with
+literal text cells, including formula-like input, without changing source data.
+New video jobs may produce zero to two transcript-grounded Points for lecturer
+review after saving the summary; each has a verified exact quote, derived source
+time range and a cautious check suggestion. Failure preserves saved summary and
+transcript. Shared owner/course controls, seven-day expiry and the overall
+600-second processing budget apply. No image/audio-quality or student-understanding
+inference is claimed. Existing jobs retain their earlier outcomes.
+
+UC-01 includes checking the roster with the student when disputed and opening an
+additional registration window if appropriate. Account registration is not proof
+of physical presence; valid codes can be forwarded. No manual correction or face
+recognition has been added. UC-02 includes Lecturer XLSX export; UC-03 includes
+manual creation as a separate non-AI entry; UC-04 includes optional review-point
+failure without losing its completed summary/transcript. UC-05 remains experimental,
+English, snapshot-bound and separately published after Lecturer review. The group
+quality failure and manual corrections remain explicit.
+
+Acceptance: server tests cover new form validation/provenance, role/direct-URL
+access, literal-cell export, quote/time binding, optional failure/interruption and
+expiry. Isolated HTTP load at 80/100 synthetic users passed its predeclared bounds;
+this is not class Wi-Fi/device validation. See [closure evidence](submission-closure.md)
+and [component tests](testing.md#submission-closure-validation---2026-11-19).
+Item 10 remains not performed; exact delivery/defense arrangements are external.

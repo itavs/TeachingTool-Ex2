@@ -461,3 +461,29 @@ checks with injected providers do not certify comparison meaning. The subsequent
 but failed the known-difference quality test. The user reported Alex's corrected
 publication and Casey's private draft; corrections are human work, not automatic
 comparison success. Other proposed enhancements remain outside this stage.
+
+
+## D-59 - Approved technical submission closure
+
+The user authorized completion of existing gaps without expanding the classroom
+proof of feasibility: manual model-independent poll creation with provenance;
+Lecturer-only comment XLSX with literal text; up to two transcript-grounded Points
+for lecturer review with source time/quote and optional failure; consistent QR
+limitations; isolated 80/100-user non-AI load checks; full software regression and
+clean source setup. Current implementation/evidence and limitations are in
+[closure](submission-closure.md) and [operations](operations.md).
+
+Review suggestions are cautious checks, not automatic assessments of teaching
+quality. An initial model observation field produced unsupported absence claims;
+the final contract omits that field. Exact matching can cross consecutive ASR
+segments, normalizing only boundary whitespace; timestamps are derived by the
+server, not generated. Ambiguous/unmatched quotes are rejected. Zero points is
+valid. The optional stage shares the existing 600-second video budget/retention
+and never replaces a saved summary/transcript with a failure.
+
+The successful selected-group workflow and user-reported separate publication
+remain distinct from failed automatic comparison and human corrections. English
+AI, QR and Lecturer review/publication are unchanged; no additional homework
+inference was performed. Item 10 remains not performed. Submission channel/package,
+exact deadline and defense arrangements are not prescribed by the available PDF.
+Lecture excerpts remain user-supplied summaries, not independently verified sources.

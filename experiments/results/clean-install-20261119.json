@@ -1,0 +1,40 @@
+{
+  "scope": "HEAD source archive plus closure working-tree files, new venv, no copied .local/.ai-lab or demo database",
+  "checks": [
+    {
+      "command": "manage.py check",
+      "returncode": 0
+    },
+    {
+      "command": "manage.py migrate --noinput",
+      "returncode": 0
+    },
+    {
+      "command": "manage.py makemigrations --check --dry-run",
+      "returncode": 0
+    },
+    {
+      "command": "manage.py seed_demo",
+      "returncode": 0
+    },
+    {
+      "command": "manage.py seed_demo",
+      "returncode": 0
+    },
+    {
+      "command": "manage.py seed_demo_homework_review",
+      "returncode": 0
+    },
+    {
+      "command": "manage.py seed_demo_polls",
+      "returncode": 0
+    },
+    {
+      "command": "manage.py cleanup_demo",
+      "returncode": 0
+    }
+  ],
+  "fresh_demo_login": true,
+  "models_copied": false,
+  "real_server_login_page": 200
+}

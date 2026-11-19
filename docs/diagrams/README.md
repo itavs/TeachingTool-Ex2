@@ -47,3 +47,13 @@ reservation and batch-job responsibility. Its source/SVG hashes are updated in
 the manifest. Other diagrams retain their existing scope; the individual review
 sequences still apply inside each group's per-feedback publication workflow.
 This is not an application browser pass or model-quality evidence.
+
+
+### Submission closure - 2026-11-19
+
+Diagrams 1–4 were regenerated and visually inspected as static SVG/PNG documents:
+review-point persistence, LocalQwenLecturerReviewer/contract, partial-failure video
+sequence and the manual/AI poll alternatives. Sources and render hashes are in the
+manifest. Other three diagrams retain their reviewed current homework scope.
+Dense sequences require full-size viewing/zoom. This is document rendering, not a
+website-browser/phone check; the application-origin permission block was respected.

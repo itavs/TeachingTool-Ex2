@@ -79,3 +79,14 @@ test('summary failure retains the transcript link without reloading',async()=>{
  await h.settle();assert.equal(h.reloads(),0);assert.equal(h.elements.get('video-transcript-link').hidden,false);
  assert.match(h.elements.get('video-failure').textContent,/Summarizing/);
 });
+
+
+test('optional lecturer-review completion reloads once without hiding transcript',async()=>{
+    const h=harness({status:'summarized',stage_label:'Summary completed',processing_seconds:9,waiting_seconds:1,
+        audio_seconds:2,audio_removed:true,error:'',transcript_available:true,summary_available:false,
+        lecturer_review_status:'completed'});
+    await h.settle();
+    assert.equal(h.reloads(),1);
+    assert.equal(h.elements.get('video-transcript-link').hidden,false);
+    assert.equal(h.timers.size,0);
+});

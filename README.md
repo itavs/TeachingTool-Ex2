@@ -13,6 +13,15 @@ for this demo. Comparison quality remains limited and requires review.
 
 Earlier planning/preparation record: [runbook and labeled AI backups](docs/demo-runbook.md). The comprehension disclosure check has [user-reported Safari/iPhone evidence](docs/testing.md#user-reported-comprehension-disclosure-check---completed); the agent browser attempt remains blocked.
 
+## Submission-ready reading route
+
+[Closure report and remaining acceptance](docs/submission-closure.md) ·
+[Installation, models, workers, shutdown and cleanup](docs/operations.md) ·
+[Rendered diagram gallery](docs/diagrams/README.md).
+The current closure adds model-independent manual polls, Lecturer comment XLSX
+and optional transcript-grounded Points for lecturer review. Item 10 remains
+not performed; reliable deep homework comparison remains a documented quality gap.
+
 ## Problem and Scope
 
 The sections below distinguish assignment capabilities from approved design choices.
@@ -34,7 +43,7 @@ work** (D-01). This is our working target; the lecturer has not confirmed that
 all five must be implemented for the demo. User-approved directions now cover
 attendance D-05/D-06, comments D-18/D-19 with the D-17 during/outside-class clarification,
 polls D-08 through D-11, video D-12 through D-16, and homework D-20 through
-D-22. Homework remains a planning/quality target; implemented video/English-poll AI and participation evidence are described below;
+D-22. Homework has experimental English integration with a substantive comparison-quality gap; current evidence is described below;
 remaining operational parameters and open interpretations are explicit.
 The shared website foundation is now implemented under D-23 through D-26;
 Unit B implements attendance/XLSX and connected comments under D-27 through D-30. Unit C implements the poll lifecycle with explicit local demo data (D-31 through D-33). Local English poll-draft generation is now available under D-44; Unit D implements private MP4 validation/audio extraction; Unit E now transcribes new video uploads locally and exposes private full transcripts; new uploads now include local Qwen3 automatic summaries; homework now has experimental local English feedback/comparison with a recorded professional rubric and separate Lecturer publication; Hebrew generation remains unavailable.
@@ -146,14 +155,14 @@ linked sections; detailed historical evidence is separate from current status.
 | To Do | Required deliverable | Short reading route | Current status |
 |---|---|---|---|
 | 1 | Repository; problem and scope in README | [Problem and scope](#problem-and-scope) | Repository and scope exist; five-feature demo remains a user-approved target, not lecturer-confirmed coverage. |
-| 2 | Technical tools report, with actual trials of suggested tools | [Tools and evidence index](docs/local-ai-feasibility.md#current-tools-and-evidence-index) | Trials and failures documented; homework quality insufficient, Gemini partial; some evidence local-only/uncommitted. |
-| 3 | SoW document | [Scope and deliverables](docs/SoW.md#3-planned-capability-coverage) | Draft maintained against implemented boundaries and open interpretations. |
-| 4 | SRS document | [Functional requirements](docs/SRS.md#4-functional-requirements) | FR/NFR and acceptance targets defined; full acceptance not claimed. |
+| 2 | Technical tools report, with actual trials of suggested tools | [Tools and evidence index](docs/local-ai-feasibility.md#current-tools-and-evidence-index) | Trials and failures documented, including the group and new video-review probe; homework quality insufficient, Gemini partial. Local-only evidence is labelled. |
+| 3 | SoW document | [Scope and deliverables](docs/SoW.md#3-planned-capability-coverage) | Current scope maintained; project choices and remaining quality limits explicit. |
+| 4 | SRS document | [Functional requirements](docs/SRS.md#4-functional-requirements) | FR/NFR and acceptance targets aligned with closure; full acceptance not claimed. |
 | 5 | Main use cases / client stories | [UC-01 through UC-05](docs/SRS.md#5-main-use-cases) | Five main flows documented; UC-05 workflow and experimental English integration implemented; quality remains open and initial operating limits are explicit. |
 | 6 | Main software components | [Current components](docs/architecture.md#current-components) | Implemented responsibilities mapped, including the experimental English homework adapter and review controls. |
 | 7 | Low-level class and sequence diagrams | [Class interfaces](docs/architecture.md#class-and-interface-diagrams), [video](docs/architecture.md#video-sequence), [poll generation](docs/architecture.md#poll-generation-and-publication-sequence), [homework design](docs/architecture.md#planned-uc-05-components) | Current class/sequence sources plus [seven visually reviewed SVG renders](docs/diagrams/README.md); experimental English review/comparison remains quality-limited. |
-| 8 | Testing strategy addressing the classes in item 7 | [Component-to-test strategy](docs/testing.md#current-component-to-test-strategy) | Software checks mapped separately from real-model evidence and open acceptance. |
-| 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Five paths have a [user-reported guided walkthrough](docs/testing.md#user-reported-guided-rehearsal---2026-11-17); experimental English homework comparison required human correction. Reliability/full acceptance remain open. |
+| 8 | Testing strategy addressing the classes in item 7 | [Component-to-test strategy](docs/testing.md#current-component-to-test-strategy) | 215 server and 21 JS checks; isolated 80/100-user HTTP load passed. Separate real-model/manual evidence and quality limits. |
+| 9 | Implement or compose a KISS web demo | [Current status](#current-implementation-status), [local run](#local-setup-and-run) | Five paths have a [user-reported guided walkthrough](docs/testing.md#user-reported-guided-rehearsal---2026-11-17); experimental English homework comparison required human correction. Manual polls, comment XLSX and optional video review points added; deep-comparison quality and real-class acceptance remain open. |
 | 10 | Perform a demo in class | [Assignment acceptance](docs/SRS.md#7-future-acceptance-checks-and-traceability) | Not performed. |
 | 11 | Conclude; write a short account of results | [Results summary](#results-summary) | Written summary completed from existing implementation, experiments and the user-reported guided walkthrough; model limitations and human corrections are explicit. |
 
@@ -388,10 +397,10 @@ actually implemented and observed; it does not certify broad AI accuracy.
 | Video | Local turbo transcription followed by Qwen summary and full-transcript viewing worked for SHORT. | Measured preparation: 33.400 s total processing, 4.650 s transcription, 9.536 s summary, not a rehearsal duration. Hebrew STATIC retains word/negation errors; one uploaded summary failed language validation while its transcript remained available. Analysis is speech-only. |
 | Homework | Version-bound requests, frozen sources/rubric, private editable drafts and separate Lecturer publication work. | The user reported Alex seeing feedback on the matching version. The generated no-difference conclusion was manually changed to distinguish conditional update from locking with recheck. **This is workflow success and a human correction, not successful automatic comparison.** |
 
-Existing records contain 177 passing server tests, 26 focused checks after routine
-corrections and 12 JavaScript logic tests. These are separate from actual-model
-experiments and user-reported device observations; no new tests were run for this
-summary. The user-reported five-feature walkthrough was guided with pauses and
+Final closure passed 215 server tests and 21 JavaScript logic tests, plus the
+isolated 80/100-user attendance/vote load probe. Earlier counts are historical.
+These checks remain separate from actual-model experiments and user-reported
+device observations. [Closure evidence](docs/submission-closure.md). The user-reported five-feature walkthrough was guided with pauses and
 provides no uninterrupted ten-minute measurement. [Detailed evidence](docs/testing.md#user-reported-guided-rehearsal---2026-11-17).
 
 The AI experiments demonstrate the limits of fluent, structured output: Qwen's
@@ -405,8 +414,9 @@ and established no substantive task-quality result. [Tools report](docs/local-ai
 
 The result is a functioning, limited local teaching-tool implementation with
 human-controlled AI drafts, not an autonomous assessor. It uses one shared
-nonblocking compute lock; a busy operation may fail rather than wait behind
-another feature. The observed CUDA DLL loading failure was resolved through a
+compute lock; polls retain busy failure, while selected homework groups have
+a bounded pre-inference wait. The optional video review stage preserves completed
+summary/transcript on failure. The observed CUDA DLL loading failure was resolved through a
 process-local startup environment, without changing drivers or model settings.
 Retained limitations include Hebrew generation/accuracy, classroom-scale load,
 indirect identity disclosure requiring Lecturer review, intentional post-demo

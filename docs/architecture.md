@@ -17,7 +17,7 @@ attendance list plus an XLSX snapshot readable without a connection, and summari
 of recorded speech excluding unspoken visuals. These choices are ours, not
 technical prescriptions by the lecturer. Review the relevant lecture section; no
 claim of independent lecture review is made here.
-D-17 comments timing is resolved and is not part of that pending set.
+D-17 comments timing is resolved; none of those three email questions remains pending.
 
 ## Selected demonstration-group coordinator (D-58)
 
@@ -42,13 +42,13 @@ The existing single-review, poll and video compute paths remain unchanged.
 |---|---|
 | `teachingtool/settings.py`, Django middleware/auth, `classroom/views.py` | Django 5.2.19 Templates/session/CSRF and meeting management; fresh course-membership authorization, SQLite development database. No public account/course administration. |
 | `models.py` | Course/Membership/Meeting, AttendanceWindow/AttendanceRecord/MeetingRequest, Poll/PollVote, VideoJob, HomeworkAssignment/SubmissionVersion and ReviewBatch/ReviewJob/FeedbackDraft persistence/constraints. |
-| `attendance.py`, `participation_views.py`, `request_forms.py` | Rotating signed QR, POST registration/deduplication, XLSX snapshot, private comments/history and visible-page updates. |
-| `poll_views.py`, `poll_forms.py`, `poll_services.py` | Generation form, draft edit/version checks, publication, final vote, close and disclosure-safe payload. No inference inside a database write transaction. |
+| `attendance.py`, `participation_views.py`, `request_forms.py` | Rotating signed QR, POST registration/deduplication, XLSX snapshot, private comments/history, Lecturer-only literal-text XLSX export and visible-page updates. |
+| `poll_views.py`, `poll_forms.py`, `poll_services.py` | Lecturer-authored manual drafts plus the AI generation form, draft edit/version checks, publication, final vote, close and disclosure-safe payload. No inference inside a database write transaction. |
 | `poll_generation.py`, `local_poll_generator.py`, `poll_contract.py`, `local_poll_runner.py` | Replaceable PollGenerator contract, local Qwen3 8B English adapter, generated-output validation and isolated runtime. Fake providers are test-only; seed_demo_polls is a separate labeled local fixture command. |
 | `video_uploads.py`, `video_forms.py`, `video_views.py`, `video_jobs.py` | Bound uploaded bytes, private persistence, uploader/current-role access, state payloads, failure/recovery and retention. |
 | `video_worker.py`, `video_media.py`, `video_storage.py` | One persistent queue/worker; isolated CPU media validation and WAV extraction, locks, deadline/heartbeat and private file handling. |
 | `video_engines.py`, `local_transcriber.py`, `local_asr_runner.py`, `asr_checkpoint.py` | Transcriber contract/factory, pinned local large-v3-turbo, CUDA float16, offline checkpoint validation, supervised events and validated transcript results. |
-| `local_summarizer.py`, `local_summary_runner.py`, `summary_contract.py` | Summarizer implementation, pinned Qwen3 8B/structured paragraph plus 3-5 points, language/identity checks; no semantic-accuracy guarantee. |
+| `local_summarizer.py`, `local_summary_runner.py`, `summary_contract.py`, `lecturer_review_contract.py` | Summarizer implementation, pinned Qwen3 8B/structured paragraph plus 3-5 points, language/identity checks plus optional quote-bound Lecturer inspection points; no semantic-accuracy guarantee. |
 | `homework_views.py`, `homework_review.py`, `homework_worker.py`, `homework_evidence.py` | Version-bound request/source snapshots, private narratives/evidence, exact quote verification, guarded editing/outcome correction and separate immutable publication. |
 | `local_homework_reviewer.py`, `local_homework_runner.py`, `homework_contract.py` | Pinned experimental English Qwen individual/comparison stages, rubric prompts, source limits, owned process deadline/cleanup and measured metadata. |
 | `homework_batches.py`, group routes and `homework_groups.js` | Signed preview, atomic selected-source groups, idempotency, expiry and lecturer-only status reads; no inference in HTTP handlers. |
@@ -134,6 +134,9 @@ classDiagram
         summary_points
         summary_metadata
         summary_expires_at
+        lecturer_review_status
+        lecturer_review_points
+        lecturer_review_metadata
     }
     User "1" --> "0..*" Membership
     Course "1" --> "0..*" Membership
@@ -173,6 +176,14 @@ classDiagram
     class LocalQwenSummarizer {
         summarize(transcript, language, work_dir, deadline, on_event, on_tick)
     }
+    class LocalQwenLecturerReviewer {
+        review(segments, language, work_dir, deadline, on_event, on_tick)
+    }
+    class lecturer_review_contract {
+        <<module>>
+        review_prompt()
+        validate_review()
+    }
     class PollGenerator {
         <<interface>>
         generate(material, kind, language)
@@ -209,6 +220,7 @@ classDiagram
     class poll_services {
         <<module>>
         create_generated_draft(meeting_id, user, kind, language, material)
+        create_manual_draft(meeting_id, user, kind, language, data)
         edit_draft(meeting_id, poll_id, user, version, data)
         publish(meeting_id, poll_id, user, version)
         vote(meeting_id, poll_id, user, option_index)
@@ -219,6 +231,9 @@ classDiagram
     Summarizer <|.. LocalQwenSummarizer : structural protocol
     PollGenerator <|.. LocalPollGenerator : structural protocol
     video_worker ..> Transcriber
+    LocalQwenSummarizer <|-- LocalQwenLecturerReviewer
+    LocalQwenLecturerReviewer ..> lecturer_review_contract
+    video_worker ..> LocalQwenLecturerReviewer
     video_worker ..> Summarizer
     video_worker ..> video_jobs
     video_jobs ..> VideoJob
@@ -245,6 +260,7 @@ sequenceDiagram
     participant M as video_media.media_child
     participant T as LocalWhisperTranscriber
     participant S as LocalQwenSummarizer
+    participant R as LocalQwenLecturerReviewer
     participant C as maintenance
     L->>V: CSRF POST MP4 in meeting
     V->>V: BoundedUploadHandler + VideoUploadForm
@@ -269,6 +285,17 @@ sequenceDiagram
             alt Summary valid and role still allowed
                 S-->>W: Validated paragraph, points, actual metadata
                 W->>DB: summarized, expiry no later than transcript
+                opt New task requests Lecturer review points
+                    W->>DB: reviewing (summary already stored)
+                    W->>R: review(segments, language, same deadline)
+                    R-->>W: Zero to two quotes and inspection suggestions
+                    W->>W: Exact quote match, derive source time range
+                    alt Valid points and current access/deadline
+                        W->>DB: Save private points, shared expiry, summarized
+                    else Invalid/unavailable/timeout/interrupted
+                        W->>DB: Review failed, retain summary and transcript
+                    end
+                end
             else Summary unavailable/invalid/timeout/interrupted
                 W->>J: fail_job() with stage/reason
                 Note over J,DB: Saved transcript remains, no false summary success
@@ -285,7 +312,7 @@ sequenceDiagram
 
 A WAV cleanup failure also routes to fail_job before saving a transcript or
 starting summary; the diagram abbreviates this guard. Actual states are queued,
-validating, extracting, loading_asr, transcribing, loading_sum, summarizing and
+validating, extracting, loading_asr, transcribing, loading_sum, summarizing, reviewing and
 terminal extracted/transcribed/summarized/failed (plus uploading during persistence).
 The persisted start governs a single 600-second processing deadline; queue wait
 is separate. Heartbeats/recovery and the worker lock prevent indefinitely active
@@ -309,37 +336,38 @@ sequenceDiagram
     participant R as local_poll_runner / Qwen3 8B
     participant DB as Poll / SQLite
     actor S as Student
-    L->>V: CSRF POST English/type/material (1-6000 characters)
-    V->>P: create_generated_draft()
-    P->>P: validate_input(), authorize Lecturer
-    alt Invalid input or Hebrew generation
-        P-->>V: Reject before inference
-        V-->>L: Preserve material, explain English-only generation
-    else Valid English request
-    P->>G: generate(material, kind, language) outside DB transaction
-    G->>R: Private IPC, pinned local model, bounded shared compute
-    R-->>G: Structured result or explicit failure
-    alt Unavailable/busy/invalid/timeout
-        P-->>V: Explicit error, no Poll saved
-        V-->>L: Bound form retains material, no prepared fallback
-    else Valid English output
-        G-->>P: Validated draft content
-        P->>DB: Recheck membership under lock, create ai/Draft
-        V-->>L: Editable unpublished draft, review required
+    alt Manual entry, English or Hebrew
+        L->>V: CSRF POST kind/language/question/four options
+        V->>P: create_manual_draft(), validate_content()
+        P->>DB: Authorize Lecturer, create manual/Draft
+        Note over P,DB: No model call or AI provenance
+    else Automatic English entry
+        L->>V: CSRF POST kind/language/material (1-6000)
+        V->>P: create_generated_draft(), validate_input()
+        P->>G: generate() outside DB transaction
+        G->>R: Pinned local model, bounded shared compute
+        alt Unavailable/busy/invalid/timeout
+            P-->>V: Error, retain material, no draft or canned fallback
+        else Valid output
+            G-->>P: Validated content
+            P->>DB: Recheck role under lock, create ai/Draft
+        end
+    end
+    opt Successfully created private draft
+        V-->>L: Review/edit, source provenance shown
         S->>V: GET unpublished draft
-        V-->>S: 404, omit from list
-        L->>V: POST edit/save draft + version + CSRF
+        V-->>S: 404, absent from list
+        L->>V: POST edit/save + version + CSRF
         V->>P: edit_draft(), validate_content(), increment version
         L->>V: Separate POST Publish + version + CSRF
         V->>P: publish()
-        P->>DB: Lock meeting/poll, require_draft, one Active, publish
+        P->>DB: Lock meeting/poll, require_draft, one Active
         S->>V: POST one final choice
-        V->>P: vote(), current Student role, Active, unique vote
-        L->>V: Read live counts, POST manual close
+        V->>P: vote(), fresh Student role, unique vote
+        L->>V: Read live counts, POST close
         V->>P: close() under same locking order
         S->>V: GET closed results
-        V-->>S: Aggregates, comprehension-only answer/explanation
-    end
+        V-->>S: Aggregates and comprehension-only answer/explanation
     end
 ```
 

@@ -39,6 +39,7 @@ def video_detail(request,meeting,membership,job_id):
     job=owned_job(meeting.pk,job_id,request.user)
     summary={'paragraph':job.summary_paragraph,'points':job.summary_points} if summary_available(job) else None
     return render(request,'classroom/video_detail.html',{**context(meeting,membership),'job':payload(job),
+        'lecturer_review':{'status':job.lecturer_review_status,'points':job.lecturer_review_points} if summary else None,
         'summary':summary,'text_direction':'rtl' if job.detected_language=='he' else 'ltr'})
 
 

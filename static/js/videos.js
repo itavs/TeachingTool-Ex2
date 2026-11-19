@@ -14,11 +14,12 @@
         set("video-transcript-expired",data.transcript_expired?"Transcript expired; its content is no longer available.":"");
         document.getElementById("video-transcript-link").hidden=!data.transcript_available;
         if(data.summary_available && config.dataset.summaryRendered!=="true" && !summaryReloadRequested){summaryReloadRequested=true;window.location.reload();}
+        if(["completed","failed"].includes(data.lecturer_review_status) && config.dataset.reviewRendered!==data.lecturer_review_status && !summaryReloadRequested){summaryReloadRequested=true;window.location.reload();}
         set("video-source",data.source_removed?"Uploaded MP4 removed by cleanup.":"");tick();
     }
     function tick(){
         const age=(Date.now()-seenAt)/1000;
-        set("video-elapsed",(data.processing_seconds+(["validating","extracting","loading_asr","transcribing","loading_sum","summarizing"].includes(data.status)?age:0)).toFixed(1));
+        set("video-elapsed",(data.processing_seconds+(["validating","extracting","loading_asr","transcribing","loading_sum","summarizing","reviewing"].includes(data.status)?age:0)).toFixed(1));
         set("video-wait",(data.waiting_seconds+(data.status==="queued"?age:0)).toFixed(1));
     }
     async function refresh(){

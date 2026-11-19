@@ -1,0 +1,38 @@
+{
+  "success": true,
+  "wall_seconds": 7.67083990003448,
+  "result": {
+    "points": [
+      {
+        "quote": "It separates and organizes your code around objects.",
+        "suggestion": "Check if 'objects' is clearly defined before introducing the concept.",
+        "segment_index": 1,
+        "start": 5.68,
+        "end": 11.44
+      },
+      {
+        "quote": "But where this gets really powerful though is through inheritance.",
+        "suggestion": "Verify that 'inheritance' is explicitly explained with an example.",
+        "segment_index": 4,
+        "start": 23.04,
+        "end": 33.78
+      }
+    ],
+    "metadata": {
+      "model": "qwen3:8b",
+      "weights_digest": "sha256:a3de86cd1c132c822487ededd47a324c50491393e6565cd14bafa40d0b8e686f",
+      "manifest_sha256": "b3d9ba7c899cfd112df2574c6a91458a70b724c5e4e50dfffd75574b2d1648e7",
+      "quantization": "Q4_K_M",
+      "prompt_version": "lecturer-review-v2",
+      "ollama_version": "0.40.14",
+      "thinking": false,
+      "temperature": 0.1,
+      "seed": 42,
+      "num_ctx": 8192,
+      "num_predict": 1536,
+      "load_seconds": 2.8227507,
+      "generation_seconds": 1.742235
+    },
+    "summary_seconds": 4.908481799997389
+  }
+}

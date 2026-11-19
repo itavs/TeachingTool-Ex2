@@ -52,6 +52,25 @@ A clone can audit those results without a database or running model. New inferen
 still needs the explicitly documented installed local runtime/checkpoint, and is
 not bit-for-bit reproducible across different hardware/runtime conditions.
 
+## Submission closure supplement
+
+The [closure report](submission-closure.md) adds the actual Qwen3 lecturer-review
+probe, including initial validation/semantic failures and the final cautious
+suggestions. It also links the real 80/100-user non-AI HTTP workload and clean
+website setup. These are different from model-quality and physical-device tests.
+The final selected-group result and reproducible synthetic originals are in
+[group acceptance](homework-group-acceptance.md); comparison accuracy failed even
+though processing and human-reviewed publication worked.
+
+The local uncommitted Gemini report/code/results were inspected read-only in
+closure. Saved diagnostics and the user's direct PowerShell report establish a
+partial connection plus task failures, including HTTP 503 outside the agent.
+They do not prove provider load, sandbox root cause or usable task quality. No new
+API request, account/billing change or contemporary model/quota claim was made.
+The published initial report remains historical; later raw Gemini material stays
+local-only, with the relevant conclusion recorded here rather than redistributing
+keys, account inventory or unrelated changes.
+
 ## Historical initial local feasibility report
 
 The following dated record preserves the original trials and their failures.

@@ -158,3 +158,29 @@ def requests_page(request, meeting, membership):
 @scoped(Membership.Role.LECTURER)
 def requests_feed(request, meeting, membership):
     return JsonResponse({"rows": request_rows(meeting, request.user, True)})
+
+
+@scoped(Membership.Role.LECTURER)
+def requests_export(request, meeting, membership):
+    rows = request_rows(meeting, request.user, True)
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = 'Comments and suggestions'
+    sheet.append(['Request ID', 'Name', 'Username', 'Type', 'Text', 'Created at (Asia/Jerusalem)'])
+    for row in rows:
+        sheet.append([row[k] for k in ['id','author','username','kind','text','created_at']])
+    for cells in sheet:
+        for cell in cells:
+            if isinstance(cell.value, str): cell.data_type = 's'
+    sheet.freeze_panes = 'A2'
+    sheet.auto_filter.ref = sheet.dimensions
+    for col, width in [('A',14),('B',24),('C',24),('D',18),('E',70),('F',28)]:
+        sheet.column_dimensions[col].width = width
+    snapshot = workbook.create_sheet('Snapshot')
+    snapshot.append(['Meeting ID',meeting.pk])
+    snapshot.append(['Exported at (Asia/Jerusalem)',rules.display_time(timezone.now())])
+    snapshot.append(['Meaning','Snapshot only; no import or synchronization back.'])
+    output = BytesIO();workbook.save(output)
+    response = HttpResponse(output.getvalue(),content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="comments-{meeting.pk}.xlsx"'
+    return response

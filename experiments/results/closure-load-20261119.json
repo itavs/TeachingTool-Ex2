@@ -1,0 +1,103 @@
+{
+  "scope": "Loopback threaded WSGI + SQLite HTTP server; not classroom Wi-Fi/device test",
+  "conditions_declared_before_requests": {
+    "each_size": [
+      80,
+      100
+    ],
+    "no_unexpected_status": true,
+    "p95_seconds_below": 5,
+    "max_seconds_below": 10,
+    "exact_unique_counts": true,
+    "duplicate_attendance": "302 idempotent",
+    "duplicate_vote": "409 rejected"
+  },
+  "runs": [
+    {
+      "users": 80,
+      "attendance": {
+        "statuses": {
+          "302": 80
+        },
+        "p50_seconds": 1.0361716499901377,
+        "p95_seconds": 2.079228400019929,
+        "max_seconds": 2.451890299911611,
+        "passed": true
+      },
+      "vote": {
+        "statuses": {
+          "302": 80
+        },
+        "p50_seconds": 1.1124059000285342,
+        "p95_seconds": 3.588259099982679,
+        "max_seconds": 4.024672499974258,
+        "passed": true
+      },
+      "duplicate_attendance": {
+        "statuses": {
+          "302": 80
+        },
+        "p50_seconds": 0.7566462999675423,
+        "p95_seconds": 1.7656446999171749,
+        "max_seconds": 2.198517100070603,
+        "passed": true
+      },
+      "duplicate_vote": {
+        "statuses": {
+          "409": 80
+        },
+        "p50_seconds": 0.6969657000736333,
+        "p95_seconds": 1.3515657000243664,
+        "max_seconds": 1.4846479000989348,
+        "passed": true
+      },
+      "attendance_count": 80,
+      "vote_count": 80,
+      "original_choices_preserved": true,
+      "passed": true
+    },
+    {
+      "users": 100,
+      "attendance": {
+        "statuses": {
+          "302": 100
+        },
+        "p50_seconds": 1.1675559499999508,
+        "p95_seconds": 2.8674878000747412,
+        "max_seconds": 3.4038233999162912,
+        "passed": true
+      },
+      "vote": {
+        "statuses": {
+          "302": 100
+        },
+        "p50_seconds": 1.5929685999872163,
+        "p95_seconds": 4.825023700017482,
+        "max_seconds": 5.233488900004886,
+        "passed": true
+      },
+      "duplicate_attendance": {
+        "statuses": {
+          "302": 100
+        },
+        "p50_seconds": 0.9842116499785334,
+        "p95_seconds": 2.7046404000138864,
+        "max_seconds": 3.227860299986787,
+        "passed": true
+      },
+      "duplicate_vote": {
+        "statuses": {
+          "409": 100
+        },
+        "p50_seconds": 1.1669201000477187,
+        "p95_seconds": 2.2244858000194654,
+        "max_seconds": 2.6543371999869123,
+        "passed": true
+      },
+      "attendance_count": 100,
+      "vote_count": 100,
+      "original_choices_preserved": true,
+      "passed": true
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 # Statement of Work
-## Web-Based Teaching Tool - Draft
+## Web-Based Teaching Tool - Current submission baseline
 
 ## 1. Purpose
 
@@ -39,7 +39,7 @@ The reviewed handout does not specify a programming language. No conflict with
 Python was found; this finding does not select a framework or AI service.
 D-23 through D-26 subsequently approve Django/Templates, initial SQLite,
 individual demo accounts, course-membership roles and lecturer meeting
-management. Local turbo/Qwen adapters are selected for video and English polls; homework AI and production hosting remain open.
+management. Local turbo/Qwen adapters are selected for video and English polls; experimental English homework AI is integrated; reliable comparison and production hosting remain open.
 
 ## 3. Planned Capability Coverage
 
@@ -317,3 +317,34 @@ publication remain. Group success establishes software workflow, not comparison
 quality or whole-class analysis. [Operation and limits](local-homework-review.md#selected-demonstration-groups-d-58),
 [software evidence](testing.md#selected-demonstration-group-workflow---2026-11-18).
 No other proposed capability was added in this stage.
+
+
+## Submission closure additions (D-59)
+
+These are user-approved project completions, not additional handout mandates.
+Manual Lecturer-authored English/Hebrew polls now enter the existing validated
+private draft/edit/publication lifecycle without a model, preserving provenance.
+Lecturers can export one meeting's comments/suggestions as an XLSX snapshot with
+literal text cells, including formula-like input, without changing source data.
+New video jobs may produce zero to two transcript-grounded Points for lecturer
+review after saving the summary; each has a verified exact quote, derived source
+time range and a cautious check suggestion. Failure preserves saved summary and
+transcript. Shared owner/course controls, seven-day expiry and the overall
+600-second processing budget apply. No image/audio-quality or student-understanding
+inference is claimed. Existing jobs retain their earlier outcomes.
+
+UC-01 includes checking the roster with the student when disputed and opening an
+additional registration window if appropriate. Account registration is not proof
+of physical presence; valid codes can be forwarded. No manual correction or face
+recognition has been added. UC-02 includes Lecturer XLSX export; UC-03 includes
+manual creation as a separate non-AI entry; UC-04 includes optional review-point
+failure without losing its completed summary/transcript. UC-05 remains experimental,
+English, snapshot-bound and separately published after Lecturer review. The group
+quality failure and manual corrections remain explicit.
+
+Acceptance: server tests cover new form validation/provenance, role/direct-URL
+access, literal-cell export, quote/time binding, optional failure/interruption and
+expiry. Isolated HTTP load at 80/100 synthetic users passed its predeclared bounds;
+this is not class Wi-Fi/device validation. See [closure evidence](submission-closure.md)
+and [component tests](testing.md#submission-closure-validation---2026-11-19).
+Item 10 remains not performed; exact delivery/defense arrangements are external.

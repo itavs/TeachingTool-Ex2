@@ -4,7 +4,7 @@
 <a class="back-link" href="{% url 'homework-submission' course.pk meeting.pk job.submission.assignment_id job.submission_id %}">← Submitted Version {{ job.submission.version_number }}</a>
 <h1>Lecturer review · Version {{ job.submission.version_number }}</h1><p>{{ job.submission.student.username }} · {{ job.submission.assignment.title }} · {{ job.display_status }}</p>
 {% if job.batch_id %}<p class="notice">Selected demonstration group, not the whole class. <a href="{% url 'homework-batch-detail' course.pk meeting.pk job.submission.assignment_id job.batch_id %}">Back to group {{ job.batch_id }}</a></p>{% endif %}
-<p>Experimental AI draft — check meaning, evidence and anonymity before publication. Synthetic demonstration material only.</p>
+<p>Experimental AI draft — check meaning, evidence and anonymity before publication. Synthetic demonstration material only.</p><p class="notice">In the demonstration-group check, automatic comparison missed known differences and required lecturer correction. Exact quotes do not prove that a conclusion is correct.</p>
 {% if job.started_at %}<p>Processing started {{ job.started_at|timesince }} ago. Limit: 180 seconds after processing starts; queue time is separate.</p>{% endif %}
 <details class="panel"><summary>Recorded professional rubric</summary><div class="submission-text">{{ job.rubric_snapshot }}</div></details>
 {% if newer_version %}<p role="status">A newer submitted version exists. This request and feedback apply only to Version {{ job.submission.version_number }}.</p>{% endif %}
