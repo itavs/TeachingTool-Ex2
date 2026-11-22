@@ -4,6 +4,16 @@ Implemented 2026-11-08. New meeting MP4 uploads use local turbo GPU transcriptio
 
 ## Existing local runtime (no downloads/installations)
 
+Windows runtime correction, 22 November 2026: a new full-route attempt loaded
+the model but failed at inference with `Library cublas64_12.dll is not found or
+cannot be loaded`. The local DLL existed; `os.add_dll_directory` alone did not
+cover CTranslate2's late library search. The ASR child now also prepends the same
+verified local CUDA directory to its own process PATH. No system/user PATH,
+driver, package, model identity or inference setting changed. The original failed
+task was retained; a separate normal upload subsequently completed GPU
+transcription. This correction has a mocked environment regression plus the
+real GPU run, not a claim of higher transcription accuracy.
+
 - Python: `.ai-lab/venv/Scripts/python.exe`; separate from website `.venv`.
 - Current default for new uploads (D-41): existing `dropbox-dash/faster-whisper-large-v3-turbo`, revision `0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf`, under `.ai-lab/models/faster-whisper-large-v3-turbo`; model.bin 1,617,884,929 bytes. The approved download and independent full-clip comparisons are in static-turbo-quality.md and short-turbo-quality.md. The earlier medium model/results remain historical evidence, not the active default.
 - faster-whisper 1.2.1, CTranslate2 4.8.5, PyAV 16.0.0; CUDA float16 on the existing NVIDIA RTX 5050 Laptop GPU. CPU threads 8, workers 1, beam 5, task transcribe, automatic language, VAD off, condition_on_previous_text false. No translation or CPU fallback.

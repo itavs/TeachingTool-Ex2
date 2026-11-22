@@ -117,12 +117,18 @@ Raw transcripts/media and development failure captures remain local-only.
   their actual evidence scope. This closure did not perform another phone test.
 - Browser observation is still denied by the saved local-origin permission. No
   alternate browser or headless application workaround was used. The only remaining
-  focused visual checklist is: inspect the manual poll form in Light/Dark and narrow
-  view, and inspect the optional review section on a video task. The user has
+  remaining unreported visual check is the manual poll form in Light/Dark and narrow
+  view. The user has
   subsequently reported manual poll creation/publication and comment XLSX export/
   opening; see [recorded reports](testing.md#recorded-manual-closure-reports---2026-11-22).
   No additional device/theme coverage is inferred. There was no existing website
   review-point task on 22 November; another real run was not silently performed.
+  The user then authorized a fresh normal upload: its completed pipeline and
+  child-only CUDA loading correction are recorded in
+  [fresh task preparation](testing.md#fresh-video-review-task-preparation---2026-11-22).
+  The user subsequently reported the review-point display was correct in response
+  to the requested Light/Dark/phone check. This is user-reported visual acceptance
+  of that screen, separate from authenticated HTTP checks and model-quality claims.
   Software checks do not substitute for visual acceptance.
 - Submission channel/package convention, exact deadline and demonstration/defense
   arrangements require external confirmation. No slide deck or export format is

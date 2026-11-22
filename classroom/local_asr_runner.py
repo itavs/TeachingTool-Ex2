@@ -17,6 +17,14 @@ def emit(**event):
     print(json.dumps(event,ensure_ascii=True),flush=True)
 
 
+def configure_cuda_dll(directory):
+    """CTranslate2's late LoadLibrary also needs this child-only PATH entry."""
+    directory = str(Path(directory).resolve())
+    handle = os.add_dll_directory(directory)
+    os.environ['PATH'] = directory + os.pathsep + os.environ.get('PATH', '')
+    return handle
+
+
 def main():
     parser=argparse.ArgumentParser()
     for name in ['audio','output','model','cuda-dll']:parser.add_argument('--'+name,required=True)
@@ -47,7 +55,7 @@ def main():
                 verify_checkpoint(model_path)
             except (OSError, ValueError):
                 emit(result='failed',stage=stage,code='asr_model_missing');return 1
-            if os.name=='nt':dll_handle=os.add_dll_directory(args.cuda_dll)
+            if os.name=='nt':dll_handle=configure_cuda_dll(args.cuda_dll)
             import ctranslate2
             if ctranslate2.get_cuda_device_count()<1:
                 emit(result='failed',stage=stage,code='asr_gpu');return 1

@@ -73,6 +73,8 @@ Source is the public `dropbox-dash/faster-whisper-large-v3-turbo` CTranslate2
 checkpoint, revision `0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf`; model.bin is
 approximately 1.62 GB. File hashes are versioned in `asr_checkpoint.py`.
 The child uses the Ollama bundle's `cuda_v12` DLL directory only for its process,
+both through `os.add_dll_directory` and its own PATH for late CUDA library loads;
+no system or user PATH is changed. The tested ASR packages are
 faster-whisper 1.2.1 / CTranslate2 4.8.5 / PyAV 16.0.0, CUDA float16. There is
 no automatic CPU/model fallback. See [ASR details](local-transcription.md).
 

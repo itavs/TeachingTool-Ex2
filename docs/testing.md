@@ -1652,3 +1652,43 @@ ten-minute classroom demonstration; no slide deck is specified. Delivery details
 and defense arrangements require external confirmation. Item 10 stays not
 performed; experimental homework comparison failures and human corrections remain
 explicit. The PDF and existing Gemini changes were not modified or committed.
+
+## Fresh video review task preparation - 2026-11-22
+
+The user authorized a new SHORT-EXPLAIN MP4 task because no website review-point
+result existed. The upload used the normal authenticated multipart HTTP/CSRF
+route as lecturer_alpha in DEMO-CS101 / Test Meeting, then the ordinary separate
+`run_video_worker --once`; it was not a fabricated DB result or browser action.
+
+The first task, 5b84860c-c1a9-4eac-a74c-4581f4bc42ac, failed at transcription
+after 13.279 seconds and remains failed. Local diagnostic ASR runs exposed
+`Library cublas64_12.dll is not found or cannot be loaded`: model loading worked,
+but the later library search did not use `os.add_dll_directory` alone. The child
+now also prepends its existing local CUDA directory to its process PATH. No
+driver/system/user PATH, dependency, model or inference settings were changed.
+**43 relevant transcription/summary/closure software tests passed** in 13.679
+seconds, including the new mocked child-environment regression. These checks
+are not real inference or another full-suite run.
+
+A separate normal upload created task 9c87a1d0-e880-4b19-bda8-e04ecbe79500.
+It completed the whole route: turbo CUDA float16 transcription 15.206 seconds,
+Qwen summary request 82.284 seconds, review stage 9.063 seconds, total processing
+128.230 seconds. Both review points matched the final probe's original quotes
+and cautious suggestions, at 5.68–11.44 and 23.04–33.78 seconds. Exact quote/time
+binding was rechecked against this new task's stored segments; this is not a
+guarantee of pedagogical usefulness or evidence of a missing explanation.
+
+Authenticated owner HTTP checks on loopback and the authorized LAN host returned
+200 for the result/full transcript, with Automatic summary and Points for lecturer
+review present. Student access returned 403. Temporary WAV was absent and deletion
+recorded. Pinned installed models only; no downloads/cloud service or silent retry.
+The original result/metadata and diagnostic records remain private/local-only in
+`.local/manual-video-review-20261122/`.
+
+The user subsequently replied that everything was correct after being asked to
+inspect this task's Points for lecturer review, including quotes, time ranges
+and suggestions in Light/Dark and on the phone. Record this as user-reported
+visual acceptance of that requested screen/check, not agent browser execution.
+No specific phone model/browser, other screen, word-by-word transcription accuracy
+or pedagogical-quality acceptance is inferred. No classroom demonstration is
+claimed, and homework comparison-quality limitations are unchanged.

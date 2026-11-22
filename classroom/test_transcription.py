@@ -270,6 +270,16 @@ class TranscriptDisplayTests(SimpleTestCase):
 
 
 class CheckpointIdentityTests(SimpleTestCase):
+    def test_cuda_directory_supports_late_dll_loading_in_child_environment(self):
+        import os
+        from .local_asr_runner import configure_cuda_dll
+        with patch.dict(os.environ, {'PATH':'original-search-path'}), patch(
+                'classroom.local_asr_runner.os.add_dll_directory', create=True) as add_directory:
+            directory=str(Path('test-only-cuda').resolve())
+            self.assertIs(configure_cuda_dll(directory),add_directory.return_value)
+            add_directory.assert_called_once_with(directory)
+            self.assertEqual(os.environ['PATH'],directory+os.pathsep+'original-search-path')
+
     def test_checkpoint_verification_rejects_missing_or_changed_files(self):
         import hashlib
         with TemporaryDirectory() as directory:
