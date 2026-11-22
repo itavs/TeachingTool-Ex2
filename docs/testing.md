@@ -1629,3 +1629,26 @@ Browser observation of loopback was denied by saved permission again. No workaro
 was used. New HTML is server-tested; Light/Dark/narrow visual acceptance for the
 new manual form and optional report remains manual. Prior Safari/iPhone and guided
 rehearsal reports retain their stated scope. Item 10 remains not performed.
+
+## Recorded manual closure reports - 2026-11-22
+
+Recorded from the user's preceding messages, not from agent browser execution:
+the user confirmed creating/saving and separately publishing a manual poll, and
+then reported completing the meeting-comment XLSX export/opening check. These
+reports establish those observed flows only. No additional formula-safety,
+individual-cell, device, Light/Dark or narrow-layout coverage is inferred; the
+automated export-safety evidence remains separate.
+
+A current read of the development database found no completed lecturer-review
+video task. The earlier real-model review probe is a local experiment result,
+not an existing website task. No new inference/upload was performed for this
+manual-check preparation. The website was started on loopback and the previously
+authorized exact home-LAN address without firewall changes or AI workers.
+
+Both pages of the local source PDF were extracted and visually inspected again.
+Page 2 has eleven populated To Do items; it specifies no delivery channel,
+archive/document packaging convention or deadline. Page 1 requests an approximately
+ten-minute classroom demonstration; no slide deck is specified. Delivery details
+and defense arrangements require external confirmation. Item 10 stays not
+performed; experimental homework comparison failures and human corrections remain
+explicit. The PDF and existing Gemini changes were not modified or committed.
